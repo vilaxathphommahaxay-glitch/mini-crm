@@ -83,13 +83,18 @@ export function ActivityList({ activities, showLinks = true }: Props) {
           const done = isDone(activity)
           return (
             <li key={activity.id} className="flex gap-3 px-4 py-3">
-              <input
-                type="checkbox"
-                aria-label={`Done: ${activity.subject}`}
-                checked={done}
-                onChange={() => toggleDone(activity)}
-                className="mt-1 size-4 shrink-0 rounded border-slate-300"
-              />
+              {/* only to-dos (with a due date) can be ticked; a log entry already happened */}
+              {activity.due_date || activity.done ? (
+                <input
+                  type="checkbox"
+                  aria-label={`Done: ${activity.subject}`}
+                  checked={done}
+                  onChange={() => toggleDone(activity)}
+                  className="mt-1 size-4 shrink-0 rounded border-slate-300"
+                />
+              ) : (
+                <span className="size-4 shrink-0" aria-hidden />
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <ActivityBadge type={activity.type} />

@@ -236,4 +236,4 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 8 – Pipeline Kanban
 - [x] Phase 9 – Tasks & Dashboard UI
 - [x] Phase 10 – Import/Export CSV
-- [ ] Phase 11 – ส่งงาน
+- [x] Phase 11 – ส่งงาน

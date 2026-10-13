@@ -1,43 +1,67 @@
 # Mini CRM
 
-A small CRM for shops and service businesses: contacts, companies, a deal pipeline (Kanban), activities with due dates, and a dashboard.
+A small CRM for shops and service businesses: keep track of customers and their companies, move deals through a sales pipeline, and never miss a follow-up.
 
-> **Status:** early development — see [PLAN.md](PLAN.md) for scope and progress.
+Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end, React + TypeScript on the front end, one command to run.
 
-## Tech stack
+![Dashboard](docs/screenshots/dashboard.png)
 
-- **Backend:** Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2
-- **Frontend:** React, Vite, TypeScript, Tailwind CSS, React Router, TanStack Query
-- **Database:** SQLite for local development, PostgreSQL in Docker
+| Pipeline (drag and drop) | Contact with deals and activity |
+|---|---|
+| ![Pipeline](docs/screenshots/pipeline.png) | ![Contact](docs/screenshots/contact-detail.png) |
 
-## Project structure
+## Features
 
+- **Contacts and companies** — search across name, email, phone and company; filter by tag and owner; filters live in the URL.
+- **Deals and a Kanban pipeline** — six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
+- **Activities and tasks** — log calls, meetings and notes on a contact's timeline; tasks with due dates show up under *Today*, *Overdue* and *Next 7 days*.
+- **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage.
+- **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
+- **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
+- **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
+
+## Quick start (Docker)
+
+Requirements: Docker with Compose.
+
+```bash
+cp .env.example .env        # optional — sensible defaults are built in
+docker compose up --build
 ```
-backend/    FastAPI app (app/), tests (tests/)
-frontend/   React + Vite app
-docs/       screenshots and other docs
-PLAN.md     scope, data model, API and phase plan
-```
+
+Open **http://localhost:8080** and sign in with one of the demo accounts:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@example.com` | `admin123` |
+| Staff | `somchai@example.com` | `staff123` |
+| Staff | `keo@example.com` | `staff123` |
+
+Log in as an admin and then as a staff member to see the difference in what each can access. The database is migrated and filled with sample data on first start; restarting keeps your data. To start over: `docker compose down -v`.
+
+The interactive API documentation is at **http://localhost:8080/api/docs**.
 
 ## Local development
 
-Requirements: Python 3.12+, Node.js 22+.
+Requirements: Python 3.12+ and Node.js 22+.
 
 ```bash
 cp .env.example .env
 ```
 
-### Backend (http://localhost:8000, API docs at `/api/docs`)
+**Backend** — http://localhost:8000 (API docs at `/api/docs`). Uses SQLite (`backend/crm.db`) by default.
 
 ```bash
 cd backend
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
+alembic upgrade head          # create / update the database schema
+python -m app.seed            # sample data (use --reset to wipe and reseed)
 uvicorn app.main:app --reload
 ```
 
-### Frontend (http://localhost:5173)
+**Frontend** — http://localhost:5173. The dev server proxies `/api` to the backend, so start the backend first.
 
 ```bash
 cd frontend
@@ -45,19 +69,64 @@ npm install
 npm run dev
 ```
 
-The Vite dev server proxies `/api` to the backend on port 8000, so start the backend first.
-
-## Checks
+## Tests and checks
 
 ```bash
-# backend
-cd backend
-pytest
+# backend (in backend/, venv active)
+pytest                        # 84 tests on in-memory SQLite
 ruff check . && ruff format --check .
 
-# frontend
-cd frontend
-npm run lint
-npm run format:check
-npm run build
+# the same tests on PostgreSQL
+docker run -d --name crm-test-db -e POSTGRES_USER=crm -e POSTGRES_PASSWORD=crm \
+  -e POSTGRES_DB=crm_test -p 55432:5432 postgres:16-alpine
+TEST_DATABASE_URL=postgresql+psycopg://crm:crm@localhost:55432/crm_test pytest
+
+# frontend (in frontend/)
+npm test                      # Vitest + Testing Library
+npm run lint && npm run format:check && npm run build
 ```
+
+## Project structure
+
+```
+backend/
+  app/
+    main.py          FastAPI app and router registration
+    models.py        SQLAlchemy models
+    routers/         one module per resource (auth, users, contacts, companies, deals, …)
+    schemas/         Pydantic request/response models
+    access.py        ownership rules shared by every resource
+    pipeline.py      deal ordering, closed_at and per-currency totals
+    csv_io.py        CSV import/export
+    clock.py         "now" and "today" in the app timezone (freezable in tests)
+    seed.py          demo data
+  alembic/           database migrations
+  tests/
+frontend/
+  src/
+    api/             fetch client, types, TanStack Query hooks
+    auth/            session provider and route guards
+    components/      layout, shared UI, activity list, chart
+    forms/           react-hook-form + zod forms
+    lib/             formatting, URL filters, Kanban logic
+    pages/           one component per screen
+docker-compose.yml   postgres + backend + frontend (nginx)
+PLAN.md              scope, data model, API and the phase-by-phase plan
+```
+
+## Design decisions
+
+- **Ownership is enforced on the server, in one place.** Every query goes through `access.scope()`. A staff member asking for someone else's record gets `404`, not `403`, so the API doesn't reveal that the record exists.
+- **Money is exact.** Amounts are `NUMERIC(18,2)` in the database and travel as strings (`"1500000.00"`). The front end formats and sums them as strings and BigInt cents, never floats.
+- **Dates follow the business, not the server.** "Today", "overdue" and monthly revenue use `APP_TIMEZONE` (default `Asia/Vientiane`). Tests freeze the clock just after midnight to prove it.
+- **Drag and drop sends `before_id`, not a position number.** Staff only see their own cards, so an on-screen index wouldn't match the real order. The server places the deal before the given card and renumbers the column in one transaction.
+- **CSV export is safe to open in Excel.** It includes a BOM so Lao/Thai text displays correctly, and cells that would run as formulas (`=…`, `@…`) are escaped. Phone numbers like `+856…` are left alone.
+- **One error shape everywhere:** `{"error": {"code", "message", "details"}}`. Forms map `details` back onto the matching field.
+- **Portable SQL.** The same code and tests run on SQLite and PostgreSQL; tags use a join table rather than JSON queries.
+
+## Known limitations
+
+- The access token (8 hours, no refresh token) is kept in `localStorage`. That's fine for a demo but would need hardening (httpOnly cookies, refresh tokens) for production.
+- Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
+- No currency conversion, email/SMS sending, file attachments or audit log (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
+- The UI is English only and has no dark mode.
