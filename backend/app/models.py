@@ -125,6 +125,10 @@ class Contact(TimestampMixin, Base):
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name or ''}".strip()
 
+    @property
+    def tag_names(self) -> list[str]:
+        return [tag.name for tag in self.tags]
+
 
 class Deal(TimestampMixin, Base):
     __tablename__ = "deals"

@@ -5,6 +5,7 @@ Tests run on in-memory SQLite by default. Set TEST_DATABASE_URL to run them on P
 """
 
 import os
+from decimal import Decimal
 from itertools import count
 
 import pytest
@@ -16,7 +17,7 @@ from sqlalchemy.pool import StaticPool
 from app import clock
 from app.db import Base, get_db, make_engine
 from app.main import app
-from app.models import Role, User
+from app.models import Activity, ActivityType, Company, Contact, Deal, Role, User
 from app.security import create_access_token, hash_password
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite://")
@@ -91,6 +92,42 @@ def make_user(db):
         return user
 
     return _make
+
+
+class Factory:
+    """Creates rows straight in the database, with sensible defaults."""
+
+    def __init__(self, db):
+        self.db = db
+
+    def _save(self, obj):
+        self.db.add(obj)
+        self.db.commit()
+        return obj
+
+    def company(self, owner: User, **fields) -> Company:
+        return self._save(Company(name=fields.pop("name", "Acme"), owner_id=owner.id, **fields))
+
+    def contact(self, owner: User, **fields) -> Contact:
+        return self._save(
+            Contact(first_name=fields.pop("first_name", "Noy"), owner_id=owner.id, **fields)
+        )
+
+    def deal(self, owner: User, contact: Contact | None = None, **fields) -> Deal:
+        contact = contact or self.contact(owner)
+        fields.setdefault("title", "Deal")
+        fields.setdefault("value", Decimal("1000"))
+        return self._save(Deal(contact_id=contact.id, owner_id=owner.id, **fields))
+
+    def activity(self, owner: User, **fields) -> Activity:
+        fields.setdefault("type", ActivityType.task)
+        fields.setdefault("subject", "Follow up")
+        return self._save(Activity(owner_id=owner.id, **fields))
+
+
+@pytest.fixture
+def factory(db) -> Factory:
+    return Factory(db)
 
 
 def auth(user: User) -> dict[str, str]:
