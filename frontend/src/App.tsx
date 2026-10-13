@@ -1,20 +1,17 @@
 import { Route, Routes } from 'react-router'
 import { RequireAdmin, RequireAuth } from './auth/guards'
 import { Layout } from './components/Layout'
-import { PageHeader } from './components/ui/layout'
 import { CompaniesPage } from './pages/CompaniesPage'
 import { CompanyDetailPage } from './pages/CompanyDetailPage'
 import { ContactDetailPage } from './pages/ContactDetailPage'
 import { ContactsPage } from './pages/ContactsPage'
+import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PipelinePage } from './pages/PipelinePage'
 import { SettingsPage } from './pages/SettingsPage'
-
-// Filled in by later phases.
-function Placeholder({ title }: { title: string }) {
-  return <PageHeader title={title} subtitle="Coming soon" />
-}
+import { TasksPage } from './pages/TasksPage'
+import { UsersPage } from './pages/UsersPage'
 
 export default function App() {
   return (
@@ -27,18 +24,18 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<Placeholder title="Dashboard" />} />
+        <Route index element={<DashboardPage />} />
         <Route path="contacts" element={<ContactsPage />} />
         <Route path="contacts/:id" element={<ContactDetailPage />} />
         <Route path="companies" element={<CompaniesPage />} />
         <Route path="companies/:id" element={<CompanyDetailPage />} />
         <Route path="pipeline" element={<PipelinePage />} />
-        <Route path="tasks" element={<Placeholder title="Tasks" />} />
+        <Route path="tasks" element={<TasksPage />} />
         <Route
           path="users"
           element={
             <RequireAdmin>
-              <Placeholder title="Users" />
+              <UsersPage />
             </RequireAdmin>
           }
         />

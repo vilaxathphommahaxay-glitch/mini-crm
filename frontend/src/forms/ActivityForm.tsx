@@ -20,10 +20,18 @@ interface Props {
   contactId?: number
   dealId?: number
   defaultType?: ActivityType
+  defaultDueDate?: string
   onClose: () => void
 }
 
-function ActivityForm({ activity, contactId, dealId, defaultType = 'task', onClose }: Props) {
+function ActivityForm({
+  activity,
+  contactId,
+  dealId,
+  defaultType = 'task',
+  defaultDueDate = '',
+  onClose,
+}: Props) {
   const isAdmin = useCurrentUser().role === 'admin'
   const save = useSaveActivity()
   const toast = useToast()
@@ -40,7 +48,7 @@ function ActivityForm({ activity, contactId, dealId, defaultType = 'task', onClo
       type: activity?.type ?? defaultType,
       subject: activity?.subject ?? '',
       description: activity?.description ?? '',
-      due_date: activity?.due_date ?? '',
+      due_date: activity ? (activity.due_date ?? '') : defaultDueDate,
       done: activity?.done ?? false,
       contact_id: String(activity?.contact?.id ?? contactId ?? ''),
       deal_id: String(activity?.deal?.id ?? dealId ?? ''),

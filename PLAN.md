@@ -232,6 +232,6 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 6 – Frontend พื้นฐาน
 - [x] Phase 7 – Contacts & Companies UI
 - [x] Phase 8 – Pipeline Kanban
-- [ ] Phase 9 – Tasks & Dashboard UI
+- [x] Phase 9 – Tasks & Dashboard UI
 - [ ] Phase 10 – Import/Export CSV
 - [ ] Phase 11 – ส่งงาน
