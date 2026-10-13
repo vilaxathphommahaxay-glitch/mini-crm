@@ -224,7 +224,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 
 ## 13. สถานะ
 - [x] Phase 0 – Setup
-- [ ] Phase 1 – Database
+- [x] Phase 1 – Database
 - [ ] Phase 2 – Auth & Users
 - [ ] Phase 3 – Contacts, Companies, Tags API
 - [ ] Phase 4 – Deals & Pipeline API
