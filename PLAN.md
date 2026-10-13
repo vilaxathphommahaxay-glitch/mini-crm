@@ -228,7 +228,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 2 – Auth & Users
 - [x] Phase 3 – Contacts, Companies, Tags API
 - [x] Phase 4 – Deals & Pipeline API
-- [ ] Phase 5 – Activities & Dashboard API
+- [x] Phase 5 – Activities & Dashboard API
 - [ ] Phase 6 – Frontend พื้นฐาน
 - [ ] Phase 7 – Contacts & Companies UI
 - [ ] Phase 8 – Pipeline Kanban

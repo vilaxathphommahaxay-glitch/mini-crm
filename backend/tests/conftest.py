@@ -8,7 +8,10 @@ import os
 from decimal import Decimal
 from itertools import count
 
-import pytest
+# Tests assert on Vientiane dates; don't let a developer's .env change that.
+os.environ["APP_TIMEZONE"] = "Asia/Vientiane"
+
+import pytest  # noqa: E402
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
