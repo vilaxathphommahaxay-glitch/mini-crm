@@ -64,6 +64,8 @@ DEAL_TITLES = [
     "Coffee machine lease", "Annual supply contract", "Website redesign", "Staff uniforms",
     "Catering for event", "Delivery van", "POS system", "Room booking package",
     "Bulk rice order", "Brochure printing", "Water dispenser rental", "Tour package",
+    "Office furniture", "Wedding banquet", "Signage and banners", "Cold storage unit",
+    "Loyalty card program", "Solar panels", "Motorbike fleet service", "Corporate gift boxes",
 ]  # fmt: skip
 
 ACTIVITY_SUBJECTS = {

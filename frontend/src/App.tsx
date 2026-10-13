@@ -8,6 +8,7 @@ import { ContactDetailPage } from './pages/ContactDetailPage'
 import { ContactsPage } from './pages/ContactsPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { PipelinePage } from './pages/PipelinePage'
 import { SettingsPage } from './pages/SettingsPage'
 
 // Filled in by later phases.
@@ -31,7 +32,7 @@ export default function App() {
         <Route path="contacts/:id" element={<ContactDetailPage />} />
         <Route path="companies" element={<CompaniesPage />} />
         <Route path="companies/:id" element={<CompanyDetailPage />} />
-        <Route path="pipeline" element={<Placeholder title="Pipeline" />} />
+        <Route path="pipeline" element={<PipelinePage />} />
         <Route path="tasks" element={<Placeholder title="Tasks" />} />
         <Route
           path="users"
