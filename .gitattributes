@@ -1,0 +1,5 @@
+# Always LF in the repo and working tree: Prettier expects LF and shell scripts run in Linux containers.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
