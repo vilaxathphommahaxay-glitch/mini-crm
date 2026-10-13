@@ -13,6 +13,7 @@ import { ContactFormModal } from '../forms/ContactForm'
 import { OwnerSelect } from '../forms/selects'
 import { formatDate } from '../lib/format'
 import { toId, useUrlFilters } from '../lib/hooks'
+import { ContactsImportExport } from './contacts/ImportExport'
 
 const PAGE_SIZE = 20
 
@@ -48,10 +49,15 @@ export function ContactsPage() {
         title="Contacts"
         subtitle={query.data ? `${query.data.total} contact(s)` : undefined}
         actions={
-          <Button onClick={() => setCreating(true)}>
-            <Icon name="plus" className="size-4" />
-            New contact
-          </Button>
+          <>
+            <ContactsImportExport
+              filters={{ search: values.search, tag: values.tag, owner_id: values.owner_id }}
+            />
+            <Button onClick={() => setCreating(true)}>
+              <Icon name="plus" className="size-4" />
+              New contact
+            </Button>
+          </>
         }
       />
 

@@ -1,16 +1,18 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response, UploadFile
+from pydantic import ValidationError
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from app import csv_io
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
-from app.clock import utcnow
+from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
 from app.errors import AppError
 from app.models import Activity, Company, Contact, Deal, Tag, User
 from app.pagination import Page, Pagination, paginate
-from app.schemas.contacts import ContactCreate, ContactOut, ContactUpdate
+from app.schemas.contacts import ContactCreate, ContactOut, ContactUpdate, ImportResult
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
@@ -78,6 +80,81 @@ def list_contacts(
 ):
     stmt = contact_query(user, search, tag, company_id, owner_id)
     return paginate(db, stmt, pagination)
+
+
+@router.get("/export")
+def export_contacts(
+    user: CurrentUser,
+    db: DbSession,
+    search: Annotated[str | None, Query(max_length=100)] = None,
+    tag: str | None = None,
+    company_id: int | None = None,
+    owner_id: int | None = None,
+):
+    """Every contact matching the list filters (not paginated) as a UTF-8 CSV."""
+    contacts = db.scalars(contact_query(user, search, tag, company_id, owner_id)).all()
+    filename = f"contacts-{local_today().isoformat()}.csv"
+    return Response(
+        content=csv_io.export_contacts(contacts),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post("/import", response_model=ImportResult)
+async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
+    """Import contacts owned by the importer. Bad or duplicate rows are skipped and reported;
+    good rows are saved (PLAN.md §9)."""
+    raw = await file.read(csv_io.MAX_BYTES + 1)
+    try:
+        rows = csv_io.read_rows(csv_io.decode(raw))
+    except csv_io.CsvError as exc:
+        status = 413 if "larger" in str(exc) else 422
+        raise AppError(status, str(exc), code="invalid_file") from exc
+
+    visible = scope(select(Contact.email), Contact, user).where(Contact.email.is_not(None))
+    seen_emails = {email.lower() for email in db.scalars(visible)}
+    companies = {c.name.lower(): c for c in db.scalars(scope(select(Company), Company, user))}
+    created, companies_created, errors = 0, 0, []
+
+    for line, values in rows:
+        try:
+            data, company_name = csv_io.validate_row(values)
+        except (ValidationError, ValueError) as exc:
+            errors.append({"row": line, "message": csv_io.error_message(exc)})
+            continue
+        if data.email and data.email in seen_emails:
+            errors.append({"row": line, "message": f"Duplicate email {data.email} - skipped"})
+            continue
+
+        company = None
+        if company_name:
+            company = companies.get(company_name.lower())
+            if company is None:
+                company = Company(name=company_name, owner_id=user.id)
+                db.add(company)
+                companies[company_name.lower()] = company
+                companies_created += 1
+        db.add(
+            Contact(
+                **data.model_dump(exclude={"owner_id", "tags", "company_id"}),
+                company=company,
+                owner_id=user.id,
+                tags=get_or_create_tags(db, data.tags),
+            )
+        )
+        db.flush()  # new tags/companies get ids before the next row looks them up
+        if data.email:
+            seen_emails.add(data.email)
+        created += 1
+
+    db.commit()
+    return {
+        "created": created,
+        "skipped": len(errors),
+        "companies_created": companies_created,
+        "errors": errors,
+    }
 
 
 @router.post("", response_model=ContactOut, status_code=201)

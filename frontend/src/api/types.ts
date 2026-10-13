@@ -127,5 +127,6 @@ export interface DashboardSummary {
 export interface ImportResult {
   created: number
   skipped: number
+  companies_created: number
   errors: { row: number; message: string }[]
 }

@@ -181,7 +181,9 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - จำกัดไฟล์ 1 MB / 1,000 แถว
 - `company` จับคู่ด้วยชื่อ (ไม่สนตัวพิมพ์เล็ก/ใหญ่) กับบริษัทที่ผู้ใช้เห็น ไม่เจอ → สร้างใหม่
 - อีเมลซ้ำกับ contact ที่ผู้ใช้เห็นอยู่แล้ว หรือซ้ำกันในไฟล์ → ข้ามแถวนั้น
-- แถวที่ผิดไม่ทำให้ทั้งไฟล์ล้ม: นำเข้าแถวที่ถูก แล้วตอบ `{ created, skipped, errors: [{ row, message }] }`
+- แถวที่ผิดไม่ทำให้ทั้งไฟล์ล้ม: นำเข้าแถวที่ถูก แล้วตอบ `{ created, skipped, companies_created, errors: [{ row, message }] }`
+  (`skipped` = แถวที่ไม่ได้นำเข้า ทั้งที่ข้อมูลผิดและอีเมลซ้ำ, `errors` บอกเหตุผลทีละแถว)
+- export ป้องกัน CSV/formula injection: ค่าที่ขึ้นต้นด้วย `=`, `@` หรือ `+`/`-` ที่ไม่ใช่เบอร์โทร จะถูกนำหน้าด้วย `'`
 - เจ้าของของข้อมูลที่ import = ผู้ import
 
 ## 10. ลำดับการทำ
@@ -233,5 +235,5 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 7 – Contacts & Companies UI
 - [x] Phase 8 – Pipeline Kanban
 - [x] Phase 9 – Tasks & Dashboard UI
-- [ ] Phase 10 – Import/Export CSV
+- [x] Phase 10 – Import/Export CSV
 - [ ] Phase 11 – ส่งงาน

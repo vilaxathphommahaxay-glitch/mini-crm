@@ -65,3 +65,15 @@ class ContactOut(OutputModel):
     owner: UserRef
     created_at: datetime
     updated_at: datetime
+
+
+class ImportRowError(OutputModel):
+    row: int
+    message: str
+
+
+class ImportResult(OutputModel):
+    created: int
+    skipped: int
+    companies_created: int
+    errors: list[ImportRowError]
