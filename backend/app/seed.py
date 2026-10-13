@@ -150,8 +150,8 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
         }[currency]
         closed_at = None
         if stage in CLOSED_STAGES:
-            # spread closed deals over the last ~11 months for the monthly chart
-            closed_at = now - timedelta(days=rng.randint(0, 330))
+            # recently closed, so they show on the board (it hides wins/losses older than 90 days)
+            closed_at = now - timedelta(days=rng.randint(0, 60))
         deals.append(
             Deal(
                 title=DEAL_TITLES[i % len(DEAL_TITLES)],
