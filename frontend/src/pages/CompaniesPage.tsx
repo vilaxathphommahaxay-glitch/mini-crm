@@ -1,0 +1,157 @@
+import { useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { useCompanies } from '../api/hooks'
+import { useCurrentUser } from '../auth/context'
+import { Icon } from '../components/icons'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/form'
+import { Card, PageHeader } from '../components/ui/layout'
+import { Pagination } from '../components/ui/Pagination'
+import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
+import { CompanyFormModal } from '../forms/CompanyForm'
+import { OwnerSelect } from '../forms/selects'
+import { formatDate } from '../lib/format'
+import { toId, useUrlFilters } from '../lib/hooks'
+
+const PAGE_SIZE = 20
+
+export function CompaniesPage() {
+  const isAdmin = useCurrentUser().role === 'admin'
+  const navigate = useNavigate()
+  const { values, page, set } = useUrlFilters(['search', 'owner_id'] as const)
+  const [searchInput, setSearchInput] = useState(values.search)
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [creating, setCreating] = useState(false)
+
+  function onSearchChange(text: string) {
+    setSearchInput(text)
+    clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => set({ search: text.trim() }), 300)
+  }
+
+  const query = useCompanies({
+    search: values.search,
+    owner_id: toId(values.owner_id),
+    page,
+    size: PAGE_SIZE,
+  })
+  const filtered = Boolean(values.search || values.owner_id)
+
+  return (
+    <>
+      <PageHeader
+        title="Companies"
+        subtitle={
+          query.data
+            ? `${query.data.total} compan${query.data.total === 1 ? 'y' : 'ies'}`
+            : undefined
+        }
+        actions={
+          <Button onClick={() => setCreating(true)}>
+            <Icon name="plus" className="size-4" />
+            New company
+          </Button>
+        }
+      />
+      <Card>
+        <div className="flex flex-wrap gap-3 border-b border-slate-200 p-4">
+          <div className="relative min-w-56 flex-1">
+            <Icon
+              name="search"
+              className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400"
+            />
+            <Input
+              aria-label="Search companies"
+              placeholder="Search name or phone…"
+              className="pl-9"
+              value={searchInput}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+          {isAdmin && (
+            <div className="w-full sm:w-48">
+              <OwnerSelect
+                aria-label="Filter by owner"
+                emptyLabel="All owners"
+                value={values.owner_id}
+                onChange={(e) => set({ owner_id: e.target.value })}
+              />
+            </div>
+          )}
+        </div>
+
+        {query.isPending ? (
+          <LoadingState />
+        ) : query.isError ? (
+          <ErrorState error={query.error} onRetry={() => query.refetch()} />
+        ) : query.data.items.length === 0 ? (
+          <EmptyState title={filtered ? 'No companies match these filters' : 'No companies yet'} />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
+                <tr>
+                  <th className="px-4 py-2.5">Name</th>
+                  <th className="px-4 py-2.5">Phone</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">Website</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">Address</th>
+                  {isAdmin && <th className="hidden px-4 py-2.5 lg:table-cell">Owner</th>}
+                  <th className="hidden px-4 py-2.5 xl:table-cell">Updated</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {query.data.items.map((company) => (
+                  <tr
+                    key={company.id}
+                    className="cursor-pointer hover:bg-slate-50"
+                    onClick={() => navigate(`/companies/${company.id}`)}
+                  >
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      <Link
+                        to={`/companies/${company.id}`}
+                        className="hover:text-indigo-600"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {company.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-600">
+                      {company.phone ?? '—'}
+                    </td>
+                    <td className="hidden max-w-56 truncate px-4 py-3 text-slate-600 md:table-cell">
+                      {company.website ?? '—'}
+                    </td>
+                    <td className="hidden px-4 py-3 text-slate-600 md:table-cell">
+                      {company.address ?? '—'}
+                    </td>
+                    {isAdmin && (
+                      <td className="hidden px-4 py-3 text-slate-600 lg:table-cell">
+                        {company.owner.name}
+                      </td>
+                    )}
+                    <td className="hidden px-4 py-3 text-slate-500 xl:table-cell">
+                      {formatDate(company.updated_at)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {query.data && (
+          <Pagination
+            page={page}
+            size={PAGE_SIZE}
+            total={query.data.total}
+            onPageChange={(p) => set({ page: p })}
+          />
+        )}
+      </Card>
+      <CompanyFormModal
+        open={creating}
+        onClose={() => setCreating(false)}
+        onSaved={(company) => navigate(`/companies/${company.id}`)}
+      />
+    </>
+  )
+}

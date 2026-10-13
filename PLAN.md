@@ -230,7 +230,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 4 – Deals & Pipeline API
 - [x] Phase 5 – Activities & Dashboard API
 - [x] Phase 6 – Frontend พื้นฐาน
-- [ ] Phase 7 – Contacts & Companies UI
+- [x] Phase 7 – Contacts & Companies UI
 - [ ] Phase 8 – Pipeline Kanban
 - [ ] Phase 9 – Tasks & Dashboard UI
 - [ ] Phase 10 – Import/Export CSV

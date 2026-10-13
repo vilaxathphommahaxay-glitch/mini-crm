@@ -2,6 +2,10 @@ import { Route, Routes } from 'react-router'
 import { RequireAdmin, RequireAuth } from './auth/guards'
 import { Layout } from './components/Layout'
 import { PageHeader } from './components/ui/layout'
+import { CompaniesPage } from './pages/CompaniesPage'
+import { CompanyDetailPage } from './pages/CompanyDetailPage'
+import { ContactDetailPage } from './pages/ContactDetailPage'
+import { ContactsPage } from './pages/ContactsPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -23,8 +27,10 @@ export default function App() {
         }
       >
         <Route index element={<Placeholder title="Dashboard" />} />
-        <Route path="contacts" element={<Placeholder title="Contacts" />} />
-        <Route path="companies" element={<Placeholder title="Companies" />} />
+        <Route path="contacts" element={<ContactsPage />} />
+        <Route path="contacts/:id" element={<ContactDetailPage />} />
+        <Route path="companies" element={<CompaniesPage />} />
+        <Route path="companies/:id" element={<CompanyDetailPage />} />
         <Route path="pipeline" element={<Placeholder title="Pipeline" />} />
         <Route path="tasks" element={<Placeholder title="Tasks" />} />
         <Route
