@@ -17,7 +17,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app import clock
+from app import clock, storage
 from app.db import Base, get_db, make_engine
 from app.main import app
 from app.models import Activity, ActivityType, Company, Contact, Deal, Role, User
@@ -69,6 +69,14 @@ def client(session_factory):
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _upload_dir(tmp_path):
+    """Attached files go to a fresh temporary folder in every test."""
+    storage.root_override = tmp_path / "uploads"
+    yield storage.root_override
+    storage.root_override = None
 
 
 @pytest.fixture(autouse=True)

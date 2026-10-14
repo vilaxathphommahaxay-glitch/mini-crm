@@ -211,7 +211,8 @@ export interface BusinessProfile {
   quote_terms: string | null
 }
 
-export type HistoryEntity = 'company' | 'contact' | 'deal' | 'activity' | 'quote' | 'user'
+export type HistoryEntity =
+  'company' | 'contact' | 'deal' | 'activity' | 'quote' | 'user' | 'attachment'
 
 /** One field's change: plain values, plus names for links to other records. */
 export interface HistoryChange {
@@ -234,4 +235,15 @@ export interface HistoryEvent {
   entity_label: string
   action: 'created' | 'updated' | 'deleted' | 'transferred'
   changes: HistoryChange[] | null
+}
+
+export type AttachmentEntity = 'contact' | 'company' | 'deal'
+
+export interface Attachment {
+  id: number
+  filename: string
+  content_type: string
+  size: number
+  uploaded_by: { id: number; name: string }
+  created_at: string
 }

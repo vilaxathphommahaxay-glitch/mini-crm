@@ -5,6 +5,7 @@ import { useCompany, useContacts, useDeals, useDeleteCompany } from '../api/hook
 import { useCurrentUser } from '../auth/context'
 import { DealsTable } from '../components/DealsTable'
 import { DetailList } from '../components/DetailList'
+import { AttachmentsCard } from '../components/Attachments'
 import { HistoryCard } from '../components/HistoryList'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
@@ -158,7 +159,8 @@ export function CompanyDetailPage() {
           </Card>
         </div>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <AttachmentsCard type="company" id={c.id} />
         <HistoryCard type="company" id={c.id} />
       </div>
 

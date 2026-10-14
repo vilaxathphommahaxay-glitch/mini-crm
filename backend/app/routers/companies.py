@@ -4,12 +4,14 @@ from fastapi import APIRouter, Query
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import joinedload
 
+from app import storage
 from app.access import apply_patch, get_owned, resolve_owner, scope
 from app.clock import utcnow
 from app.deps import CurrentUser, DbSession
 from app.errors import AppError
 from app.models import Company, Contact, Deal
 from app.pagination import Page, Pagination, paginate
+from app.routers import attachments
 from app.schemas.companies import CompanyCreate, CompanyOut, CompanyUpdate
 
 router = APIRouter(prefix="/companies", tags=["companies"])
@@ -71,5 +73,7 @@ def delete_company(company_id: int, user: CurrentUser, db: DbSession):
             code="has_related_records",
             details=[{"contacts": contacts, "deals": deals}],
         )
+    files = attachments.remove_for(db, "company", company.id)
     db.delete(company)
     db.commit()
+    storage.remove(*files)

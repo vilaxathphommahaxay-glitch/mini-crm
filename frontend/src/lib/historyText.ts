@@ -31,6 +31,7 @@ const FIELD_LABELS: Record<string, MessageKey> = {
   valid_until: 'quote.validUntil',
   discount: 'quote.discount',
   tax_rate: 'quote.taxRate',
+  files: 'files.title',
 }
 
 const LONG_TEXT = 80
@@ -91,14 +92,14 @@ export function changeLines(event: HistoryEvent): string[] {
         activities: n('activities'),
       })
     }
-    if (change.field === 'tags') {
+    if (change.field === 'tags' || change.field === 'files') {
       const parts = []
       if (change.added?.length)
         parts.push(t('history.tagsAdded', { tags: change.added.join(', ') }))
       if (change.removed?.length) {
         parts.push(t('history.tagsRemoved', { tags: change.removed.join(', ') }))
       }
-      return `${fieldLabel('tags')}: ${parts.join('; ')}`
+      return `${fieldLabel(change.field)}: ${parts.join('; ')}`
     }
     return `${fieldLabel(change.field)}: ${valueText(change, 'from')} → ${valueText(change, 'to')}`
   })

@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session, joinedload
 
+from app import storage
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
 from app.clock import utcnow
 from app.deps import CurrentUser, DbSession
@@ -11,6 +12,7 @@ from app.errors import field_error
 from app.models import CLOSED_STAGES, STAGES, Activity, Company, Contact, Deal, Stage, User
 from app.pagination import Page, Pagination, paginate
 from app.pipeline import apply_closed_at, move_deal, next_position, totals_by_currency
+from app.routers import attachments
 from app.schemas.deals import BoardColumn, DealCreate, DealMove, DealOut, DealUpdate
 
 router = APIRouter(prefix="/deals", tags=["deals"])
@@ -141,5 +143,7 @@ def delete_deal(deal_id: int, user: CurrentUser, db: DbSession):
     deal = get_owned(db, Deal, deal_id, user)
     # Activities stay on the contact's timeline, just unlinked from the deal (PLAN.md §6).
     db.execute(update(Activity).where(Activity.deal_id == deal.id).values(deal_id=None))
+    files = attachments.remove_for(db, "deal", deal.id)
     db.delete(deal)
     db.commit()
+    storage.remove(*files)

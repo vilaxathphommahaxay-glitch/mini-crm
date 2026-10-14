@@ -49,7 +49,7 @@ Port: backend `8000`, frontend dev `5173` (Vite proxy `/api` → backend ไม�
 
 ### ไม่ทำในเวอร์ชันแรก
 ส่งอีเมล/SMS อัตโนมัติ, เชื่อม Facebook/WhatsApp, multi-tenant, แอปมือถือ, แปลงค่าเงิน,
-refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์, audit log (ทำแล้วหลังส่งงาน: ประวัติการแก้ไข), sync แบบ real-time, UI หลายภาษา (ทำแล้วหลังส่งงาน: ลาว/อังกฤษ), rate limiting
+refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์ (ทำแล้วหลังส่งงาน), audit log (ทำแล้วหลังส่งงาน: ประวัติการแก้ไข), sync แบบ real-time, UI หลายภาษา (ทำแล้วหลังส่งงาน: ลาว/อังกฤษ), rate limiting
 
 ## 5. Data model
 ทุกตารางมี `id` (int PK), `created_at`, `updated_at` (timezone-aware, UTC)
@@ -268,3 +268,6 @@ token หมดอายุหรือได้ `401` → ล้าง token �
   ชื่อของ record ที่อ้างถึง; ไม่บันทึก position/updated_at ฯลฯ; การโอนข้อมูลบันทึกเป็นรายการเดียว;
   `GET /history?entity_type=&entity_id=` (ตามสิทธิ์ของ record) และทั้งหมด (admin), การ์ดในหน้า contact/company/deal,
   หน้า "Change history" สำหรับ admin
+- [x] ไฟล์แนบ: ตาราง `attachments` + ไฟล์ใน volume `uploads` (ชื่อไฟล์บนดิสก์เป็น key สุ่ม), แนบกับ contact/company/deal,
+  รับเฉพาะรูป/PDF/Office/ข้อความ/ZIP ≤ 10 MB (ชนิดไฟล์ดูจากนามสกุล ไม่เชื่อ browser; รูป/PDF เปิดในเบราว์เซอร์ อื่น ๆ ดาวน์โหลด),
+  สิทธิ์ตาม record, ลบ record แล้วไฟล์ถูกลบตาม, บันทึกในประวัติของ record, backup อัตโนมัติรวมไฟล์ (`files-*.tar.gz`) และ restore ได้

@@ -389,6 +389,23 @@ Please check these first; a change here should be applied everywhere.
 | `history.yes` | Yes | ແມ່ນ |
 | `history.no` | No | ບໍ່ |
 | `history.counts` | {companies} companies, {contacts} contacts, {deals} deals, {activities} activities | ບໍລິສັດ {companies}, ລູກຄ້າ {contacts}, ລາຍການຂາຍ {deals}, ກິດຈະກຳ {activities} |
+| `files.title` | Files and photos | ໄຟລ໌ ແລະ ຮູບພາບ |
+| `files.add` | Add file or photo | ເພີ່ມໄຟລ໌ ຫຼື ຮູບ |
+| `files.uploading` | Uploading… | ກຳລັງອັບໂຫຼດ… |
+| `files.uploaded` | {count} files added | ເພີ່ມ {count} ໄຟລ໌ແລ້ວ |
+| `files.uploaded_one` | File added | ເພີ່ມໄຟລ໌ແລ້ວ |
+| `files.none` | No files yet | ຍັງບໍ່ມີໄຟລ໌ |
+| `files.noneHint` | Keep photos, contracts and receipts here. Up to {mb} MB each. | ເກັບຮູບ, ສັນຍາ ແລະ ໃບບິນໄວ້ບ່ອນນີ້. ສູງສຸດ {mb} MB ຕໍ່ໄຟລ໌. |
+| `files.open` | Open {name} | ເປີດ {name} |
+| `files.download` | Download | ດາວໂຫຼດ |
+| `files.delete` | Delete {name} | ລຶບ {name} |
+| `files.deleteTitle` | Delete this file? | ລຶບໄຟລ໌ນີ້ບໍ? |
+| `files.deleteMessage` | “{name}” will be deleted permanently. | “{name}” ຈະຖືກລຶບຖາວອນ. |
+| `files.deleted` | File deleted | ລຶບໄຟລ໌ແລ້ວ |
+| `files.tooLarge` | “{name}” is larger than {mb} MB | “{name}” ໃຫຍ່ເກີນ {mb} MB |
+| `error.attachmentTooLarge` | The file is larger than {mb} MB | ໄຟລ໌ໃຫຍ່ເກີນ {mb} MB |
+| `error.fileTypeNotAllowed` | This kind of file can't be attached. Use photos, PDF, Word, Excel, PowerPoint, text or ZIP files. | ແນບໄຟລ໌ປະເພດນີ້ບໍ່ໄດ້. ໃຫ້ໃຊ້ຮູບ, PDF, Word, Excel, PowerPoint, ໄຟລ໌ຂໍ້ຄວາມ ຫຼື ZIP. |
+| `history.entity.attachment` | file | ໄຟລ໌ |
 | `validation.descriptionRequired` | Describe the item | ໃສ່ລາຍລະອຽດຂອງລາຍການ |
 | `validation.quantity` | Enter a number above 0 | ໃສ່ຕົວເລກທີ່ຫຼາຍກວ່າ 0 |
 | `validation.amount` | Enter an amount like 150000 or 99.50 | ໃສ່ຈຳນວນເງິນ ເຊັ່ນ 150000 ຫຼື 99.50 |

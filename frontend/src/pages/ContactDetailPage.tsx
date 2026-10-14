@@ -4,6 +4,7 @@ import { ApiError, errorMessage } from '../api/client'
 import { useActivities, useContact, useDeals, useDeleteContact } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
+import { AttachmentsCard } from '../components/Attachments'
 import { HistoryCard } from '../components/HistoryList'
 import { TagList } from '../components/badges'
 import { DealsTable } from '../components/DealsTable'
@@ -169,7 +170,8 @@ export function ContactDetailPage() {
           </Card>
         </div>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <AttachmentsCard type="contact" id={c.id} />
         <HistoryCard type="contact" id={c.id} />
       </div>
 

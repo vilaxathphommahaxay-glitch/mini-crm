@@ -25,6 +25,7 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 - **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
+- **Files and photos** — attach photos, contracts and receipts (up to 10 MB each; photos, PDF, Office, text and ZIP) to any contact, company or deal. Take a picture straight from the phone's camera; photos preview in the app.
 - **Edit history** — every add, change and delete is recorded with who did it and the old and new values (“Phone: 020 1111 → 020 2222”). Each contact, company and deal has a *Show history* section; admins get a *Change history* page with everything, including deleted records and hand-overs.
 - **For managers** — a team table (open pipeline, wins this month, overdue tasks per person) and a one-click *Transfer records* when someone leaves.
 - **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
@@ -53,12 +54,15 @@ The interactive API documentation is at **http://localhost:8080/api/docs**.
 
 ### Backups
 
-The `backup` service saves the database to `backups/` **automatically** — once when it starts and then every day — and keeps the last 14 days (`BACKUP_INTERVAL_SECONDS`, `BACKUP_KEEP_DAYS`). File names use UTC time. Copy the folder somewhere safe now and then (it is git-ignored).
+The `backup` service saves the database (`crm-….sql.gz`) and the attached files (`files-….tar.gz`) to `backups/` **automatically** — once when it starts and then every day — and keeps the last 14 days (`BACKUP_INTERVAL_SECONDS`, `BACKUP_KEEP_DAYS`). File names use UTC time. Copy the folder somewhere safe now and then (it is git-ignored).
 
 ```bash
 ./scripts/backup.sh                                   # an extra backup right now
-./scripts/restore.sh backups/crm-20261014-120000.sql.gz   # asks you to type "restore" first
+# asks you to type "restore" first; the second file (attached files) is optional
+./scripts/restore.sh backups/crm-20261014-120000.sql.gz backups/files-20261014-120000.tar.gz
 ```
+
+Attached files themselves live in the Docker volume `uploads` (`MAX_UPLOAD_MB`, default 10).
 
 Run the scripts from Git Bash on Windows.
 
@@ -179,5 +183,5 @@ PLAN.md              scope, data model, API and the phase-by-phase plan
 - The access token (8 hours, no refresh token) is kept in `localStorage`. That's fine for a demo but would need hardening (httpOnly cookies, refresh tokens) for production.
 - The sign-in rate limit is kept in memory, so it is per backend process; running several workers or servers would need a shared store such as Redis.
 - Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
-- No currency conversion, email/SMS sending or file attachments. Quotes are made into PDFs by the browser's own *Save as PDF*, not by the server (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
+- No currency conversion or email/SMS sending. Quotes are made into PDFs by the browser's own *Save as PDF*, not by the server (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
 - The UI is available in Lao and English only, and has no dark mode.

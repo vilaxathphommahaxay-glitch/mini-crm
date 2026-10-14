@@ -24,6 +24,7 @@ const BY_CODE: Record<string, MessageKey> = {
   file_too_large: 'error.fileTooLarge',
   file_not_utf8: 'error.fileNotUtf8',
   file_empty: 'error.fileEmpty',
+  file_type_not_allowed: 'error.fileTypeNotAllowed',
   file_missing_column: 'error.fileMissingColumn',
   file_too_many_rows: 'error.fileTooManyRows',
 }
@@ -42,6 +43,8 @@ export function apiErrorText(error: ApiError): string {
             deals: Number(detail.deals),
           })
         : t('error.contactInUse', { deals: Number(detail?.deals ?? 0) })
+    case 'attachment_too_large':
+      return t('error.attachmentTooLarge', { mb: Number(detail?.mb ?? 10) })
     case 'error':
       return t('error.requestFailed', { status: error.status })
   }

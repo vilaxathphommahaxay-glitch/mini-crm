@@ -3,6 +3,7 @@ from fastapi import APIRouter, FastAPI
 from app.errors import register_error_handlers
 from app.routers import (
     activities,
+    attachments,
     auth,
     companies,
     contacts,
@@ -38,6 +39,7 @@ for module in (
     dashboard,
     search,
     history,
+    attachments,
 ):
     api.include_router(module.router)
 

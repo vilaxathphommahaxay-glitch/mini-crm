@@ -282,3 +282,22 @@ class AuditEvent(Base):
     changes: Mapped[list | None] = mapped_column(JSON)
 
     actor: Mapped[User | None] = relationship()
+
+
+class Attachment(Base):
+    """A file attached to a contact, company or deal; the bytes live in UPLOAD_DIR (storage.py)."""
+
+    __tablename__ = "attachments"
+    __table_args__ = (Index("ix_attachments_entity", "entity_type", "entity_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    entity_type: Mapped[str] = mapped_column(String(20))
+    entity_id: Mapped[int] = mapped_column(Integer)
+    filename: Mapped[str] = mapped_column(String(255))
+    content_type: Mapped[str] = mapped_column(String(100))
+    size: Mapped[int] = mapped_column(Integer)
+    storage_key: Mapped[str] = mapped_column(String(64), unique=True)
+    uploaded_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+
+    uploaded_by: Mapped[User] = relationship()

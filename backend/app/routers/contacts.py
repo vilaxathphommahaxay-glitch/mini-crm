@@ -5,13 +5,14 @@ from pydantic import ValidationError
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app import csv_io
+from app import csv_io, storage
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
 from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
 from app.errors import AppError, field_error
 from app.models import Activity, Company, Contact, Deal, Tag, User
 from app.pagination import Page, Pagination, paginate
+from app.routers import attachments
 from app.schemas.contacts import ContactCreate, ContactOut, ContactUpdate, ImportResult
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
@@ -243,5 +244,7 @@ def delete_contact(contact_id: int, user: CurrentUser, db: DbSession):
         )
     # The contact's own activity history goes with it (PLAN.md §6).
     db.execute(delete(Activity).where(Activity.contact_id == contact.id))
+    files = attachments.remove_for(db, "contact", contact.id)
     db.delete(contact)
     db.commit()
+    storage.remove(*files)

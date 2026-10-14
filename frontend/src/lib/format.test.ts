@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildUrl } from '../api/client'
-import { formatDate, formatMoney, formatTotals } from './format'
+import { formatDate, formatMoney, formatSize, formatTotals } from './format'
 
 describe('formatMoney', () => {
   it('groups thousands and hides LAK decimals', () => {
@@ -44,5 +44,15 @@ describe('buildUrl', () => {
     expect(buildUrl('/contacts', { search: '', page: 2, tag: undefined, done: false })).toBe(
       '/api/contacts?page=2&done=false',
     )
+  })
+})
+
+describe('formatSize', () => {
+  it.each([
+    [512, '512 B'],
+    [2048, '2 KB'],
+    [3_400_000, '3.4 MB'],
+  ])('%s -> %s', (bytes, text) => {
+    expect(formatSize(bytes)).toBe(text)
   })
 })

@@ -10,6 +10,8 @@ import {
 import { api } from './client'
 import type {
   Activity,
+  Attachment,
+  AttachmentEntity,
   BusinessProfile,
   BoardColumn,
   Company,
@@ -178,6 +180,51 @@ export function useReminders() {
     refetchOnWindowFocus: true,
     retry: false, // a missing badge is harmless; don't hammer the server for it
   })
+}
+
+// --- attached files ---
+export function useAttachments(entityType: AttachmentEntity, entityId: number) {
+  return useQuery({
+    queryKey: ['attachments', entityType, entityId],
+    queryFn: () =>
+      api<Attachment[]>('/attachments', {
+        query: { entity_type: entityType, entity_id: entityId },
+      }),
+  })
+}
+
+export function useUploadAttachment(entityType: AttachmentEntity, entityId: number) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData()
+      form.append('entity_type', entityType)
+      form.append('entity_id', String(entityId))
+      form.append('file', file)
+      return api<Attachment>('/attachments', { method: 'POST', body: form })
+    },
+    onSettled: () =>
+      Promise.all(
+        ['attachments', 'history'].map((key) => client.invalidateQueries({ queryKey: [key] })),
+      ),
+  })
+}
+
+export function useDeleteAttachment() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => api<void>(`/attachments/${id}`, { method: 'DELETE' }),
+    onSuccess: () =>
+      Promise.all(
+        ['attachments', 'history'].map((key) => client.invalidateQueries({ queryKey: [key] })),
+      ),
+  })
+}
+
+/** The file's bytes (sent with the sign-in token, so it can't be a plain link). */
+export async function fetchAttachment(id: number): Promise<Blob> {
+  const response = await api<Response>(`/attachments/${id}/file`, { raw: true })
+  return response.blob()
 }
 
 // --- edit history ---

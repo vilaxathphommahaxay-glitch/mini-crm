@@ -25,6 +25,10 @@ services:
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
       # language of the demo data; follows APP_LOCALE unless set on its own
       SEED_LANGUAGE: ${SEED_LANGUAGE:-${APP_LOCALE:-en}}
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -42,8 +46,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Automatic backups to ./backups: one at start-up, then daily; 14 days are kept.
-  # Restore with: ./scripts/restore.sh backups/crm-YYYYMMDD-HHMMSS.sql.gz
+  # Automatic backups to ./backups (database + attached files): one at start-up, then
+  # daily; 14 days are kept. Restore with:
+  #   ./scripts/restore.sh backups/crm-YYYYMMDD-HHMMSS.sql.gz
   backup:
     image: postgres:16-alpine
     environment:
@@ -55,6 +60,7 @@ services:
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
     volumes:
       - ./backups:/backups
+      - uploads:/uploads:ro
       - ./scripts/backup-loop.sh:/backup-loop.sh:ro
     entrypoint: ["/bin/sh", "/backup-loop.sh"]
     depends_on:
@@ -64,3 +70,4 @@ services:
 
 volumes:
   db-data:
+  uploads:

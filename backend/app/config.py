@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     secret_key: str = Field(DEV_SECRET_KEY, min_length=32)
     access_token_expire_minutes: int = 480
     app_timezone: str = "Asia/Vientiane"
+    # where attached files are kept (a Docker volume in production)
+    upload_dir: str = "./uploads"
+    max_upload_mb: int = 10
 
     @field_validator("app_timezone")
     @classmethod

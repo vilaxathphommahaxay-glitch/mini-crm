@@ -14,7 +14,17 @@ from sqlalchemy import event, insert, inspect
 from sqlalchemy.orm import Session, attributes
 
 from app.clock import utcnow
-from app.models import Activity, AuditEvent, Company, Contact, Deal, Quote, QuoteItem, User
+from app.models import (
+    Activity,
+    Attachment,
+    AuditEvent,
+    Company,
+    Contact,
+    Deal,
+    Quote,
+    QuoteItem,
+    User,
+)
 
 ACTOR_KEY = "audit_actor_id"
 
@@ -150,6 +160,37 @@ def _record(session: Session, _flush_context) -> None:
                 add(quote, "updated", [{"field": "items"}])
         elif entry["action"] == "updated":
             entry["changes"].append({"field": "items"})
+
+    # Files are logged on the record they belong to: "Files: added contract.pdf".
+    parents = {"contact": Contact, "company": Company, "deal": Deal}
+    for obj, side in [
+        *((o, "added") for o in session.new),
+        *((o, "removed") for o in session.deleted),
+    ]:
+        if not isinstance(obj, Attachment) or obj.entity_type not in parents:
+            continue
+        entry = next(
+            (
+                r
+                for r in rows
+                if r["entity_type"] == obj.entity_type and r["entity_id"] == obj.entity_id
+            ),
+            None,
+        )
+        if entry is None:
+            with session.no_autoflush:
+                parent = session.get(parents[obj.entity_type], obj.entity_id)
+            if parent is None:
+                continue
+            add(parent, "updated", [])
+            entry = rows[-1]
+        if entry["action"] != "updated":
+            continue
+        change = next((c for c in entry["changes"] if c["field"] == "files"), None)
+        if change is None:
+            change = {"field": "files", "added": [], "removed": []}
+            entry["changes"].append(change)
+        change[side].append(obj.filename)
 
     if rows:
         session.connection().execute(insert(AuditEvent), rows)

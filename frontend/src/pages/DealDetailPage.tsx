@@ -6,6 +6,7 @@ import { moveDeal, useActivities, useDeal, useDealQuotes } from '../api/hooks'
 import { STAGES, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
+import { AttachmentsCard } from '../components/Attachments'
 import { HistoryCard } from '../components/HistoryList'
 import { DetailList } from '../components/DetailList'
 import { Icon } from '../components/icons'
@@ -168,7 +169,8 @@ export function DealDetailPage() {
           )}
         </Card>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <AttachmentsCard type="deal" id={d.id} />
         <HistoryCard type="deal" id={d.id} />
       </div>
 

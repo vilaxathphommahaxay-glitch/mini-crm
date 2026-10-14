@@ -15,7 +15,8 @@ COPY alembic ./alembic
 COPY app ./app
 COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh \
-    && useradd --create-home --uid 1000 crm
+    && useradd --create-home --uid 1000 crm \
+    && mkdir -p /app/uploads && chown crm /app/uploads
 USER crm
 
 EXPOSE 8000
