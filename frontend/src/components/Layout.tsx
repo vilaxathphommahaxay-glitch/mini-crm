@@ -4,6 +4,8 @@ import { useAuth, useCurrentUser } from '../auth/context'
 import { t, type MessageKey } from '../i18n'
 import { CommandPalette } from './CommandPalette'
 import { LanguageSwitch } from './LanguageSwitch'
+import { useReminderTitleAndAppBadge } from '../lib/reminders'
+import { ReminderBadge, ReminderShortcut } from './Reminders'
 import { Icon, type IconName } from './icons'
 import { LoadingState } from './ui/states'
 
@@ -65,7 +67,8 @@ function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: 
             }
           >
             <Icon name={item.icon} />
-            {t(item.label)}
+            <span className="flex-1">{t(item.label)}</span>
+            {item.to === '/tasks' && <ReminderBadge />}
           </NavLink>
         ))}
       </nav>
@@ -93,6 +96,7 @@ function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: 
 export function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  useReminderTitleAndAppBadge()
 
   // Ctrl+K / ⌘K opens the quick search from anywhere
   useEffect(() => {
@@ -128,6 +132,7 @@ export function Layout() {
           <Icon name="menu" />
         </button>
         <span className="flex-1 font-semibold text-slate-900">Mini CRM</span>
+        <ReminderShortcut />
         <button
           type="button"
           aria-label={t('common.search')}

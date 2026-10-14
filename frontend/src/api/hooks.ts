@@ -16,6 +16,7 @@ import type {
   DashboardSummary,
   Deal,
   Page,
+  Reminders,
   SearchResults,
   Stage,
   TeamMember,
@@ -121,6 +122,17 @@ export const useActivities = (params: Params, enabled = true) =>
   useList<Activity>('activities', params, enabled)
 export const useSaveActivity = () => useSave<Activity>('activities')
 export const useDeleteActivity = () => useDelete('activities')
+
+/** Polled so the badge stays right when the tab is left open past midnight or all day. */
+export function useReminders() {
+  return useQuery({
+    queryKey: ['activities', 'reminders'],
+    queryFn: () => api<Reminders>('/activities/reminders'),
+    refetchInterval: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    retry: false, // a missing badge is harmless; don't hammer the server for it
+  })
+}
 
 // --- users (admin) ---
 export const useUsers = (params: Params, enabled = true) => useList<User>('users', params, enabled)

@@ -12,6 +12,8 @@ export const lo: Record<keyof typeof en, string> = {
   'nav.companies': 'ບໍລິສັດ',
   'nav.pipeline': 'ຂັ້ນຕອນການຂາຍ',
   'nav.tasks': 'ວຽກທີ່ຕ້ອງເຮັດ',
+  'reminders.label': 'ມີ {count} ວຽກທີ່ເກີນກຳນົດ ຫຼື ຄົບກຳນົດມື້ນີ້',
+  'reminders.label_one': 'ມີ {count} ວຽກທີ່ເກີນກຳນົດ ຫຼື ຄົບກຳນົດມື້ນີ້',
   'nav.users': 'ຜູ້ໃຊ້ລະບົບ',
   'nav.settings': 'ຕັ້ງຄ່າ',
   'nav.logout': 'ອອກຈາກລະບົບ',

@@ -101,3 +101,22 @@ def test_delete_activity(client, factory, staff):
 
     assert client.delete(f"/api/activities/{activity.id}", headers=auth(staff)).status_code == 204
     assert client.get(f"/api/activities/{activity.id}", headers=auth(staff)).status_code == 404
+
+
+def test_reminders_count_only_my_open_tasks(client, factory, admin, staff):
+    headers, admin_headers = auth(staff), auth(admin)  # issue tokens before freezing time
+    clock.freeze(LATE_EVENING_UTC)
+    yesterday, today = VIENTIANE_TODAY - timedelta(1), VIENTIANE_TODAY
+    factory.activity(staff, due_date=yesterday)
+    factory.activity(staff, due_date=yesterday)
+    factory.activity(staff, due_date=today)
+    factory.activity(staff, due_date=today, done=True)
+    factory.activity(staff, due_date=today + timedelta(1))
+    factory.activity(admin, due_date=yesterday)
+
+    mine = client.get("/api/activities/reminders", headers=headers)
+    # the admin's badge is about the admin's own tasks, not the whole team's
+    admins = client.get("/api/activities/reminders", headers=admin_headers)
+
+    assert mine.json() == {"overdue": 2, "today": 1}
+    assert admins.json() == {"overdue": 1, "today": 0}

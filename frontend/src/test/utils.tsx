@@ -44,7 +44,10 @@ export const adminUser: User = { ...staffUser, id: 1, name: 'Admin', role: 'admi
 
 export function signIn(user: User) {
   localStorage.setItem('crm.token', 'test-token')
-  return { 'GET /api/auth/me': () => ({ body: user }) }
+  return {
+    'GET /api/auth/me': () => ({ body: user }),
+    'GET /api/activities/reminders': () => ({ body: { overdue: 0, today: 0 } }),
+  }
 }
 
 export function renderApp(ui: ReactNode, path = '/') {

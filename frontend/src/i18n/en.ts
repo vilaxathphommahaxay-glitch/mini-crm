@@ -14,6 +14,8 @@ export const en = {
   'nav.users': 'Users',
   'nav.settings': 'Settings',
   'nav.logout': 'Log out',
+  'reminders.label': '{count} tasks overdue or due today',
+  'reminders.label_one': '{count} task overdue or due today',
 
   'role.admin': 'Admin',
   'role.staff': 'Staff',

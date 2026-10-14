@@ -156,3 +156,9 @@ export interface TeamMember {
   won_value: CurrencyTotal[]
   overdue_tasks: number
 }
+
+/** The signed-in user's own open tasks that need attention (badge on every page). */
+export interface Reminders {
+  overdue: number
+  today: number
+}

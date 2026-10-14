@@ -47,3 +47,8 @@ class ActivityOut(OutputModel):
     owner: UserRef
     created_at: datetime
     updated_at: datetime
+
+
+class Reminders(OutputModel):
+    overdue: int
+    today: int

@@ -2,7 +2,7 @@ from datetime import timedelta
 from enum import StrEnum
 
 from fastapi import APIRouter
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
@@ -10,7 +10,7 @@ from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
 from app.models import Activity, ActivityType, Contact, Deal, User
 from app.pagination import Page, Pagination, paginate
-from app.schemas.activities import ActivityCreate, ActivityOut, ActivityUpdate
+from app.schemas.activities import ActivityCreate, ActivityOut, ActivityUpdate, Reminders
 
 router = APIRouter(prefix="/activities", tags=["activities"])
 
@@ -85,6 +85,23 @@ def list_activities(
     else:
         stmt = stmt.order_by(Activity.created_at.desc(), Activity.id.desc())
     return paginate(db, stmt, pagination)
+
+
+@router.get("/reminders", response_model=Reminders)
+def reminders(user: CurrentUser, db: DbSession):
+    """The signed-in user's own open tasks that need attention, for the badge on every page.
+
+    Admins get their own count too: the badge is a personal to-do reminder, not a team report.
+    """
+
+    def count(due: Due) -> int:
+        stmt = filter_due(
+            select(func.count()).where(Activity.owner_id == user.id, Activity.done.is_(False)),
+            due,
+        )
+        return db.scalar(stmt) or 0
+
+    return {"overdue": count(Due.overdue), "today": count(Due.today)}
 
 
 @router.post("", response_model=ActivityOut, status_code=201)
