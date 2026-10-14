@@ -7,6 +7,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { useCompanies, useContacts, useDeals, useUsers } from '../api/hooks'
 import { STAGE_LABELS, type Ref } from '../api/types'
 import { Select } from '../components/ui/form'
+import { NEW_COMPANY } from './schemas'
 
 type SelectProps = ComponentProps<'select'>
 
@@ -33,7 +34,10 @@ function AsyncSelect({
   )
 }
 
-export function CompanySelect(props: SelectProps) {
+export function CompanySelect({
+  allowCreate = false,
+  ...props
+}: SelectProps & { allowCreate?: boolean }) {
   const { data, isPending } = useCompanies(ALL)
   return (
     <AsyncSelect {...props} loading={isPending} empty="— No company —">
@@ -42,6 +46,7 @@ export function CompanySelect(props: SelectProps) {
           {c.name}
         </option>
       ))}
+      {allowCreate && <option value={NEW_COMPANY}>+ New company…</option>}
     </AsyncSelect>
   )
 }

@@ -1,6 +1,6 @@
 from sqlalchemy import func, select
 
-from app.models import Activity
+from app.models import Activity, Company
 from tests.conftest import auth
 
 
@@ -171,3 +171,46 @@ def test_assigning_to_a_deactivated_user_is_still_refused(
     )
 
     assert response.status_code == 422
+
+
+def test_create_contact_with_a_new_company_name(client, db, staff):
+    body = create(client, staff, first_name="Phonesavanh", company_name="Vang Vieng Resort")
+
+    assert body["company"]["name"] == "Vang Vieng Resort"
+    company = db.get(Company, body["company"]["id"])
+    assert company.owner_id == staff.id
+
+
+def test_company_name_reuses_an_existing_company(client, factory, staff, other_staff):
+    mine = factory.company(staff, name="Champa Hotel")
+    factory.company(other_staff, name="Secret Co")
+
+    reused = create(client, staff, first_name="A", company_name="  champa HOTEL ")
+    separate = create(client, staff, first_name="B", company_name="Secret Co")
+
+    assert reused["company"]["id"] == mine.id
+    assert separate["company"]["name"] == "Secret Co"  # can't see theirs -> gets its own
+
+
+def test_company_name_on_update_and_conflict_with_company_id(client, factory, staff):
+    contact = factory.contact(staff)
+    other = factory.company(staff, name="Other")
+
+    updated = client.patch(
+        f"/api/contacts/{contact.id}", headers=auth(staff), json={"company_name": "New Shop"}
+    )
+    both = client.patch(
+        f"/api/contacts/{contact.id}",
+        headers=auth(staff),
+        json={"company_name": "X", "company_id": other.id},
+    )
+
+    assert updated.json()["company"]["name"] == "New Shop"
+    assert both.status_code == 422
+    assert both.json()["error"]["details"][0]["field"] == "company_name"
+
+
+def test_admin_assigning_a_contact_creates_the_company_for_that_owner(client, db, admin, staff):
+    body = create(client, admin, first_name="A", company_name="Staff Shop", owner_id=staff.id)
+
+    assert db.get(Company, body["company"]["id"]).owner_id == staff.id

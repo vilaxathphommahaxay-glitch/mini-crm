@@ -37,6 +37,8 @@ class ContactCreate(InputModel):
     phone: optional_text(50) = None
     notes: OptionalText = None
     company_id: int | None = None
+    # alternative to company_id: use the visible company with this name, or create it
+    company_name: optional_text(200) = None
     tags: Tags = []
     owner_id: int | None = None
 
@@ -48,6 +50,7 @@ class ContactUpdate(InputModel):
     phone: optional_text(50) = None
     notes: OptionalText = None
     company_id: int | None = None
+    company_name: optional_text(200) = None
     tags: Tags | None = None
     owner_id: int | None = None
 

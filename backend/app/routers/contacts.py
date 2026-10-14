@@ -9,7 +9,7 @@ from app import csv_io
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
 from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
-from app.errors import AppError
+from app.errors import AppError, field_error
 from app.models import Activity, Company, Contact, Deal, Tag, User
 from app.pagination import Page, Pagination, paginate
 from app.schemas.contacts import ContactCreate, ContactOut, ContactUpdate, ImportResult
@@ -29,6 +29,28 @@ def get_or_create_tags(db: Session, names: list[str]) -> list[Tag]:
             db.add(tag)
         tags.append(tag)
     return tags
+
+
+def company_by_name(db: Session, user: User, name: str, owner_id: int) -> Company:
+    """The visible company with this name (any letter case), or a new one owned by `owner_id`."""
+    stmt = scope(select(Company), Company, user).where(func.lower(Company.name) == name.lower())
+    company = db.scalars(stmt.order_by(Company.id)).first()
+    if company is None:
+        company = Company(name=name, owner_id=owner_id)
+        db.add(company)
+        db.flush()
+    return company
+
+
+def _resolve_company(db: Session, user: User, changes: dict, owner_id: int) -> None:
+    """Turn company_id / company_name from the body into a checked company_id."""
+    name = changes.pop("company_name", None)
+    if name and changes.get("company_id") is not None:
+        raise field_error("company_name", "Choose an existing company or type a new name, not both")
+    if name:
+        changes["company_id"] = company_by_name(db, user, name, owner_id).id
+    elif changes.get("company_id") is not None:
+        get_referenced(db, Company, changes["company_id"], user, "company_id")
 
 
 def contact_query(
@@ -137,7 +159,7 @@ async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
                 companies_created += 1
         db.add(
             Contact(
-                **data.model_dump(exclude={"owner_id", "tags", "company_id"}),
+                **data.model_dump(exclude={"owner_id", "tags", "company_id", "company_name"}),
                 company=company,
                 owner_id=user.id,
                 tags=get_or_create_tags(db, data.tags),
@@ -159,13 +181,10 @@ async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
 
 @router.post("", response_model=ContactOut, status_code=201)
 def create_contact(body: ContactCreate, user: CurrentUser, db: DbSession):
-    if body.company_id is not None:
-        get_referenced(db, Company, body.company_id, user, "company_id")
-    contact = Contact(
-        **body.model_dump(exclude={"owner_id", "tags"}),
-        owner_id=resolve_owner(db, user, body.owner_id),
-        tags=get_or_create_tags(db, body.tags),
-    )
+    data = body.model_dump(exclude={"owner_id", "tags"})
+    owner_id = resolve_owner(db, user, body.owner_id)
+    _resolve_company(db, user, data, owner_id)
+    contact = Contact(**data, owner_id=owner_id, tags=get_or_create_tags(db, body.tags))
     db.add(contact)
     db.commit()
     return contact
@@ -180,10 +199,9 @@ def get_contact(contact_id: int, user: CurrentUser, db: DbSession):
 def update_contact(contact_id: int, body: ContactUpdate, user: CurrentUser, db: DbSession):
     contact = get_owned(db, Contact, contact_id, user)
     changes = body.model_dump(exclude_unset=True)
-    if changes.get("company_id") is not None:
-        get_referenced(db, Company, changes["company_id"], user, "company_id")
     if "owner_id" in changes:
         changes["owner_id"] = resolve_owner(db, user, changes["owner_id"], contact.owner_id)
+    _resolve_company(db, user, changes, changes.get("owner_id", contact.owner_id))
     if "tags" in changes:
         contact.tags = get_or_create_tags(db, changes.pop("tags") or [])
     apply_patch(contact, changes, required={"first_name"})

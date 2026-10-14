@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useSaveContact } from '../api/hooks'
 import type { Contact } from '../api/types'
 import { useCurrentUser } from '../auth/context'
@@ -8,11 +8,21 @@ import { useToast } from '../components/toast/context'
 import { Field, FormError, Input, Textarea } from '../components/ui/form'
 import { Modal } from '../components/ui/Modal'
 import { FormFooter } from './FormFooter'
-import { contactSchema, toContactBody, type ContactFormValues } from './schemas'
+import { contactSchema, NEW_COMPANY, toContactBody, type ContactFormValues } from './schemas'
 import { CompanySelect, OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
 
-const FIELDS = Object.keys(contactSchema.shape)
+const FIELDS = [
+  'first_name',
+  'last_name',
+  'email',
+  'phone',
+  'company_id',
+  'company_name',
+  'tags',
+  'notes',
+  'owner_id',
+]
 
 function initialValues(contact?: Contact, companyId?: number): ContactFormValues {
   return {
@@ -21,6 +31,7 @@ function initialValues(contact?: Contact, companyId?: number): ContactFormValues
     email: contact?.email ?? '',
     phone: contact?.phone ?? '',
     company_id: String(contact?.company?.id ?? companyId ?? ''),
+    company_name: '',
     tags: contact?.tags.join(', ') ?? '',
     notes: contact?.notes ?? '',
     owner_id: contact ? String(contact.owner.id) : '',
@@ -44,11 +55,14 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: initialValues(contact, companyId),
   })
+
+  const newCompany = useWatch({ control, name: 'company_id' }) === NEW_COMPANY
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
@@ -80,8 +94,18 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
         </Field>
       </div>
       <Field label="Company" error={errors.company_id?.message}>
-        {(c) => <CompanySelect {...c} {...register('company_id')} />}
+        {(c) => <CompanySelect {...c} {...register('company_id')} allowCreate />}
       </Field>
+      {newCompany && (
+        <Field
+          label="New company name"
+          required
+          error={errors.company_name?.message}
+          hint="If a company with this name already exists, the contact is added to it"
+        >
+          {(c) => <Input {...c} {...register('company_name')} autoComplete="off" autoFocus />}
+        </Field>
+      )}
       <Field
         label="Tags"
         error={errors.tags?.message}

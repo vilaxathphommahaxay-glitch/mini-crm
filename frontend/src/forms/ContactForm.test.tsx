@@ -5,7 +5,13 @@ import type { Contact } from '../api/types'
 import { RequireAuth } from '../auth/guards'
 import { mockApi, renderApp, signIn, staffUser } from '../test/utils'
 import { ContactForm } from './ContactForm'
-import { contactSchema, parseTags, toContactBody, type ContactFormValues } from './schemas'
+import {
+  contactSchema,
+  NEW_COMPANY,
+  parseTags,
+  toContactBody,
+  type ContactFormValues,
+} from './schemas'
 
 const blank: ContactFormValues = {
   first_name: '',
@@ -13,6 +19,7 @@ const blank: ContactFormValues = {
   email: '',
   phone: '',
   company_id: '',
+  company_name: '',
   tags: '',
   notes: '',
   owner_id: '',
@@ -51,6 +58,20 @@ describe('contact schema', () => {
       tags: ['vip', 'wholesale'],
       notes: null,
     })
+  })
+
+  it('sends a new company by name instead of an id', () => {
+    const values = {
+      ...blank,
+      first_name: 'A',
+      company_id: NEW_COMPANY,
+      company_name: ' Vang Vieng ',
+    }
+
+    expect(toContactBody(values)).toMatchObject({ company_name: 'Vang Vieng' })
+    expect(toContactBody(values)).not.toHaveProperty('company_id')
+    const missingName = contactSchema.safeParse({ ...values, company_name: '' })
+    expect(missingName.error?.issues[0].path).toEqual(['company_name'])
   })
 
   it('parses tags like the backend', () => {
