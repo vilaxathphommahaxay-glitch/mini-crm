@@ -17,7 +17,11 @@ export async function start({ width = 1366, height = 860 } = {}) {
     channel: CHANNEL === 'chromium' ? undefined : CHANNEL,
     headless: process.env.HEADED !== '1',
   })
-  const page = await browser.newPage({ viewport: { width, height } })
+  const page = await browser.newPage({
+    viewport: { width, height },
+    // E2E_TZ=UTC reproduces CI, whose runners use UTC
+    ...(process.env.E2E_TZ ? { timezoneId: process.env.E2E_TZ } : {}),
+  })
   const problems = []
   // 'Failed to load resource' is just the browser logging an expected 4xx; 5xx is caught below
   page.on('console', (m) => {

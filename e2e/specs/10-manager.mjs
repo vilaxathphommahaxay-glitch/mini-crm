@@ -22,9 +22,12 @@ try {
   // drill into one person
   await teamRow('Keo Phommachanh').getByRole('button').click()
   await page.waitForURL(/owner_id=/)
-  await main.locator('a', { hasText: 'Open deals' }).waitFor()
-  const filtered = await main.locator('a', { hasText: 'Open deals' }).locator('p').nth(1).textContent()
-  check(Number(filtered) === keoOpen, `clicking a name filters the dashboard (${filtered})`)
+  // wait for the filtered numbers (a slow machine can still be showing the old render)
+  await main
+    .locator('a', { hasText: 'Open deals' })
+    .filter({ hasText: new RegExp(`^Open deals${keoOpen}$`) })
+    .waitFor({ timeout: 10_000 })
+  check(true, `clicking a name filters the dashboard (${keoOpen})`)
   check(!(await main.getByRole('heading', { name: 'Team' }).isVisible()), 'team table hides while filtered')
 
   // Keo leaves: transfer everything to Somchai, then disable Keo
