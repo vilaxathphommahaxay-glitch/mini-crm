@@ -84,7 +84,7 @@ npm run dev
 
 ```bash
 # backend (in backend/, venv active)
-pytest                        # 86 tests on in-memory SQLite
+pytest                        # 105 tests on in-memory SQLite
 ruff check . && ruff format --check .
 
 # the same tests on PostgreSQL

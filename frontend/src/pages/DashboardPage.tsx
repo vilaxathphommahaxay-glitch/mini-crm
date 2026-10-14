@@ -42,7 +42,8 @@ export function DashboardPage() {
   const user = useCurrentUser()
   const isAdmin = user.role === 'admin'
   const { values, set } = useUrlFilters(['owner_id'] as const)
-  const summary = useDashboard(toId(values.owner_id))
+  const [showAllStale, setShowAllStale] = useState(false)
+  const summary = useDashboard(toId(values.owner_id), showAllStale)
   const [planning, setPlanning] = useState<{ dealId: number; contactId: number } | null>(null)
 
   return (
@@ -146,7 +147,28 @@ export function DashboardPage() {
           )}
 
           <Card>
-            <CardHeader title={`Deals without a next step (${summary.data.no_next_step.count})`} />
+            <CardHeader
+              title={`Deals without a next step (${summary.data.no_next_step.count})`}
+              actions={
+                summary.data.no_next_step.count > summary.data.no_next_step.items.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllStale(true)}
+                    className="text-xs font-medium text-indigo-600 hover:underline"
+                  >
+                    Show all
+                  </button>
+                ) : showAllStale && summary.data.no_next_step.count > 10 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllStale(false)}
+                    className="text-xs font-medium text-indigo-600 hover:underline"
+                  >
+                    Show fewer
+                  </button>
+                ) : undefined
+              }
+            />
             {summary.data.no_next_step.items.length === 0 ? (
               <EmptyState title="Every open deal has a planned next step" />
             ) : (

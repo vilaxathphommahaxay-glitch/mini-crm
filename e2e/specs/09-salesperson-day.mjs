@@ -5,6 +5,16 @@ import { BASE, check, login, shot, start } from '../lib.mjs'
 const { browser, page, problems } = await start()
 const main = page.locator('main')
 
+/** The dashboard card shows 10 deals; expand it when there are more. */
+async function showAllWithoutNextStep() {
+  await main.getByRole('heading', { name: /Deals without a next step/ }).waitFor()
+  const more = main.getByRole('button', { name: 'Show all' })
+  if (await more.isVisible()) {
+    await more.click()
+    await main.getByRole('button', { name: 'Show fewer' }).waitFor()
+  }
+}
+
 try {
   await login(page, 'somchai@example.com', 'staff123')
   const before = Number(
@@ -16,6 +26,19 @@ try {
   await page.goto(`${BASE}/contacts`)
   await main.getByRole('button', { name: 'New contact' }).click()
   const form = page.getByRole('dialog')
+  // typing an email that's already used warns about a duplicate
+  const token = await page.evaluate(() => localStorage.getItem('crm.token'))
+  const existing = (
+    await (await page.request.get(`${BASE}/api/contacts?size=100`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })).json()
+  ).items.find((c) => c.email)
+  await form.getByLabel('Email').fill(existing.email.toUpperCase())
+  await form.getByText('Already in your contacts').waitFor()
+  check(await form.getByRole('link', { name: existing.full_name }).isVisible(), `duplicate email warning links to ${existing.full_name}`)
+  await form.getByLabel('Email').fill('')
+  await form.getByText('Already in your contacts').waitFor({ state: 'detached' })
+
   await form.getByLabel(/First name/).fill('Phonesavanh')
   await form.getByLabel('Last name').fill('Inthalath')
   await form.getByLabel('Phone').fill('+856 20 5544 3322')
@@ -50,6 +73,7 @@ try {
   await main.getByText('15,000,000 LAK').waitFor()
 
   await page.goto(`${BASE}/`)
+  await showAllWithoutNextStep()
   await main.getByText('Room booking - 20 rooms').waitFor()
   check(true, 'new deal shows up as "no next step"')
 
@@ -73,7 +97,7 @@ try {
 
   // the deal now has a next step, so it leaves the dashboard list
   await page.goto(`${BASE}/`)
-  await main.getByRole('heading', { name: /Deals without a next step/ }).waitFor()
+  await showAllWithoutNextStep()
   await page.waitForTimeout(500)
   check(!(await main.getByText('Room booking - 20 rooms').isVisible()), 'deal with a planned step leaves the list')
 

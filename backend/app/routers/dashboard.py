@@ -1,7 +1,8 @@
 from collections import defaultdict
 from datetime import UTC, datetime
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from sqlalchemy import exists, func, select
 from sqlalchemy.orm import Session, joinedload
 
@@ -80,7 +81,9 @@ def _tasks(db: Session, user: User, owner_id: int | None) -> dict:
     }
 
 
-def _deals_without_next_step(db: Session, user: User, owner_id: int | None) -> dict:
+def _deals_without_next_step(
+    db: Session, user: User, owner_id: int | None, limit: int = NO_NEXT_STEP_ITEMS
+) -> dict:
     """Open deals with no open task on them - the ones most likely to be forgotten."""
     has_open_task = exists().where(
         Activity.deal_id == Deal.id, Activity.done.is_(False), Activity.due_date.is_not(None)
@@ -92,20 +95,26 @@ def _deals_without_next_step(db: Session, user: User, owner_id: int | None) -> d
     items = db.scalars(
         stmt.options(joinedload(Deal.contact))
         .order_by(Deal.updated_at, Deal.id)  # longest untouched first
-        .limit(NO_NEXT_STEP_ITEMS)
+        .limit(limit)
     ).all()
     return {"count": total, "items": items}
 
 
 @router.get("/summary", response_model=DashboardSummary)
-def summary(user: CurrentUser, db: DbSession, owner_id: int | None = None):
+def summary(
+    user: CurrentUser,
+    db: DbSession,
+    owner_id: int | None = None,
+    # the dashboard shows 10; "Show all" asks for more
+    no_next_step_limit: Annotated[int, Query(ge=1, le=200)] = NO_NEXT_STEP_ITEMS,
+):
     pipeline = _pipeline(db, user, owner_id)
     return {
         "open_deals": sum(p["count"] for p in pipeline if p["stage"] not in CLOSED_STAGES),
         "pipeline": pipeline,
         "won_by_month": _won_by_month(db, user, owner_id),
         "tasks": _tasks(db, user, owner_id),
-        "no_next_step": _deals_without_next_step(db, user, owner_id),
+        "no_next_step": _deals_without_next_step(db, user, owner_id, no_next_step_limit),
     }
 
 

@@ -156,3 +156,15 @@ def test_team_overview(client, factory, admin, staff, other_staff, make_user):
 
 def test_team_overview_is_admin_only(client, staff):
     assert client.get("/api/dashboard/team", headers=auth(staff)).status_code == 403
+
+
+def test_deals_without_a_next_step_can_show_more(client, factory, staff):
+    contact = factory.contact(staff)
+    for i in range(12):
+        factory.deal(staff, contact=contact, title=f"D{i}")
+
+    default = summary(client, auth(staff))["no_next_step"]
+    everything = summary(client, auth(staff), no_next_step_limit=50)["no_next_step"]
+
+    assert (default["count"], len(default["items"])) == (12, 10)
+    assert len(everything["items"]) == 12
