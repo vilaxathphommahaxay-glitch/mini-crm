@@ -1,0 +1,13 @@
+{
+  "name": "crm-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests against a running Mini CRM (default http://localhost:8080)",
+  "scripts": {
+    "test": "node run-all.mjs",
+    "screenshots": "node screenshots.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.0"
+  }
+}
