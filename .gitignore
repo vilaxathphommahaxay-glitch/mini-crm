@@ -33,3 +33,6 @@ PLAN.original.md
 
 # Browser test output
 e2e/.output/
+
+# Database backups
+backups/
