@@ -1,5 +1,7 @@
 # Mini CRM
 
+[![CI](https://github.com/vilaxathphommahaxay-glitch/mini-crm/actions/workflows/ci.yml/badge.svg)](https://github.com/vilaxathphommahaxay-glitch/mini-crm/actions/workflows/ci.yml)
+
 A small CRM for shops and service businesses: keep track of customers and their companies, move deals through a sales pipeline, and never miss a follow-up.
 
 Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end, React + TypeScript on the front end, one command to run.
