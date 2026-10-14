@@ -25,6 +25,7 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 - **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
+- **Duplicate contacts** — *Find duplicates* lists contacts with the same phone number (however it was written: `+856 20…`, `020…`), email or full name. Pick the one to keep: deals, activities, files and tags of the others move to it, its empty details are filled in, and the others are removed.
 - **Files and photos** — attach photos, contracts and receipts (up to 10 MB each; photos, PDF, Office, text and ZIP) to any contact, company or deal. Take a picture straight from the phone's camera; photos preview in the app.
 - **Edit history** — every add, change and delete is recorded with who did it and the old and new values (“Phone: 020 1111 → 020 2222”). Each contact, company and deal has a *Show history* section; admins get a *Change history* page with everything, including deleted records and hand-overs.
 - **For managers** — a team table (open pipeline, wins this month, overdue tasks per person) and a one-click *Transfer records* when someone leaves.

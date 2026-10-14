@@ -271,3 +271,6 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] ไฟล์แนบ: ตาราง `attachments` + ไฟล์ใน volume `uploads` (ชื่อไฟล์บนดิสก์เป็น key สุ่ม), แนบกับ contact/company/deal,
   รับเฉพาะรูป/PDF/Office/ข้อความ/ZIP ≤ 10 MB (ชนิดไฟล์ดูจากนามสกุล ไม่เชื่อ browser; รูป/PDF เปิดในเบราว์เซอร์ อื่น ๆ ดาวน์โหลด),
   สิทธิ์ตาม record, ลบ record แล้วไฟล์ถูกลบตาม, บันทึกในประวัติของ record, backup อัตโนมัติรวมไฟล์ (`files-*.tar.gz`) และ restore ได้
+- [x] ลูกค้าซ้ำ: `GET /contacts/duplicates` (เบอร์โทรเดียวกันแม้เขียนต่างรูปแบบ, อีเมล, ชื่อ+นามสกุล; รวมกลุ่มแบบต่อเนื่อง),
+  `POST /contacts/{id}/merge {other_id}` ย้ายดีล/กิจกรรม/ไฟล์/แท็ก, เติมช่องว่าง, รวมโน้ต, ลบอีกคน, บันทึกในประวัติ (action `merged`);
+  หน้า "Possible duplicates" จากปุ่ม Find duplicates ในหน้า Contacts

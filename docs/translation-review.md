@@ -406,6 +406,25 @@ Please check these first; a change here should be applied everywhere.
 | `error.attachmentTooLarge` | The file is larger than {mb} MB | ໄຟລ໌ໃຫຍ່ເກີນ {mb} MB |
 | `error.fileTypeNotAllowed` | This kind of file can't be attached. Use photos, PDF, Word, Excel, PowerPoint, text or ZIP files. | ແນບໄຟລ໌ປະເພດນີ້ບໍ່ໄດ້. ໃຫ້ໃຊ້ຮູບ, PDF, Word, Excel, PowerPoint, ໄຟລ໌ຂໍ້ຄວາມ ຫຼື ZIP. |
 | `history.entity.attachment` | file | ໄຟລ໌ |
+| `dup.find` | Find duplicates | ຊອກຫາລູກຄ້າຊ້ຳ |
+| `dup.title` | Possible duplicates | ລູກຄ້າທີ່ອາດຈະຊ້ຳກັນ |
+| `dup.subtitle` | Contacts with the same phone number, email or full name. Choose the one to keep; the others are merged into it. | ລູກຄ້າທີ່ມີເບີໂທ, ອີເມວ ຫຼື ຊື່ ແລະ ນາມສະກຸນ ດຽວກັນ. ເລືອກຄົນທີ່ຈະເກັບໄວ້, ຄົນອື່ນຈະຖືກລວມເຂົ້າກັບຄົນນັ້ນ. |
+| `dup.reason.phone` | Same phone | ເບີໂທດຽວກັນ |
+| `dup.reason.email` | Same email | ອີເມວດຽວກັນ |
+| `dup.reason.name` | Same name | ຊື່ດຽວກັນ |
+| `dup.counts` | {deals} deals · {activities} activities · {files} files | ລາຍການຂາຍ {deals} · ກິດຈະກຳ {activities} · ໄຟລ໌ {files} |
+| `dup.added` | Added {date} | ເພີ່ມເມື່ອ {date} |
+| `dup.keep` | Keep this one | ເກັບຄົນນີ້ໄວ້ |
+| `dup.confirmTitle` | Merge contacts? | ລວມລູກຄ້າບໍ? |
+| `dup.confirmMessage` | Keep “{name}” and merge {count} other contacts into it? Their deals, activities, files and tags move to “{name}”, empty details are filled in from them, and then they are deleted. | ເກັບ “{name}” ໄວ້ ແລະ ລວມລູກຄ້າອີກ {count} ຄົນເຂົ້າກັບຄົນນີ້ບໍ? ລາຍການຂາຍ, ກິດຈະກຳ, ໄຟລ໌ ແລະ ປ້າຍກຳກັບຂອງເຂົາຈະຍ້າຍມາຫາ “{name}”, ຂໍ້ມູນທີ່ຍັງຫວ່າງຈະຖືກເຕີມໃຫ້, ແລ້ວຈຶ່ງລຶບເຂົາອອກ. |
+| `dup.confirmMessage_one` | Keep “{name}” and merge {count} other contact into it? Its deals, activities, files and tags move to “{name}”, empty details are filled in from it, and then it is deleted. | ເກັບ “{name}” ໄວ້ ແລະ ລວມລູກຄ້າອີກ {count} ຄົນເຂົ້າກັບຄົນນີ້ບໍ? ລາຍການຂາຍ, ກິດຈະກຳ, ໄຟລ໌ ແລະ ປ້າຍກຳກັບຂອງເຂົາຈະຍ້າຍມາຫາ “{name}”, ຂໍ້ມູນທີ່ຍັງຫວ່າງຈະຖືກເຕີມໃຫ້, ແລ້ວຈຶ່ງລຶບເຂົາອອກ. |
+| `dup.merge` | Merge | ລວມ |
+| `dup.merged` | Merged into {name} | ລວມເຂົ້າກັບ {name} ແລ້ວ |
+| `dup.none` | No duplicates found | ບໍ່ພົບລູກຄ້າຊ້ຳ |
+| `dup.noneHint` | Contacts with the same phone number, email or full name would be listed here. | ຖ້າມີລູກຄ້າທີ່ເບີໂທ, ອີເມວ ຫຼື ຊື່ ແລະ ນາມສະກຸນ ຄືກັນ ຈະສະແດງຢູ່ບ່ອນນີ້. |
+| `history.merged` | {actor} merged “{other}” into {what} | {actor} ລວມ “{other}” ເຂົ້າກັບ{what} |
+| `history.mergedCounts` | Moved {deals} deals, {activities} activities and {files} files | ຍ້າຍລາຍການຂາຍ {deals}, ກິດຈະກຳ {activities} ແລະ ໄຟລ໌ {files} |
+| `fielderror.sameContact` | Choose a different contact | ເລືອກລູກຄ້າຄົນອື່ນ |
 | `validation.descriptionRequired` | Describe the item | ໃສ່ລາຍລະອຽດຂອງລາຍການ |
 | `validation.quantity` | Enter a number above 0 | ໃສ່ຕົວເລກທີ່ຫຼາຍກວ່າ 0 |
 | `validation.amount` | Enter an amount like 150000 or 99.50 | ໃສ່ຈຳນວນເງິນ ເຊັ່ນ 150000 ຫຼື 99.50 |

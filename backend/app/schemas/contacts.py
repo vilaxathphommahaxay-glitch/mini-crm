@@ -84,3 +84,18 @@ class ImportResult(OutputModel):
     skipped: int
     companies_created: int
     errors: list[ImportRowError]
+
+
+class DuplicateContact(ContactOut):
+    deals: int
+    activities: int
+    files: int
+
+
+class DuplicateGroup(OutputModel):
+    reasons: list[str]  # phone, email, name
+    contacts: list[DuplicateContact]
+
+
+class MergeIn(InputModel):
+    other_id: int

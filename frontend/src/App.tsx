@@ -11,6 +11,7 @@ const page = <K extends string>(load: () => Promise<Record<K, React.ComponentTyp
 
 const DashboardPage = page(() => import('./pages/DashboardPage'), 'DashboardPage')
 const ContactsPage = page(() => import('./pages/ContactsPage'), 'ContactsPage')
+const DuplicatesPage = page(() => import('./pages/DuplicatesPage'), 'DuplicatesPage')
 const ContactDetailPage = page(() => import('./pages/ContactDetailPage'), 'ContactDetailPage')
 const CompaniesPage = page(() => import('./pages/CompaniesPage'), 'CompaniesPage')
 const CompanyDetailPage = page(() => import('./pages/CompanyDetailPage'), 'CompanyDetailPage')
@@ -39,6 +40,7 @@ export default function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="contacts" element={<ContactsPage />} />
+          <Route path="contacts/duplicates" element={<DuplicatesPage />} />
           <Route path="contacts/:id" element={<ContactDetailPage />} />
           <Route path="companies" element={<CompaniesPage />} />
           <Route path="companies/:id" element={<CompanyDetailPage />} />

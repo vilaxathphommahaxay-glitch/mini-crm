@@ -56,6 +56,7 @@ const FIELD_BY_CODE: Record<string, MessageKey> = {
   not_found: 'fielderror.notFound',
   inactive_user: 'fielderror.inactiveUser',
   same_user: 'fielderror.sameUser',
+  same_contact: 'fielderror.sameContact',
   wrong_password: 'fielderror.wrongPassword',
   company_conflict: 'fielderror.companyConflict',
   bad_position: 'fielderror.badPosition',

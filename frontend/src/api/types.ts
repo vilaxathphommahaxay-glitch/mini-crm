@@ -233,7 +233,7 @@ export interface HistoryEvent {
   entity_type: HistoryEntity
   entity_id: number
   entity_label: string
-  action: 'created' | 'updated' | 'deleted' | 'transferred'
+  action: 'created' | 'updated' | 'deleted' | 'transferred' | 'merged'
   changes: HistoryChange[] | null
 }
 
@@ -246,4 +246,16 @@ export interface Attachment {
   size: number
   uploaded_by: { id: number; name: string }
   created_at: string
+}
+
+export interface DuplicateContact extends Contact {
+  deals: number
+  activities: number
+  files: number
+}
+
+/** Contacts that look like one person, and why (same phone / email / full name). */
+export interface DuplicateGroup {
+  reasons: ('phone' | 'email' | 'name')[]
+  contacts: DuplicateContact[]
 }

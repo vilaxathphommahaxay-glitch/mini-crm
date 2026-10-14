@@ -418,6 +418,28 @@ export const en = {
   'error.fileTypeNotAllowed':
     "This kind of file can't be attached. Use photos, PDF, Word, Excel, PowerPoint, text or ZIP files.",
   'history.entity.attachment': 'file',
+  'dup.find': 'Find duplicates',
+  'dup.title': 'Possible duplicates',
+  'dup.subtitle':
+    'Contacts with the same phone number, email or full name. Choose the one to keep; the others are merged into it.',
+  'dup.reason.phone': 'Same phone',
+  'dup.reason.email': 'Same email',
+  'dup.reason.name': 'Same name',
+  'dup.counts': '{deals} deals · {activities} activities · {files} files',
+  'dup.added': 'Added {date}',
+  'dup.keep': 'Keep this one',
+  'dup.confirmTitle': 'Merge contacts?',
+  'dup.confirmMessage':
+    'Keep “{name}” and merge {count} other contacts into it? Their deals, activities, files and tags move to “{name}”, empty details are filled in from them, and then they are deleted.',
+  'dup.confirmMessage_one':
+    'Keep “{name}” and merge {count} other contact into it? Its deals, activities, files and tags move to “{name}”, empty details are filled in from it, and then it is deleted.',
+  'dup.merge': 'Merge',
+  'dup.merged': 'Merged into {name}',
+  'dup.none': 'No duplicates found',
+  'dup.noneHint': 'Contacts with the same phone number, email or full name would be listed here.',
+  'history.merged': '{actor} merged “{other}” into {what}',
+  'history.mergedCounts': 'Moved {deals} deals, {activities} activities and {files} files',
+  'fielderror.sameContact': 'Choose a different contact',
   'validation.descriptionRequired': 'Describe the item',
   'validation.quantity': 'Enter a number above 0',
   'validation.amount': 'Enter an amount like 150000 or 99.50',

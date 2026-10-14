@@ -4,7 +4,7 @@ import { useContacts, useTags } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
 import { TagList } from '../components/badges'
 import { Icon } from '../components/icons'
-import { Button } from '../components/ui/Button'
+import { Button, ButtonLink } from '../components/ui/Button'
 import { Input, Select } from '../components/ui/form'
 import { Card, PageHeader } from '../components/ui/layout'
 import { Pagination } from '../components/ui/Pagination'
@@ -48,6 +48,9 @@ export function ContactsPage() {
             <ContactsImportExport
               filters={{ search: values.search, tag: values.tag, owner_id: values.owner_id }}
             />
+            <ButtonLink to="/contacts/duplicates" variant="secondary">
+              {t('dup.find')}
+            </ButtonLink>
             <Button onClick={() => setCreating(true)}>
               <Icon name="plus" className="size-4" />
               {t('contactForm.new')}

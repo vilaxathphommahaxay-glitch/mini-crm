@@ -415,6 +415,28 @@ export const lo: Record<keyof typeof en, string> = {
   'error.fileTypeNotAllowed':
     'ແນບໄຟລ໌ປະເພດນີ້ບໍ່ໄດ້. ໃຫ້ໃຊ້ຮູບ, PDF, Word, Excel, PowerPoint, ໄຟລ໌ຂໍ້ຄວາມ ຫຼື ZIP.',
   'history.entity.attachment': 'ໄຟລ໌',
+  'dup.find': 'ຊອກຫາລູກຄ້າຊ້ຳ',
+  'dup.title': 'ລູກຄ້າທີ່ອາດຈະຊ້ຳກັນ',
+  'dup.subtitle':
+    'ລູກຄ້າທີ່ມີເບີໂທ, ອີເມວ ຫຼື ຊື່ ແລະ ນາມສະກຸນ ດຽວກັນ. ເລືອກຄົນທີ່ຈະເກັບໄວ້, ຄົນອື່ນຈະຖືກລວມເຂົ້າກັບຄົນນັ້ນ.',
+  'dup.reason.phone': 'ເບີໂທດຽວກັນ',
+  'dup.reason.email': 'ອີເມວດຽວກັນ',
+  'dup.reason.name': 'ຊື່ດຽວກັນ',
+  'dup.counts': 'ລາຍການຂາຍ {deals} · ກິດຈະກຳ {activities} · ໄຟລ໌ {files}',
+  'dup.added': 'ເພີ່ມເມື່ອ {date}',
+  'dup.keep': 'ເກັບຄົນນີ້ໄວ້',
+  'dup.confirmTitle': 'ລວມລູກຄ້າບໍ?',
+  'dup.confirmMessage':
+    'ເກັບ “{name}” ໄວ້ ແລະ ລວມລູກຄ້າອີກ {count} ຄົນເຂົ້າກັບຄົນນີ້ບໍ? ລາຍການຂາຍ, ກິດຈະກຳ, ໄຟລ໌ ແລະ ປ້າຍກຳກັບຂອງເຂົາຈະຍ້າຍມາຫາ “{name}”, ຂໍ້ມູນທີ່ຍັງຫວ່າງຈະຖືກເຕີມໃຫ້, ແລ້ວຈຶ່ງລຶບເຂົາອອກ.',
+  'dup.confirmMessage_one':
+    'ເກັບ “{name}” ໄວ້ ແລະ ລວມລູກຄ້າອີກ {count} ຄົນເຂົ້າກັບຄົນນີ້ບໍ? ລາຍການຂາຍ, ກິດຈະກຳ, ໄຟລ໌ ແລະ ປ້າຍກຳກັບຂອງເຂົາຈະຍ້າຍມາຫາ “{name}”, ຂໍ້ມູນທີ່ຍັງຫວ່າງຈະຖືກເຕີມໃຫ້, ແລ້ວຈຶ່ງລຶບເຂົາອອກ.',
+  'dup.merge': 'ລວມ',
+  'dup.merged': 'ລວມເຂົ້າກັບ {name} ແລ້ວ',
+  'dup.none': 'ບໍ່ພົບລູກຄ້າຊ້ຳ',
+  'dup.noneHint': 'ຖ້າມີລູກຄ້າທີ່ເບີໂທ, ອີເມວ ຫຼື ຊື່ ແລະ ນາມສະກຸນ ຄືກັນ ຈະສະແດງຢູ່ບ່ອນນີ້.',
+  'history.merged': '{actor} ລວມ “{other}” ເຂົ້າກັບ{what}',
+  'history.mergedCounts': 'ຍ້າຍລາຍການຂາຍ {deals}, ກິດຈະກຳ {activities} ແລະ ໄຟລ໌ {files}',
+  'fielderror.sameContact': 'ເລືອກລູກຄ້າຄົນອື່ນ',
   'validation.descriptionRequired': 'ໃສ່ລາຍລະອຽດຂອງລາຍການ',
   'validation.quantity': 'ໃສ່ຕົວເລກທີ່ຫຼາຍກວ່າ 0',
   'validation.amount': 'ໃສ່ຈຳນວນເງິນ ເຊັ່ນ 150000 ຫຼື 99.50',

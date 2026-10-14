@@ -18,6 +18,7 @@ import type {
   Contact,
   DashboardSummary,
   Deal,
+  DuplicateGroup,
   HistoryEvent,
   Page,
   Quote,
@@ -99,6 +100,28 @@ export const useCompanies = (params: Params) => useList<Company>('companies', pa
 export const useCompany = (id?: number) => useOne<Company>('companies', id)
 export const useSaveCompany = () => useSave<Company>('companies')
 export const useDeleteCompany = () => useDelete('companies')
+
+export function useDuplicates(ownerId?: number) {
+  return useQuery({
+    queryKey: ['contacts', 'duplicates', ownerId ?? null],
+    queryFn: () => api<DuplicateGroup[]>('/contacts/duplicates', { query: { owner_id: ownerId } }),
+  })
+}
+
+/** Fold `otherId` into `keepId` (its deals, activities, files and tags move over). */
+export function useMergeContacts() {
+  const invalidate = useInvalidate()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ keepId, otherId }: { keepId: number; otherId: number }) =>
+      api<Contact>(`/contacts/${keepId}/merge`, { method: 'POST', body: { other_id: otherId } }),
+    onSuccess: () =>
+      Promise.all([
+        invalidate('contacts'),
+        client.invalidateQueries({ queryKey: ['attachments'] }),
+      ]),
+  })
+}
 
 export function useTags() {
   return useQuery({ queryKey: ['tags'], queryFn: () => api<string[]>('/tags') })

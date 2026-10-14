@@ -68,6 +68,10 @@ export function valueText(change: HistoryChange, side: 'from' | 'to'): string {
 export function headline(event: HistoryEvent): string {
   const actor = event.actor?.name ?? t('history.someone')
   const what = `${t(`history.entity.${event.entity_type}` as MessageKey)} “${event.entity_label}”`
+  if (event.action === 'merged') {
+    const merged = event.changes?.find((c) => c.field === 'merged_from')
+    return t('history.merged', { actor, other: merged?.from_label ?? '—', what })
+  }
   if (event.action === 'transferred') {
     const owner = event.changes?.find((c) => c.field === 'owner_id')
     return t('history.transferred', {
@@ -83,6 +87,13 @@ export function headline(event: HistoryEvent): string {
 export function changeLines(event: HistoryEvent): string[] {
   return (event.changes ?? []).map((change) => {
     if (change.field === 'items') return t('history.itemsChanged')
+    if (change.field === 'merged_from') {
+      return t('history.mergedCounts', {
+        deals: Number(change.deals ?? 0),
+        activities: Number(change.activities ?? 0),
+        files: Number(change.files ?? 0),
+      })
+    }
     if (change.field === 'counts') {
       const n = (key: string) => Number(change[key] ?? 0)
       return t('history.counts', {

@@ -2,18 +2,25 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, Response, UploadFile
 from pydantic import ValidationError
-from sqlalchemy import delete, func, or_, select
+from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app import csv_io, storage
+from app import csv_io, duplicates, storage
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
 from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
 from app.errors import AppError, field_error
-from app.models import Activity, Company, Contact, Deal, Tag, User
+from app.models import Activity, Attachment, AuditEvent, Company, Contact, Deal, Tag, User
 from app.pagination import Page, Pagination, paginate
 from app.routers import attachments
-from app.schemas.contacts import ContactCreate, ContactOut, ContactUpdate, ImportResult
+from app.schemas.contacts import (
+    ContactCreate,
+    ContactOut,
+    ContactUpdate,
+    DuplicateGroup,
+    ImportResult,
+    MergeIn,
+)
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
@@ -128,6 +135,42 @@ def export_contacts(
     )
 
 
+MAX_DUPLICATE_GROUPS = 100
+
+
+@router.get("/duplicates", response_model=list[DuplicateGroup])
+def find_duplicates(user: CurrentUser, db: DbSession, owner_id: int | None = None):
+    """Visible contacts that look like the same person: same phone (in any format), email or
+    full name. Each contact comes with how much hangs on it, to help pick the one to keep."""
+    contacts = db.scalars(contact_query(user, owner_id=owner_id)).unique().all()
+    groups = duplicates.find_groups(list(contacts))[:MAX_DUPLICATE_GROUPS]
+    ids = [c.id for _, group in groups for c in group]
+
+    def counts(column, *where) -> dict[int, int]:
+        stmt = select(column, func.count()).where(column.in_(ids), *where).group_by(column)
+        return dict(db.execute(stmt).all())
+
+    deals = counts(Deal.contact_id)
+    activities = counts(Activity.contact_id)
+    files = counts(Attachment.entity_id, Attachment.entity_type == "contact")
+    return [
+        {
+            "reasons": reasons,
+            "contacts": [
+                {
+                    **ContactOut.model_validate(c).model_dump(exclude={"tags"}),
+                    "tag_names": c.tag_names,
+                    "deals": deals.get(c.id, 0),
+                    "activities": activities.get(c.id, 0),
+                    "files": files.get(c.id, 0),
+                }
+                for c in group
+            ],
+        }
+        for reasons, group in groups
+    ]
+
+
 @router.post("/import", response_model=ImportResult)
 async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
     """Import contacts owned by the importer. Bad or duplicate rows are skipped and reported;
@@ -229,6 +272,53 @@ def update_contact(contact_id: int, body: ContactUpdate, user: CurrentUser, db: 
     contact.updated_at = utcnow()  # also when only tags changed
     db.commit()
     return contact
+
+
+@router.post("/{contact_id}/merge", response_model=ContactOut)
+def merge_contact(contact_id: int, body: MergeIn, user: CurrentUser, db: DbSession):
+    """Fold another contact into this one: its deals, activities, files and tags move here,
+    blank fields here are filled from it, notes are combined, and it is deleted."""
+    keep = get_owned(db, Contact, contact_id, user)
+    other = get_referenced(db, Contact, body.other_id, user, "other_id")
+    if other.id == keep.id:
+        raise field_error("other_id", "Choose a different contact", code="same_contact")
+
+    for field in ("last_name", "email", "phone", "company_id"):
+        if getattr(keep, field) is None and getattr(other, field) is not None:
+            setattr(keep, field, getattr(other, field))
+    if other.notes and other.notes != keep.notes:
+        keep.notes = f"{keep.notes}\n\n{other.notes}" if keep.notes else other.notes
+    keep.tags = keep.tags + [tag for tag in other.tags if tag not in keep.tags]
+
+    moved = {
+        "deals": db.execute(
+            update(Deal).where(Deal.contact_id == other.id).values(contact_id=keep.id)
+        ).rowcount,
+        "activities": db.execute(
+            update(Activity).where(Activity.contact_id == other.id).values(contact_id=keep.id)
+        ).rowcount,
+        "files": db.execute(
+            update(Attachment)
+            .where(Attachment.entity_type == "contact", Attachment.entity_id == other.id)
+            .values(entity_id=keep.id)
+        ).rowcount,
+    }
+    db.add(
+        AuditEvent(
+            actor_id=user.id,
+            entity_type="contact",
+            entity_id=keep.id,
+            entity_label=keep.full_name,
+            action="merged",
+            changes=[
+                {"field": "merged_from", "from": other.id, "from_label": other.full_name, **moved}
+            ],
+        )
+    )
+    db.delete(other)
+    keep.updated_at = utcnow()
+    db.commit()
+    return keep
 
 
 @router.delete("/{contact_id}", status_code=204)
