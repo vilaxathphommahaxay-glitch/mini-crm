@@ -1,9 +1,12 @@
-from fastapi import APIRouter
+import math
+
+from fastapi import APIRouter, Request
 from sqlalchemy import select
 
 from app.deps import CurrentUser, DbSession
 from app.errors import AppError, field_error
 from app.models import User
+from app.ratelimit import account_limiter, client_limiter, login_keys
 from app.schemas.users import ChangePasswordIn, LoginIn, TokenOut, UserOut
 from app.security import create_access_token, hash_password, verify_password
 
@@ -14,11 +17,24 @@ _DUMMY_HASH = hash_password("not-a-real-password")
 
 
 @router.post("/login", response_model=TokenOut)
-def login(body: LoginIn, db: DbSession):
+def login(body: LoginIn, request: Request, db: DbSession):
+    account, client = login_keys(body.email, request.client.host if request.client else None)
+    wait = account_limiter.retry_after(account) or client_limiter.retry_after(client)
+    if wait is not None:
+        minutes = max(1, math.ceil(wait.total_seconds() / 60))
+        raise AppError(
+            429,
+            f"Too many failed sign-ins. Try again in {minutes} minute(s).",
+            code="too_many_attempts",
+        )
+
     user = db.scalar(select(User).where(User.email == body.email))
     password_ok = verify_password(body.password, user.password_hash if user else _DUMMY_HASH)
     if user is None or not password_ok:
+        account_limiter.failed(account)
+        client_limiter.failed(client)
         raise AppError(401, "Incorrect email or password", code="invalid_credentials")
+    account_limiter.succeeded(account)
     if not user.is_active:
         raise AppError(403, "This account has been disabled", code="account_disabled")
     return {"access_token": create_access_token(user.id), "user": user}

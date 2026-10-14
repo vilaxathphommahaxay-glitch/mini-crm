@@ -113,3 +113,43 @@ def test_password_limit_counts_bytes_not_characters(client, staff):
     )
 
     assert response.status_code == 422
+
+
+def test_too_many_failed_logins_are_blocked_for_a_while(client, staff):
+    def attempt(password):
+        return client.post("/api/auth/login", json={"email": staff.email, "password": password})
+
+    for _ in range(5):
+        assert attempt("wrong").status_code == 401
+
+    blocked = attempt(PASSWORD)  # even the right password is refused now
+    assert blocked.status_code == 429
+    assert blocked.json()["error"]["code"] == "too_many_attempts"
+    assert "15 minute" in blocked.json()["error"]["message"]
+
+    clock.freeze(clock.utcnow() + timedelta(minutes=16))
+    assert attempt(PASSWORD).status_code == 200
+
+
+def test_successful_login_clears_failures_and_other_emails_are_unaffected(client, staff, admin):
+    def attempt(email, password):
+        return client.post("/api/auth/login", json={"email": email, "password": password})
+
+    for _ in range(4):
+        attempt(staff.email, "wrong")
+    assert attempt(staff.email, PASSWORD).status_code == 200
+    for _ in range(4):
+        assert attempt(staff.email, "wrong").status_code == 401  # counter started again
+
+    for _ in range(5):
+        attempt(staff.email, "wrong")
+    assert attempt(admin.email, PASSWORD).status_code == 200
+
+
+def test_guessing_across_many_emails_is_limited_per_client(client, staff):
+    for i in range(20):
+        client.post("/api/auth/login", json={"email": f"x{i}@example.com", "password": "nope"})
+
+    response = client.post("/api/auth/login", json={"email": staff.email, "password": PASSWORD})
+
+    assert response.status_code == 429

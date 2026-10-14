@@ -21,6 +21,7 @@ from app import clock
 from app.db import Base, get_db, make_engine
 from app.main import app
 from app.models import Activity, ActivityType, Company, Contact, Deal, Role, User
+from app.ratelimit import account_limiter, client_limiter
 from app.security import create_access_token, hash_password
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite://")
@@ -74,6 +75,15 @@ def client(session_factory):
 def _unfreeze_clock():
     yield
     clock.freeze(None)
+
+
+@pytest.fixture(autouse=True)
+def _reset_login_limiter():
+    for limiter in (account_limiter, client_limiter):
+        limiter.reset()
+    yield
+    for limiter in (account_limiter, client_limiter):
+        limiter.reset()
 
 
 _ids = count(1)
