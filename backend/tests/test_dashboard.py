@@ -98,3 +98,24 @@ def test_admin_filters_dashboard_by_owner(client, factory, admin, staff, other_s
 
     assert everyone["open_deals"] == 2
     assert one["open_deals"] == 1
+
+
+def test_deals_without_a_next_step(client, factory, staff, other_staff):
+    contact = factory.contact(staff)
+    forgotten = factory.deal(staff, contact=contact, title="Forgotten")
+    planned = factory.deal(staff, contact=contact, title="Planned")
+    factory.activity(staff, deal_id=planned.id, due_date=date(2030, 1, 1))
+    only_done = factory.deal(staff, contact=contact, title="Only done tasks")
+    factory.activity(staff, deal_id=only_done.id, due_date=date(2026, 1, 1), done=True)
+    only_notes = factory.deal(staff, contact=contact, title="Only a note")
+    factory.activity(staff, deal_id=only_notes.id, type="note")
+    factory.deal(staff, contact=contact, title="Won", stage=Stage.won, closed_at=NOW)
+    factory.deal(other_staff, title="Not mine")
+
+    block = summary(client, auth(staff))["no_next_step"]
+
+    titles = {d["title"] for d in block["items"]}
+    assert titles == {"Forgotten", "Only done tasks", "Only a note"}
+    assert block["count"] == 3
+    assert forgotten.id in {d["id"] for d in block["items"]}
+    assert block["items"][0]["contact"]["name"] == "Noy"

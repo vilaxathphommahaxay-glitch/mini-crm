@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { useDashboard } from '../api/hooks'
 import { STAGE_LABELS } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { StageBadge } from '../components/badges'
+import { Button } from '../components/ui/Button'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
 import { WonChart } from '../components/WonChart'
 import { OwnerSelect } from '../forms/selects'
-import { formatMoney } from '../lib/format'
+import { ActivityFormModal } from '../forms/ActivityForm'
+import { addDaysISO, formatDate, formatMoney } from '../lib/format'
 import { toId, useUrlFilters } from '../lib/hooks'
 
 function StatTile({
@@ -39,6 +42,7 @@ export function DashboardPage() {
   const isAdmin = user.role === 'admin'
   const { values, set } = useUrlFilters(['owner_id'] as const)
   const summary = useDashboard(toId(values.owner_id))
+  const [planning, setPlanning] = useState<{ dealId: number; contactId: number } | null>(null)
 
   return (
     <>
@@ -137,6 +141,45 @@ export function DashboardPage() {
           </div>
 
           <Card>
+            <CardHeader title={`Deals without a next step (${summary.data.no_next_step.count})`} />
+            {summary.data.no_next_step.items.length === 0 ? (
+              <EmptyState title="Every open deal has a planned next step" />
+            ) : (
+              <ul className="divide-y divide-slate-100">
+                {summary.data.no_next_step.items.map((deal) => (
+                  <li
+                    key={deal.id}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to={`/deals/${deal.id}`}
+                        className="text-sm font-medium text-slate-900 hover:text-indigo-600"
+                      >
+                        {deal.title}
+                      </Link>
+                      <p className="text-xs text-slate-500">
+                        {deal.contact.name} · last change {formatDate(deal.updated_at)}
+                      </p>
+                    </div>
+                    <StageBadge stage={deal.stage} />
+                    <span className="w-36 text-right text-sm text-slate-900 tabular-nums">
+                      {formatMoney(deal.value, deal.currency)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setPlanning({ dealId: deal.id, contactId: deal.contact.id })}
+                    >
+                      Add task
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
             <CardHeader
               title="Overdue tasks"
               actions={
@@ -156,6 +199,14 @@ export function DashboardPage() {
           </Card>
         </div>
       )}
+      <ActivityFormModal
+        open={planning !== null}
+        defaultType="task"
+        defaultDueDate={addDaysISO(1)}
+        contactId={planning?.contactId}
+        dealId={planning?.dealId}
+        onClose={() => setPlanning(null)}
+      />
     </>
   )
 }

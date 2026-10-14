@@ -1,7 +1,9 @@
-from app.models import Stage
+from datetime import datetime
+
+from app.models import Currency, Stage
 from app.schemas.activities import ActivityOut
-from app.schemas.common import OutputModel
-from app.schemas.deals import CurrencyTotal
+from app.schemas.common import ContactRef, OutputModel
+from app.schemas.deals import CurrencyTotal, Money
 
 
 class StageSummary(OutputModel):
@@ -22,8 +24,24 @@ class TaskSummary(OutputModel):
     overdue_items: list[ActivityOut]
 
 
+class StaleDeal(OutputModel):
+    id: int
+    title: str
+    stage: Stage
+    value: Money
+    currency: Currency
+    contact: ContactRef
+    updated_at: datetime
+
+
+class NoNextStep(OutputModel):
+    count: int
+    items: list[StaleDeal]
+
+
 class DashboardSummary(OutputModel):
     open_deals: int
     pipeline: list[StageSummary]
     won_by_month: list[MonthTotal]
     tasks: TaskSummary
+    no_next_step: NoNextStep

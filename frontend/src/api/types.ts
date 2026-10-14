@@ -122,6 +122,18 @@ export interface DashboardSummary {
   pipeline: { stage: Stage; count: number; totals: CurrencyTotal[] }[]
   won_by_month: { month: string; totals: CurrencyTotal[] }[]
   tasks: { overdue: number; today: number; upcoming: number; overdue_items: Activity[] }
+  no_next_step: {
+    count: number
+    items: {
+      id: number
+      title: string
+      stage: Stage
+      value: string
+      currency: Currency
+      contact: Ref
+      updated_at: string
+    }[]
+  }
 }
 
 export interface ImportResult {

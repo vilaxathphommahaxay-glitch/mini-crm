@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import UTC, datetime
 
 from fastapi import APIRouter
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy import exists, func, select
+from sqlalchemy.orm import Session, joinedload
 
 from app.access import scope
 from app.clock import app_tz, local_today
@@ -17,6 +17,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 MONTHS = 12
 OVERDUE_ITEMS = 10
+NO_NEXT_STEP_ITEMS = 10
 
 
 def _last_months(count: int) -> list[tuple[int, int]]:
@@ -79,6 +80,23 @@ def _tasks(db: Session, user: User, owner_id: int | None) -> dict:
     }
 
 
+def _deals_without_next_step(db: Session, user: User, owner_id: int | None) -> dict:
+    """Open deals with no open task on them - the ones most likely to be forgotten."""
+    has_open_task = exists().where(
+        Activity.deal_id == Deal.id, Activity.done.is_(False), Activity.due_date.is_not(None)
+    )
+    stmt = scope(select(Deal), Deal, user, owner_id).where(
+        Deal.stage.not_in(CLOSED_STAGES), ~has_open_task
+    )
+    total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+    items = db.scalars(
+        stmt.options(joinedload(Deal.contact))
+        .order_by(Deal.updated_at, Deal.id)  # longest untouched first
+        .limit(NO_NEXT_STEP_ITEMS)
+    ).all()
+    return {"count": total, "items": items}
+
+
 @router.get("/summary", response_model=DashboardSummary)
 def summary(user: CurrentUser, db: DbSession, owner_id: int | None = None):
     pipeline = _pipeline(db, user, owner_id)
@@ -87,4 +105,5 @@ def summary(user: CurrentUser, db: DbSession, owner_id: int | None = None):
         "pipeline": pipeline,
         "won_by_month": _won_by_month(db, user, owner_id),
         "tasks": _tasks(db, user, owner_id),
+        "no_next_step": _deals_without_next_step(db, user, owner_id),
     }
