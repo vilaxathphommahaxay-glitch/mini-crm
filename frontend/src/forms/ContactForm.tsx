@@ -12,6 +12,7 @@ import { FormFooter } from './FormFooter'
 import { contactSchema, NEW_COMPANY, toContactBody, type ContactFormValues } from './schemas'
 import { CompanySelect, OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
+import { t } from '../i18n'
 
 const FIELDS = [
   'first_name',
@@ -81,7 +82,7 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
     setFormError(null)
     try {
       const saved = await save.mutateAsync({ id: contact?.id, body: toContactBody(values) })
-      toast.success(contact ? 'Contact updated' : 'Contact created')
+      toast.success(t(contact ? 'contactForm.updated' : 'contactForm.created'))
       onSaved?.(saved)
       onClose()
     } catch (error) {
@@ -93,19 +94,19 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="First name" required error={errors.first_name?.message}>
+        <Field label={t('f.firstName')} required error={errors.first_name?.message}>
           {(c) => <Input {...c} {...register('first_name')} autoComplete="off" />}
         </Field>
-        <Field label="Last name" error={errors.last_name?.message}>
+        <Field label={t('f.lastName')} error={errors.last_name?.message}>
           {(c) => <Input {...c} {...register('last_name')} autoComplete="off" />}
         </Field>
         <div>
-          <Field label="Email" error={errors.email?.message}>
+          <Field label={t('f.email')} error={errors.email?.message}>
             {(c) => <Input {...c} {...register('email')} type="email" autoComplete="off" />}
           </Field>
           {duplicate && (
             <p role="status" className="mt-1 text-xs text-amber-700">
-              Already in your contacts:{' '}
+              {t('contactForm.duplicate')}{' '}
               <Link
                 to={`/contacts/${duplicate.id}`}
                 onClick={onClose}
@@ -116,36 +117,32 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
             </p>
           )}
         </div>
-        <Field label="Phone" error={errors.phone?.message}>
+        <Field label={t('f.phone')} error={errors.phone?.message}>
           {(c) => <Input {...c} {...register('phone')} type="tel" autoComplete="off" />}
         </Field>
       </div>
-      <Field label="Company" error={errors.company_id?.message}>
+      <Field label={t('f.company')} error={errors.company_id?.message}>
         {(c) => <CompanySelect {...c} {...register('company_id')} allowCreate />}
       </Field>
       {newCompany && (
         <Field
-          label="New company name"
+          label={t('contactForm.newCompanyName')}
           required
           error={errors.company_name?.message}
-          hint="If a company with this name already exists, the contact is added to it"
+          hint={t('contactForm.newCompanyHint')}
         >
           {(c) => <Input {...c} {...register('company_name')} autoComplete="off" autoFocus />}
         </Field>
       )}
-      <Field
-        label="Tags"
-        error={errors.tags?.message}
-        hint="Separate with commas, e.g. vip, wholesale"
-      >
+      <Field label={t('f.tags')} error={errors.tags?.message} hint={t('contactForm.tagsHint')}>
         {(c) => <Input {...c} {...register('tags')} autoComplete="off" />}
       </Field>
       {isAdmin && (
-        <Field label="Owner" error={errors.owner_id?.message}>
+        <Field label={t('f.owner')} error={errors.owner_id?.message}>
           {(c) => <OwnerSelect {...c} {...register('owner_id')} current={contact?.owner} />}
         </Field>
       )}
-      <Field label="Notes" error={errors.notes?.message}>
+      <Field label={t('f.notes')} error={errors.notes?.message}>
         {(c) => <Textarea {...c} {...register('notes')} />}
       </Field>
       <FormFooter onCancel={onClose} saving={save.isPending} />
@@ -157,7 +154,7 @@ export function ContactFormModal({ open, ...props }: Props & { open: boolean }) 
   return (
     <Modal
       open={open}
-      title={props.contact ? 'Edit contact' : 'New contact'}
+      title={t(props.contact ? 'contactForm.edit' : 'contactForm.new')}
       onClose={props.onClose}
     >
       <ContactForm {...props} />

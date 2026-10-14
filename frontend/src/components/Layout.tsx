@@ -1,25 +1,27 @@
 import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useAuth, useCurrentUser } from '../auth/context'
+import { t, type MessageKey } from '../i18n'
 import { CommandPalette } from './CommandPalette'
+import { LanguageSwitch } from './LanguageSwitch'
 import { Icon, type IconName } from './icons'
 import { LoadingState } from './ui/states'
 
 interface NavItem {
   to: string
-  label: string
+  label: MessageKey
   icon: IconName
   adminOnly?: boolean
 }
 
 const NAV: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/contacts', label: 'Contacts', icon: 'contacts' },
-  { to: '/companies', label: 'Companies', icon: 'companies' },
-  { to: '/pipeline', label: 'Pipeline', icon: 'pipeline' },
-  { to: '/tasks', label: 'Tasks', icon: 'tasks' },
-  { to: '/users', label: 'Users', icon: 'users', adminOnly: true },
-  { to: '/settings', label: 'Settings', icon: 'settings' },
+  { to: '/', label: 'nav.dashboard', icon: 'dashboard' },
+  { to: '/contacts', label: 'nav.contacts', icon: 'contacts' },
+  { to: '/companies', label: 'nav.companies', icon: 'companies' },
+  { to: '/pipeline', label: 'nav.pipeline', icon: 'pipeline' },
+  { to: '/tasks', label: 'nav.tasks', icon: 'tasks' },
+  { to: '/users', label: 'nav.users', icon: 'users', adminOnly: true },
+  { to: '/settings', label: 'nav.settings', icon: 'settings' },
 ]
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -45,11 +47,11 @@ function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: 
           className="flex w-full items-center gap-2 rounded-md bg-slate-800 px-3 py-2 text-sm text-slate-400 hover:text-white"
         >
           <Icon name="search" className="size-4" />
-          <span className="flex-1 text-left">Search…</span>
+          <span className="flex-1 text-left">{t('nav.search')}</span>
           <kbd className="text-xs text-slate-500">{SHORTCUT}</kbd>
         </button>
       </div>
-      <nav className="flex-1 space-y-1 px-3" aria-label="Main">
+      <nav className="flex-1 space-y-1 px-3" aria-label={t('nav.main')}>
         {items.map((item) => (
           <NavLink
             key={item.to}
@@ -63,14 +65,14 @@ function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: 
             }
           >
             <Icon name={item.icon} />
-            {item.label}
+            {t(item.label)}
           </NavLink>
         ))}
       </nav>
       <div className="border-t border-slate-800 px-5 py-4">
         <p className="truncate text-sm font-medium text-white">{user.name}</p>
         <p className="truncate text-xs text-slate-400">
-          {user.email} · {user.role === 'admin' ? 'Admin' : 'Staff'}
+          {user.email} · {t(user.role === 'admin' ? 'role.admin' : 'role.staff')}
         </p>
         <button
           type="button"
@@ -78,8 +80,11 @@ function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: 
           className="mt-3 flex items-center gap-2 text-sm text-slate-400 hover:text-white"
         >
           <Icon name="logout" className="size-4" />
-          Log out
+          {t('nav.logout')}
         </button>
+        <div className="mt-3">
+          <LanguageSwitch />
+        </div>
       </div>
     </div>
   )
@@ -116,7 +121,7 @@ export function Layout() {
       <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <button
           type="button"
-          aria-label="Open menu"
+          aria-label={t('nav.openMenu')}
           onClick={() => setMenuOpen(true)}
           className="rounded p-1 text-slate-600 hover:bg-slate-100"
         >
@@ -125,7 +130,7 @@ export function Layout() {
         <span className="flex-1 font-semibold text-slate-900">Mini CRM</span>
         <button
           type="button"
-          aria-label="Search"
+          aria-label={t('common.search')}
           onClick={openSearch}
           className="rounded p-1 text-slate-600 hover:bg-slate-100"
         >

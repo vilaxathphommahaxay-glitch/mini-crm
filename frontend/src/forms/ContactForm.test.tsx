@@ -133,7 +133,7 @@ describe('<ContactForm>', () => {
           error: {
             code: 'validation_error',
             message: 'Invalid input',
-            details: [{ field: 'company_id', message: 'Company not found' }],
+            details: [{ field: 'company_id', message: 'Company not found', code: 'not_found' }],
           },
         },
       }),
@@ -142,6 +142,6 @@ describe('<ContactForm>', () => {
     await userEvent.type(await screen.findByLabelText(/First name/), 'Noy')
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText('Company not found')).toBeInTheDocument()
+    expect(await screen.findByText('That record no longer exists')).toBeInTheDocument()
   })
 })

@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { CURRENCIES, type Currency, type DashboardSummary } from '../api/types'
+import { t, type MessageKey } from '../i18n'
 import { formatMoney } from '../lib/format'
 
 const BAR_COLOR = '#6366f1' // indigo-500, validated against the white surface
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
 function monthLabel(key: string) {
   const [year, month] = key.split('-')
-  return `${MONTHS[Number(month) - 1]} ${year.slice(2)}`
+  return `${t(`month.${Number(month) - 1}` as MessageKey)} ${year.slice(2)}`
 }
 
 const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
@@ -32,7 +31,11 @@ export function WonChart({ months }: { months: DashboardSummary['won_by_month'] 
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-end gap-1" role="group" aria-label="Currency">
+      <div
+        className="mb-2 flex items-center justify-end gap-1"
+        role="group"
+        aria-label={t('chart.currency')}
+      >
         {available.length > 1 &&
           available.map((c) => (
             <button
@@ -46,14 +49,12 @@ export function WonChart({ months }: { months: DashboardSummary['won_by_month'] 
                   : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
-              {c}
+              {t(`currency.${c}`)}
             </button>
           ))}
       </div>
       {available.length === 0 ? (
-        <p className="py-16 text-center text-sm text-slate-500">
-          No won deals in the last 12 months
-        </p>
+        <p className="py-16 text-center text-sm text-slate-500">{t('chart.empty')}</p>
       ) : (
         <div className="h-64" aria-hidden>
           <ResponsiveContainer width="100%" height="100%">
@@ -75,7 +76,7 @@ export function WonChart({ months }: { months: DashboardSummary['won_by_month'] 
               />
               <Tooltip
                 cursor={{ fill: '#f1f5f9' }}
-                formatter={(_value, _name, item) => [item.payload.label, 'Won']}
+                formatter={(_value, _name, item) => [item.payload.label, t('chart.won')]}
                 contentStyle={{ fontSize: 12, borderRadius: 6, borderColor: '#e2e8f0' }}
                 itemStyle={{ color: '#0f172a' }}
                 labelStyle={{ color: '#475569' }}
@@ -87,11 +88,11 @@ export function WonChart({ months }: { months: DashboardSummary['won_by_month'] 
       )}
       {/* the same numbers as a table, for screen readers */}
       <table className="sr-only">
-        <caption>Won revenue by month in {currency}</caption>
+        <caption>{t('chart.caption', { currency: t(`currency.${currency}`) })}</caption>
         <thead>
           <tr>
-            <th>Month</th>
-            <th>Won</th>
+            <th>{t('chart.month')}</th>
+            <th>{t('chart.won')}</th>
           </tr>
         </thead>
         <tbody>

@@ -10,15 +10,16 @@ import { Field, FormError, Input, Select } from '../components/ui/form'
 import { Modal } from '../components/ui/Modal'
 import { FormFooter } from './FormFooter'
 import { applyServerErrors } from './serverErrors'
+import { msg, t } from '../i18n'
 
 // Password is required for new users; when editing, empty means "keep the current one".
 function userSchema(isNew: boolean) {
   return z.object({
-    name: z.string().trim().min(1, 'Name is required').max(100),
-    email: z.email('Enter a valid email address'),
+    name: z.string().trim().min(1, msg('validation.nameRequired')).max(100),
+    email: z.email(msg('validation.email')),
     password: isNew
-      ? z.string().min(8, 'At least 8 characters')
-      : z.string().refine((v) => v === '' || v.length >= 8, 'At least 8 characters'),
+      ? z.string().min(8, msg('validation.minChars', 8))
+      : z.string().refine((v) => v === '' || v.length >= 8, msg('validation.minChars', 8)),
     role: z.enum(['admin', 'staff']),
     is_active: z.boolean(),
   })
@@ -64,7 +65,7 @@ function UserForm({ user, onClose }: Props) {
     }
     try {
       await save.mutateAsync({ id: user?.id, body })
-      toast.success(user ? 'User updated' : 'User created')
+      toast.success(t(user ? 'userForm.updated' : 'userForm.created'))
       onClose()
     } catch (error) {
       setFormError(applyServerErrors(error, setError, FIELDS))
@@ -74,17 +75,17 @@ function UserForm({ user, onClose }: Props) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
-      <Field label="Name" required error={errors.name?.message}>
+      <Field label={t('f.name')} required error={errors.name?.message}>
         {(c) => <Input {...c} {...register('name')} autoComplete="off" />}
       </Field>
-      <Field label="Email" required error={errors.email?.message}>
+      <Field label={t('f.email')} required error={errors.email?.message}>
         {(c) => <Input {...c} {...register('email')} type="email" autoComplete="off" />}
       </Field>
       <Field
-        label={user ? 'New password' : 'Password'}
+        label={t(user ? 'settings.new' : 'f.password')}
         required={!user}
         error={errors.password?.message}
-        hint={user ? 'Leave empty to keep the current password' : 'At least 8 characters'}
+        hint={user ? t('userForm.passwordKeep') : t('settings.newHint', { n: 8 })}
       >
         {(c) => (
           <Input {...c} {...register('password')} type="password" autoComplete="new-password" />
@@ -92,14 +93,14 @@ function UserForm({ user, onClose }: Props) {
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
-          label="Role"
+          label={t('f.role')}
           error={errors.role?.message}
-          hint={isSelf ? 'You cannot change your own role' : undefined}
+          hint={isSelf ? t('userForm.roleSelf') : undefined}
         >
           {(c) => (
             <Select {...c} {...register('role')} disabled={isSelf}>
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
+              <option value="staff">{t('role.staff')}</option>
+              <option value="admin">{t('role.admin')}</option>
             </Select>
           )}
         </Field>
@@ -111,16 +112,11 @@ function UserForm({ user, onClose }: Props) {
               disabled={isSelf}
               className="size-4 rounded border-slate-300"
             />
-            Active (can log in)
+            {t('f.active')}
           </label>
         )}
       </div>
-      {user && !isSelf && (
-        <p className="text-xs text-slate-500">
-          Disabling keeps their records. To hand them to someone else, use <em>Transfer records</em>{' '}
-          on the users list.
-        </p>
-      )}
+      {user && !isSelf && <p className="text-xs text-slate-500">{t('userForm.disableNote')}</p>}
       <FormFooter onCancel={onClose} saving={save.isPending} />
     </form>
   )
@@ -128,7 +124,11 @@ function UserForm({ user, onClose }: Props) {
 
 export function UserFormModal({ open, ...props }: Props & { open: boolean }) {
   return (
-    <Modal open={open} title={props.user ? 'Edit user' : 'New user'} onClose={props.onClose}>
+    <Modal
+      open={open}
+      title={t(props.user ? 'userForm.edit' : 'userForm.new')}
+      onClose={props.onClose}
+    >
       <UserForm {...props} />
     </Modal>
   )

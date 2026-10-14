@@ -1,43 +1,44 @@
 import { useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { useSearch } from '../api/hooks'
-import { STAGE_LABELS, type SearchResults } from '../api/types'
+import type { SearchResults } from '../api/types'
+import { t } from '../i18n'
 import { formatMoney } from '../lib/format'
 import { Icon } from './icons'
 import { Spinner } from './ui/states'
 
 interface Hit {
   key: string
-  group: 'Contacts' | 'Companies' | 'Deals'
+  group: 'palette.contacts' | 'palette.companies' | 'palette.deals'
   title: string
   subtitle: string
   to: string
 }
 
-const GROUPS = ['Contacts', 'Companies', 'Deals'] as const
+const GROUPS = ['palette.contacts', 'palette.companies', 'palette.deals'] as const
 
 function toHits(data: SearchResults | undefined): Hit[] {
   if (!data) return []
   return [
     ...data.contacts.map((c) => ({
       key: `contact-${c.id}`,
-      group: 'Contacts' as const,
+      group: 'palette.contacts' as const,
       title: c.full_name,
       subtitle: [c.company?.name, c.email].filter(Boolean).join(' · '),
       to: `/contacts/${c.id}`,
     })),
     ...data.companies.map((c) => ({
       key: `company-${c.id}`,
-      group: 'Companies' as const,
+      group: 'palette.companies' as const,
       title: c.name,
       subtitle: c.phone ?? '',
       to: `/companies/${c.id}`,
     })),
     ...data.deals.map((d) => ({
       key: `deal-${d.id}`,
-      group: 'Deals' as const,
+      group: 'palette.deals' as const,
       title: d.title,
-      subtitle: `${STAGE_LABELS[d.stage]} · ${formatMoney(d.value, d.currency)} · ${d.contact.name}`,
+      subtitle: `${t(`stage.${d.stage}`)} · ${formatMoney(d.value, d.currency)} · ${d.contact.name}`,
       to: `/deals/${d.id}`,
     })),
   ]
@@ -86,9 +87,9 @@ function Palette({ onClose }: { onClose: () => void }) {
 
   let body
   if (!text.trim()) {
-    body = <Message>Search contacts, companies and deals</Message>
+    body = <Message>{t('palette.hint')}</Message>
   } else if (search.isError) {
-    body = <Message error>Search failed. Try again.</Message>
+    body = <Message error>{t('palette.failed')}</Message>
   } else if (waiting && hits.length === 0) {
     body = (
       <div className="flex justify-center py-6">
@@ -96,13 +97,13 @@ function Palette({ onClose }: { onClose: () => void }) {
       </div>
     )
   } else if (hits.length === 0) {
-    body = <Message>No results for “{query}”</Message>
+    body = <Message>{t('palette.empty', { query })}</Message>
   } else {
     body = (
       <ul
         id={listId}
         role="listbox"
-        aria-label="Search results"
+        aria-label={t('palette.results')}
         className="max-h-96 overflow-y-auto py-2"
       >
         {GROUPS.map((group) => {
@@ -111,7 +112,7 @@ function Palette({ onClose }: { onClose: () => void }) {
           return (
             <li key={group} role="presentation">
               <p className="px-4 pt-2 pb-1 text-xs font-medium tracking-wide text-slate-400 uppercase">
-                {group}
+                {t(group)}
               </p>
               <ul role="presentation">
                 {items.map((hit) => {
@@ -152,7 +153,7 @@ function Palette({ onClose }: { onClose: () => void }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Search"
+        aria-label={t('common.search')}
         className="relative w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-2xl"
       >
         <div className="flex items-center gap-3 border-b border-slate-200 px-4">
@@ -163,8 +164,8 @@ function Palette({ onClose }: { onClose: () => void }) {
             aria-expanded={hits.length > 0}
             aria-controls={listId}
             aria-activedescendant={hits.length ? optionId(active) : undefined}
-            aria-label="Search contacts, companies and deals"
-            placeholder="Search contacts, companies and deals…"
+            aria-label={t('palette.hint')}
+            placeholder={t('palette.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
@@ -176,7 +177,7 @@ function Palette({ onClose }: { onClose: () => void }) {
         </div>
         {body}
         <p className="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">
-          ↑ ↓ to move · Enter to open · Esc to close
+          {t('palette.keys')}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Deal } from '../api/types'
+import { t } from '../i18n'
 import { formatDate, formatMoney } from '../lib/format'
 import { StageBadge } from './badges'
 
@@ -17,11 +18,11 @@ export function DealsTable({
       <table className="w-full text-left text-sm">
         <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
           <tr>
-            <th className="px-4 py-2">Deal</th>
-            {showContact && <th className="px-4 py-2">Contact</th>}
-            <th className="px-4 py-2">Stage</th>
-            <th className="px-4 py-2 text-right">Value</th>
-            <th className="hidden px-4 py-2 sm:table-cell">Expected close</th>
+            <th className="px-4 py-2">{t('deals.deal')}</th>
+            {showContact && <th className="px-4 py-2">{t('common.contact')}</th>}
+            <th className="px-4 py-2">{t('deals.stage')}</th>
+            <th className="px-4 py-2 text-right">{t('deals.value')}</th>
+            <th className="hidden px-4 py-2 sm:table-cell">{t('deals.expectedClose')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">

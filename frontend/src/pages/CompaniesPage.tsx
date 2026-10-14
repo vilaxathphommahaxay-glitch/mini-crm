@@ -12,6 +12,7 @@ import { CompanyFormModal } from '../forms/CompanyForm'
 import { OwnerSelect } from '../forms/selects'
 import { formatDate } from '../lib/format'
 import { toId, useDebouncedInput, useUrlFilters } from '../lib/hooks'
+import { t } from '../i18n'
 
 const PAGE_SIZE = 20
 
@@ -35,16 +36,12 @@ export function CompaniesPage() {
   return (
     <>
       <PageHeader
-        title="Companies"
-        subtitle={
-          query.data
-            ? `${query.data.total} compan${query.data.total === 1 ? 'y' : 'ies'}`
-            : undefined
-        }
+        title={t('nav.companies')}
+        subtitle={query.data ? t('companies.count', { count: query.data.total }) : undefined}
         actions={
           <Button onClick={() => setCreating(true)}>
             <Icon name="plus" className="size-4" />
-            New company
+            {t('companyForm.new')}
           </Button>
         }
       />
@@ -56,8 +53,8 @@ export function CompaniesPage() {
               className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400"
             />
             <Input
-              aria-label="Search companies"
-              placeholder="Search name or phone…"
+              aria-label={t('companies.searchLabel')}
+              placeholder={t('companies.searchPlaceholder')}
               className="pl-9"
               value={searchInput}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -66,8 +63,8 @@ export function CompaniesPage() {
           {isAdmin && (
             <div className="w-full sm:w-48">
               <OwnerSelect
-                aria-label="Filter by owner"
-                emptyLabel="All owners"
+                aria-label={t('common.filterOwner')}
+                emptyLabel={t('select.allOwners')}
                 value={values.owner_id}
                 onChange={(e) => set({ owner_id: e.target.value })}
               />
@@ -80,18 +77,18 @@ export function CompaniesPage() {
         ) : query.isError ? (
           <ErrorState error={query.error} onRetry={() => query.refetch()} />
         ) : query.data.items.length === 0 ? (
-          <EmptyState title={filtered ? 'No companies match these filters' : 'No companies yet'} />
+          <EmptyState title={t(filtered ? 'companies.noMatch' : 'companies.none')} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
                 <tr>
-                  <th className="px-4 py-2.5">Name</th>
-                  <th className="px-4 py-2.5">Phone</th>
-                  <th className="hidden px-4 py-2.5 md:table-cell">Website</th>
-                  <th className="hidden px-4 py-2.5 md:table-cell">Address</th>
-                  {isAdmin && <th className="hidden px-4 py-2.5 lg:table-cell">Owner</th>}
-                  <th className="hidden px-4 py-2.5 xl:table-cell">Updated</th>
+                  <th className="px-4 py-2.5">{t('f.name')}</th>
+                  <th className="px-4 py-2.5">{t('f.phone')}</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">{t('f.website')}</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">{t('f.address')}</th>
+                  {isAdmin && <th className="hidden px-4 py-2.5 lg:table-cell">{t('f.owner')}</th>}
+                  <th className="hidden px-4 py-2.5 xl:table-cell">{t('common.updated')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

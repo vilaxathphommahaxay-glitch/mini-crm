@@ -10,22 +10,6 @@ export const CURRENCIES: Currency[] = ['LAK', 'THB', 'USD']
 export const STAGES: Stage[] = ['lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost']
 export const ACTIVITY_TYPES: ActivityType[] = ['call', 'meeting', 'note', 'task']
 
-export const STAGE_LABELS: Record<Stage, string> = {
-  lead: 'Lead',
-  qualified: 'Qualified',
-  proposal: 'Proposal',
-  negotiation: 'Negotiation',
-  won: 'Won',
-  lost: 'Lost',
-}
-
-export const ACTIVITY_LABELS: Record<ActivityType, string> = {
-  call: 'Call',
-  meeting: 'Meeting',
-  note: 'Note',
-  task: 'Task',
-}
-
 export interface Ref {
   id: number
   name: string
@@ -140,7 +124,14 @@ export interface ImportResult {
   created: number
   skipped: number
   companies_created: number
-  errors: { row: number; message: string }[]
+  errors: {
+    row: number
+    code: 'invalid_row' | 'duplicate_email'
+    field?: string | null
+    reason?: 'required' | 'invalid' | 'too_long' | null
+    value?: string | null
+    message: string // English, for logs
+  }[]
 }
 
 export interface SearchResults {

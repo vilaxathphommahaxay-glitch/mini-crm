@@ -2,8 +2,10 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { errorMessage } from '../api/client'
 import { useAuth } from '../auth/context'
+import { LanguageSwitch } from '../components/LanguageSwitch'
 import { Button } from '../components/ui/Button'
 import { Field, FormError, Input } from '../components/ui/form'
+import { t } from '../i18n'
 
 export function LoginPage() {
   const { user, login } = useAuth()
@@ -33,12 +35,15 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="fixed top-4 right-4">
+        <LanguageSwitch tone="light" />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="inline-flex size-10 items-center justify-center rounded-lg bg-indigo-600 text-lg font-bold text-white">
             C
           </span>
-          <h1 className="mt-4 text-2xl font-semibold text-slate-900">Sign in to Mini CRM</h1>
+          <h1 className="mt-4 text-2xl font-semibold text-slate-900">{t('login.title')}</h1>
         </div>
         <form
           onSubmit={onSubmit}
@@ -46,7 +51,7 @@ export function LoginPage() {
           noValidate
         >
           <FormError message={error} />
-          <Field label="Email">
+          <Field label={t('login.email')}>
             {(control) => (
               <Input
                 {...control}
@@ -58,7 +63,7 @@ export function LoginPage() {
               />
             )}
           </Field>
-          <Field label="Password">
+          <Field label={t('login.password')}>
             {(control) => (
               <Input
                 {...control}
@@ -76,7 +81,7 @@ export function LoginPage() {
             loading={submitting}
             disabled={!email || !password}
           >
-            Sign in
+            {t('login.submit')}
           </Button>
         </form>
       </div>

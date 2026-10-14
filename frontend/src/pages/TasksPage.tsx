@@ -12,18 +12,19 @@ import { ActivityFormModal } from '../forms/ActivityForm'
 import { OwnerSelect } from '../forms/selects'
 import { todayISO } from '../lib/format'
 import { toId, useUrlFilters } from '../lib/hooks'
+import { t, type MessageKey } from '../i18n'
 
-const TABS: { due: Due; label: string; empty: string }[] = [
-  { due: 'today', label: 'Today', empty: 'Nothing due today' },
-  { due: 'overdue', label: 'Overdue', empty: 'Nothing overdue — nice work' },
-  { due: 'upcoming', label: 'Next 7 days', empty: 'Nothing coming up this week' },
+const TABS: { due: Due; label: MessageKey; empty: MessageKey }[] = [
+  { due: 'today', label: 'tasks.today', empty: 'tasks.emptyToday' },
+  { due: 'overdue', label: 'tasks.overdue', empty: 'tasks.emptyOverdue' },
+  { due: 'upcoming', label: 'tasks.upcoming', empty: 'tasks.emptyUpcoming' },
 ]
 const PAGE_SIZE = 25
 
 export function TasksPage() {
   const isAdmin = useCurrentUser().role === 'admin'
   const { values, page, set } = useUrlFilters(['due', 'owner_id'] as const)
-  const tab = TABS.find((t) => t.due === values.due) ?? TABS[0]
+  const tab = TABS.find((item) => item.due === values.due) ?? TABS[0]
   const ownerId = toId(values.owner_id)
   const [creating, setCreating] = useState(false)
 
@@ -33,15 +34,15 @@ export function TasksPage() {
   return (
     <>
       <PageHeader
-        title="Tasks"
-        subtitle="Open activities with a due date. Tick one to mark it done."
+        title={t('nav.tasks')}
+        subtitle={t('tasks.subtitle')}
         actions={
           <>
             {isAdmin && (
               <div className="w-48">
                 <OwnerSelect
-                  aria-label="Filter by owner"
-                  emptyLabel="All owners"
+                  aria-label={t('common.filterOwner')}
+                  emptyLabel={t('select.allOwners')}
                   value={values.owner_id}
                   onChange={(e) => set({ owner_id: e.target.value })}
                 />
@@ -49,34 +50,38 @@ export function TasksPage() {
             )}
             <Button onClick={() => setCreating(true)}>
               <Icon name="plus" className="size-4" />
-              New task
+              {t('tasks.new')}
             </Button>
           </>
         }
       />
       <Card>
-        <div role="tablist" aria-label="Due" className="flex gap-1 border-b border-slate-200 px-2">
-          {TABS.map((t) => {
-            const active = t.due === tab.due
-            const count = counts?.[t.due]
+        <div
+          role="tablist"
+          aria-label={t('tasks.due')}
+          className="flex gap-1 border-b border-slate-200 px-2"
+        >
+          {TABS.map((item) => {
+            const active = item.due === tab.due
+            const count = counts?.[item.due]
             return (
               <button
-                key={t.due}
+                key={item.due}
                 role="tab"
                 type="button"
                 aria-selected={active}
-                onClick={() => set({ due: t.due })}
+                onClick={() => set({ due: item.due })}
                 className={`-mb-px flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium ${
                   active
                     ? 'border-indigo-600 text-indigo-700'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t.label}
+                {t(item.label)}
                 {count !== undefined && (
                   <span
                     className={`rounded-full px-1.5 text-xs tabular-nums ${
-                      t.due === 'overdue' && count > 0
+                      item.due === 'overdue' && count > 0
                         ? 'bg-red-50 text-red-700'
                         : 'bg-slate-100 text-slate-600'
                     }`}
@@ -94,7 +99,7 @@ export function TasksPage() {
           ) : list.isError ? (
             <ErrorState error={list.error} onRetry={() => list.refetch()} />
           ) : list.data.items.length === 0 ? (
-            <EmptyState title={tab.empty} />
+            <EmptyState title={t(tab.empty)} />
           ) : (
             <ActivityList activities={list.data.items} />
           )}

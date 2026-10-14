@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useDashboard } from '../api/hooks'
-import { STAGE_LABELS } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { StageBadge } from '../components/badges'
@@ -14,6 +13,7 @@ import { OwnerSelect } from '../forms/selects'
 import { ActivityFormModal } from '../forms/ActivityForm'
 import { addDaysISO, formatDate, formatMoney } from '../lib/format'
 import { toId, useUrlFilters } from '../lib/hooks'
+import { t } from '../i18n'
 
 function StatTile({
   label,
@@ -49,14 +49,14 @@ export function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Dashboard"
-        subtitle={`Welcome back, ${user.name.split(' ')[0]}`}
+        title={t('nav.dashboard')}
+        subtitle={t('dashboard.welcome', { name: user.name.split(' ')[0] })}
         actions={
           isAdmin && (
             <div className="w-48">
               <OwnerSelect
-                aria-label="Filter by owner"
-                emptyLabel="All owners"
+                aria-label={t('common.filterOwner')}
+                emptyLabel={t('select.allOwners')}
                 value={values.owner_id}
                 onChange={(e) => set({ owner_id: e.target.value })}
               />
@@ -73,28 +73,28 @@ export function DashboardPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatTile
-              label="Due today"
+              label={t('dashboard.dueToday')}
               value={summary.data.tasks.today}
               to="/tasks?due=today"
               tone={summary.data.tasks.today ? 'amber' : 'slate'}
             />
             <StatTile
-              label="Overdue"
+              label={t('tasks.overdue')}
               value={summary.data.tasks.overdue}
               to="/tasks?due=overdue"
               tone={summary.data.tasks.overdue ? 'red' : 'slate'}
             />
             <StatTile
-              label="Coming up (7 days)"
+              label={t('dashboard.upcoming')}
               value={summary.data.tasks.upcoming}
               to="/tasks?due=upcoming"
             />
-            <StatTile label="Open deals" value={summary.data.open_deals} to="/pipeline" />
+            <StatTile label={t('team.openDeals')} value={summary.data.open_deals} to="/pipeline" />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
             <Card>
-              <CardHeader title="Won revenue by month" />
+              <CardHeader title={t('dashboard.wonByMonth')} />
               <div className="p-4">
                 <WonChart months={summary.data.won_by_month} />
               </div>
@@ -102,24 +102,24 @@ export function DashboardPage() {
 
             <Card className="self-start">
               <CardHeader
-                title="Pipeline"
+                title={t('nav.pipeline')}
                 actions={
                   <Link
                     to="/pipeline"
                     className="text-xs font-medium text-indigo-600 hover:underline"
                   >
-                    Open board
+                    {t('dealPage.openBoard')}
                   </Link>
                 }
               />
               <table className="w-full text-sm">
-                <caption className="sr-only">Deals per stage</caption>
+                <caption className="sr-only">{t('dashboard.perStage')}</caption>
                 <tbody className="divide-y divide-slate-100">
                   {summary.data.pipeline.map((row) => (
                     <tr key={row.stage}>
                       <th scope="row" className="px-4 py-2.5 text-left font-normal">
                         <StageBadge stage={row.stage} />
-                        <span className="sr-only">{STAGE_LABELS[row.stage]}</span>
+                        <span className="sr-only">{t(`stage.${row.stage}`)}</span>
                       </th>
                       <td className="px-2 py-2.5 text-right text-slate-500 tabular-nums">
                         {row.count}
@@ -148,7 +148,7 @@ export function DashboardPage() {
 
           <Card>
             <CardHeader
-              title={`Deals without a next step (${summary.data.no_next_step.count})`}
+              title={t('dashboard.noNextStep', { count: summary.data.no_next_step.count })}
               actions={
                 summary.data.no_next_step.count > summary.data.no_next_step.items.length ? (
                   <button
@@ -156,7 +156,7 @@ export function DashboardPage() {
                     onClick={() => setShowAllStale(true)}
                     className="text-xs font-medium text-indigo-600 hover:underline"
                   >
-                    Show all
+                    {t('common.seeAll')}
                   </button>
                 ) : showAllStale && summary.data.no_next_step.count > 10 ? (
                   <button
@@ -164,13 +164,13 @@ export function DashboardPage() {
                     onClick={() => setShowAllStale(false)}
                     className="text-xs font-medium text-indigo-600 hover:underline"
                   >
-                    Show fewer
+                    {t('dashboard.showFewer')}
                   </button>
                 ) : undefined
               }
             />
             {summary.data.no_next_step.items.length === 0 ? (
-              <EmptyState title="Every open deal has a planned next step" />
+              <EmptyState title={t('dashboard.allPlanned')} />
             ) : (
               <ul className="divide-y divide-slate-100">
                 {summary.data.no_next_step.items.map((deal) => (
@@ -186,7 +186,8 @@ export function DashboardPage() {
                         {deal.title}
                       </Link>
                       <p className="text-xs text-slate-500">
-                        {deal.contact.name} · last change {formatDate(deal.updated_at)}
+                        {deal.contact.name} ·{' '}
+                        {t('dashboard.lastChange', { date: formatDate(deal.updated_at) })}
                       </p>
                     </div>
                     <StageBadge stage={deal.stage} />
@@ -198,7 +199,7 @@ export function DashboardPage() {
                       variant="secondary"
                       onClick={() => setPlanning({ dealId: deal.id, contactId: deal.contact.id })}
                     >
-                      Add task
+                      {t('dashboard.addTask')}
                     </Button>
                   </li>
                 ))}
@@ -208,18 +209,20 @@ export function DashboardPage() {
 
           <Card>
             <CardHeader
-              title="Overdue tasks"
+              title={t('team.overdueTasks')}
               actions={
                 <Link
                   to="/tasks?due=overdue"
                   className="text-xs font-medium text-indigo-600 hover:underline"
                 >
-                  See all
+                  {t('common.seeAll')}
                 </Link>
               }
             />
             {summary.data.tasks.overdue_items.length === 0 ? (
-              <EmptyState title="Nothing overdue">You're all caught up.</EmptyState>
+              <EmptyState title={t('dashboard.nothingOverdue')}>
+                {t('dashboard.caughtUp')}
+              </EmptyState>
             ) : (
               <ActivityList activities={summary.data.tasks.overdue_items} />
             )}

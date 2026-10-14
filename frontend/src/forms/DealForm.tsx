@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { errorMessage } from '../api/client'
 import { useDeleteDeal, useSaveDeal } from '../api/hooks'
-import { CURRENCIES, STAGE_LABELS, STAGES, type Deal, type Stage } from '../api/types'
+import { CURRENCIES, STAGES, type Deal, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { StageBadge } from '../components/badges'
 import { useToast } from '../components/toast/context'
@@ -13,6 +13,7 @@ import { ConfirmDialog, Modal } from '../components/ui/Modal'
 import { dealSchema, toDealBody, type DealFormValues } from './schemas'
 import { CompanySelect, ContactSelect, OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
+import { t } from '../i18n'
 
 const FIELDS = Object.keys(dealSchema.shape)
 
@@ -59,7 +60,7 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
     setFormError(null)
     try {
       await save.mutateAsync({ id: deal?.id, body: toDealBody(values, !deal) })
-      toast.success(deal ? 'Deal updated' : 'Deal created')
+      toast.success(t(deal ? 'dealForm.updated' : 'dealForm.created'))
       onClose()
     } catch (error) {
       setFormError(applyServerErrors(error, setError, FIELDS))
@@ -70,7 +71,7 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
     if (!deal) return
     try {
       await remove.mutateAsync(deal.id)
-      toast.success('Deal deleted')
+      toast.success(t('dealForm.deleted'))
       onClose()
       onDeleted?.()
     } catch (error) {
@@ -82,18 +83,20 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
-      <Field label="Title" required error={errors.title?.message}>
+      <Field label={t('f.title')} required error={errors.title?.message}>
         {(c) => <Input {...c} {...register('title')} autoComplete="off" />}
       </Field>
       <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-        <Field label="Value" required error={errors.value?.message}>
+        <Field label={t('f.value')} required error={errors.value?.message}>
           {(c) => <Input {...c} {...register('value')} inputMode="decimal" autoComplete="off" />}
         </Field>
-        <Field label="Currency" error={errors.currency?.message}>
+        <Field label={t('f.currency')} error={errors.currency?.message}>
           {(c) => (
             <Select {...c} {...register('currency')}>
               {CURRENCIES.map((cur) => (
-                <option key={cur}>{cur}</option>
+                <option key={cur} value={cur}>
+                  {t(`currency.${cur}`)}
+                </option>
               ))}
             </Select>
           )}
@@ -102,43 +105,43 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         {deal ? (
           <div>
-            <p className="mb-1 text-sm font-medium text-slate-700">Stage</p>
+            <p className="mb-1 text-sm font-medium text-slate-700">{t('f.stage')}</p>
             <div className="py-2">
               <StageBadge stage={deal.stage} />
-              <span className="ml-2 text-xs text-slate-500">change it on the Pipeline board</span>
+              <span className="ml-2 text-xs text-slate-500">{t('dealForm.stageHint')}</span>
             </div>
           </div>
         ) : (
-          <Field label="Stage" error={errors.stage?.message}>
+          <Field label={t('f.stage')} error={errors.stage?.message}>
             {(c) => (
               <Select {...c} {...register('stage')}>
                 {STAGES.map((s) => (
                   <option key={s} value={s}>
-                    {STAGE_LABELS[s]}
+                    {t(`stage.${s}`)}
                   </option>
                 ))}
               </Select>
             )}
           </Field>
         )}
-        <Field label="Expected close" error={errors.expected_close_date?.message}>
+        <Field label={t('f.expectedClose')} error={errors.expected_close_date?.message}>
           {(c) => <Input {...c} {...register('expected_close_date')} type="date" />}
         </Field>
       </div>
       {!lockedContact && (
-        <Field label="Contact" required error={errors.contact_id?.message}>
+        <Field label={t('f.contact')} required error={errors.contact_id?.message}>
           {(c) => <ContactSelect {...c} {...register('contact_id')} />}
         </Field>
       )}
       <Field
-        label="Company"
+        label={t('f.company')}
         error={errors.company_id?.message}
-        hint={deal ? undefined : "Leave empty to use the contact's company"}
+        hint={deal ? undefined : t('dealForm.companyHint')}
       >
         {(c) => <CompanySelect {...c} {...register('company_id')} />}
       </Field>
       {isAdmin && (
-        <Field label="Owner" error={errors.owner_id?.message}>
+        <Field label={t('f.owner')} error={errors.owner_id?.message}>
           {(c) => <OwnerSelect {...c} {...register('owner_id')} current={deal?.owner} />}
         </Field>
       )}
@@ -146,21 +149,21 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
       <div className="-mx-5 mt-5 -mb-4 flex items-center gap-2 border-t border-slate-200 px-5 py-3">
         {deal && (
           <Button variant="ghost" className="text-red-600" onClick={() => setConfirmDelete(true)}>
-            Delete deal
+            {t('dealForm.delete')}
           </Button>
         )}
         <div className="ml-auto flex gap-2">
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" loading={save.isPending}>
-            Save
+            {t('common.save')}
           </Button>
         </div>
       </div>
       <ConfirmDialog
         open={confirmDelete}
-        title="Delete deal?"
+        title={t('dealForm.deleteTitle')}
         message={`“${deal?.title}” will be deleted. Its activities stay on the contact's timeline.`}
         loading={remove.isPending}
         onConfirm={onDelete}
@@ -172,7 +175,11 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
 
 export function DealFormModal({ open, ...props }: Props & { open: boolean }) {
   return (
-    <Modal open={open} title={props.deal ? 'Edit deal' : 'New deal'} onClose={props.onClose}>
+    <Modal
+      open={open}
+      title={t(props.deal ? 'dealForm.edit' : 'dealForm.new')}
+      onClose={props.onClose}
+    >
       <DealForm {...props} />
     </Modal>
   )

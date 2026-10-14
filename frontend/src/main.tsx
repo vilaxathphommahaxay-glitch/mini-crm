@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import App from './App.tsx'
 import { AppProviders } from './AppProviders.tsx'
+import { LocaleBoundary } from './i18n/LocaleBoundary'
 import { createQueryClient } from './queryClient.ts'
 import './index.css'
 
@@ -12,7 +13,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AppProviders client={queryClient}>
-        <App />
+        <LocaleBoundary>
+          <App />
+        </LocaleBoundary>
       </AppProviders>
     </BrowserRouter>
   </StrictMode>,

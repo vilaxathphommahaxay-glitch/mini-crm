@@ -11,6 +11,7 @@ import { TransferModal } from '../forms/TransferForm'
 import { UserFormModal } from '../forms/UserForm'
 import { formatDate } from '../lib/format'
 import { useUrlFilters } from '../lib/hooks'
+import { t } from '../i18n'
 
 const PAGE_SIZE = 20
 
@@ -24,12 +25,12 @@ export function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Users"
-        subtitle="Admins see everything; staff only see records they own."
+        title={t('nav.users')}
+        subtitle={t('users.subtitle')}
         actions={
           <Button onClick={() => setForm({})}>
             <Icon name="plus" className="size-4" />
-            New user
+            {t('userForm.new')}
           </Button>
         }
       />
@@ -43,13 +44,13 @@ export function UsersPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
                 <tr>
-                  <th className="px-4 py-2.5">Name</th>
-                  <th className="px-4 py-2.5">Email</th>
-                  <th className="px-4 py-2.5">Role</th>
-                  <th className="px-4 py-2.5">Status</th>
-                  <th className="hidden px-4 py-2.5 md:table-cell">Created</th>
+                  <th className="px-4 py-2.5">{t('f.name')}</th>
+                  <th className="px-4 py-2.5">{t('f.email')}</th>
+                  <th className="px-4 py-2.5">{t('f.role')}</th>
+                  <th className="px-4 py-2.5">{t('users.status')}</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">{t('users.created')}</th>
                   <th className="px-4 py-2.5">
-                    <span className="sr-only">Actions</span>
+                    <span className="sr-only">{t('users.actions')}</span>
                   </th>
                 </tr>
               </thead>
@@ -59,18 +60,18 @@ export function UsersPage() {
                     <td className="px-4 py-3 font-medium text-slate-900">
                       {user.name}
                       {user.id === me.id && (
-                        <span className="ml-2 text-xs text-slate-400">(you)</span>
+                        <span className="ml-2 text-xs text-slate-400">{t('users.you')}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{user.email}</td>
                     <td className="px-4 py-3">
                       <Badge color={user.role === 'admin' ? 'indigo' : 'slate'}>
-                        {user.role === 'admin' ? 'Admin' : 'Staff'}
+                        {t(user.role === 'admin' ? 'role.admin' : 'role.staff')}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
                       <Badge color={user.is_active ? 'green' : 'red'}>
-                        {user.is_active ? 'Active' : 'Disabled'}
+                        {t(user.is_active ? 'users.active' : 'users.disabled')}
                       </Badge>
                     </td>
                     <td className="hidden px-4 py-3 text-slate-500 md:table-cell">
@@ -79,10 +80,10 @@ export function UsersPage() {
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setTransferFrom(user)}>
-                          Transfer records
+                          {t('transfer.action')}
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setForm({ user })}>
-                          Edit
+                          {t('common.edit')}
                         </Button>
                       </div>
                     </td>

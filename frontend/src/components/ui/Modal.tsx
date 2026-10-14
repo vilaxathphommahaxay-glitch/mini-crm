@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { t } from '../../i18n'
 import { Button } from './Button'
 
 interface ModalProps {
@@ -58,7 +59,7 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }: M
             type="button"
             onClick={onClose}
             className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
             ✕
           </button>
@@ -86,7 +87,7 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Delete',
+  confirmLabel = t('common.delete'),
   loading,
   onConfirm,
   onCancel,
@@ -99,7 +100,7 @@ export function ConfirmDialog({
       footer={
         <>
           <Button variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} loading={loading} data-autofocus>
             {confirmLabel}

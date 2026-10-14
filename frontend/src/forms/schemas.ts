@@ -2,10 +2,11 @@
 // API's shape (nulls for blanks, numbers for ids).
 import { z } from 'zod'
 import type { ActivityType, Currency, Stage } from '../api/types'
+import { msg, type MessageKey } from '../i18n'
 
-const optionalText = (max: number) => z.string().trim().max(max, `At most ${max} characters`)
-const requiredText = (label: string, max: number) =>
-  z.string().trim().min(1, `${label} is required`).max(max, `At most ${max} characters`)
+const optionalText = (max: number) => z.string().trim().max(max, msg('validation.maxChars', max))
+const requiredText = (required: MessageKey, max: number) =>
+  z.string().trim().min(1, msg(required)).max(max, msg('validation.maxChars', max))
 
 const blankToNull = (value: string) => (value.trim() === '' ? null : value.trim())
 const idOrNull = (value: string) => (value ? Number(value) : null)
@@ -13,7 +14,7 @@ const idOrNull = (value: string) => (value ? Number(value) : null)
 const emailField = z
   .string()
   .trim()
-  .refine((v) => v === '' || z.email().safeParse(v).success, 'Enter a valid email address')
+  .refine((v) => v === '' || z.email().safeParse(v).success, msg('validation.email'))
 
 /** "VIP, wholesale,vip" -> ["vip", "wholesale"] (same rules as the backend). */
 export function parseTags(input: string): string[] {
@@ -34,19 +35,21 @@ export const NEW_COMPANY = 'new' // the "+ New company…" choice in the company
 
 export const contactSchema = z
   .object({
-    first_name: requiredText('First name', 100),
+    first_name: requiredText('validation.firstNameRequired', 100),
     last_name: optionalText(100),
     email: emailField,
     phone: optionalText(50),
     company_id: z.string(),
     company_name: optionalText(200),
-    tags: z.string().refine((v) => parseTags(v).every((t) => t.length <= 50), 'Tags are too long'),
+    tags: z
+      .string()
+      .refine((v) => parseTags(v).every((t) => t.length <= 50), msg('validation.tagsTooLong')),
     notes: z.string(),
     owner_id: z.string(),
   })
   .refine((v) => v.company_id !== NEW_COMPANY || v.company_name.trim() !== '', {
     path: ['company_name'],
-    message: 'Type the new company name',
+    message: msg('validation.newCompanyName'),
   })
 export type ContactFormValues = z.infer<typeof contactSchema>
 
@@ -68,7 +71,7 @@ export function toContactBody(v: ContactFormValues) {
 
 // --- company ---
 export const companySchema = z.object({
-  name: requiredText('Name', 200),
+  name: requiredText('validation.nameRequired', 200),
   phone: optionalText(50),
   website: optionalText(255),
   address: z.string(),
@@ -92,16 +95,16 @@ export function toCompanyBody(v: CompanyFormValues) {
 const MONEY = /^\d{1,16}(\.\d{1,2})?$/
 
 export const dealSchema = z.object({
-  title: requiredText('Title', 200),
+  title: requiredText('validation.titleRequired', 200),
   // commas allowed while typing: "1,500,000"
   value: z
     .string()
     .trim()
-    .min(1, 'Value is required')
-    .refine((v) => MONEY.test(v.replaceAll(',', '')), 'Enter an amount like 1500000 or 99.50'),
+    .min(1, msg('validation.valueRequired'))
+    .refine((v) => MONEY.test(v.replaceAll(',', '')), msg('validation.valueFormat')),
   currency: z.enum(['LAK', 'THB', 'USD']),
   stage: z.enum(['lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost']),
-  contact_id: z.string().min(1, 'Choose a contact'),
+  contact_id: z.string().min(1, msg('validation.chooseContact')),
   company_id: z.string(),
   expected_close_date: z.string(),
   owner_id: z.string(),
@@ -126,7 +129,7 @@ export function toDealBody(v: DealFormValues, isNew: boolean) {
 export const activitySchema = z
   .object({
     type: z.enum(['call', 'meeting', 'note', 'task']),
-    subject: requiredText('Subject', 200),
+    subject: requiredText('validation.subjectRequired', 200),
     description: z.string(),
     due_date: z.string(),
     done: z.boolean(),
@@ -140,11 +143,11 @@ export const activitySchema = z
   })
   .refine((v) => !v.follow_up || v.follow_up_subject.trim() !== '', {
     path: ['follow_up_subject'],
-    message: 'What needs to happen next?',
+    message: msg('validation.nextStep'),
   })
   .refine((v) => !v.follow_up || v.follow_up_date !== '', {
     path: ['follow_up_date'],
-    message: 'Pick a date',
+    message: msg('validation.pickDate'),
   })
 export type ActivityFormValues = z.infer<typeof activitySchema>
 

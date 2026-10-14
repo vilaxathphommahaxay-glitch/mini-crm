@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { errorMessage } from '../../api/client'
+import { t } from '../../i18n'
 import { Button } from './Button'
 
 export function Spinner({ className = 'size-5' }: { className?: string }) {
@@ -11,7 +12,7 @@ export function Spinner({ className = 'size-5' }: { className?: string }) {
   )
 }
 
-export function LoadingState({ label = 'Loading…', fullScreen = false }) {
+export function LoadingState({ label = t('common.loading'), fullScreen = false }) {
   return (
     <div
       role="status"
@@ -38,7 +39,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
       <p className="text-sm text-red-600">{errorMessage(error)}</p>
       {onRetry && (
         <Button variant="secondary" size="sm" onClick={onRetry}>
-          Try again
+          {t('common.tryAgain')}
         </Button>
       )}
     </div>

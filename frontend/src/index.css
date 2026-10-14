@@ -1,1 +1,30 @@
 @import 'tailwindcss';
+
+/* Lao script, served from our own origin (the Content-Security-Policy allows only 'self').
+   The browser downloads a weight only when Lao text is on the page. */
+@import '@fontsource/noto-sans-lao/lao-400.css';
+@import '@fontsource/noto-sans-lao/lao-500.css';
+@import '@fontsource/noto-sans-lao/lao-600.css';
+
+@theme {
+  /* Latin text keeps the system font; Lao glyphs fall back to Noto Sans Lao per character. */
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Sans Lao';
+}
+
+/* Lao needs a little more room than Latin: it stacks vowel and tone marks above and below the
+   line, and looks cramped at the small sizes the interface uses for hints and table headers. */
+:root:lang(lo) {
+  font-size: 17px;
+}
+:lang(lo) body {
+  line-height: 1.65;
+}
+/* Letter-spacing and upper-casing are Latin habits; both break up Lao text. */
+:lang(lo) .tracking-wide,
+:lang(lo) .tracking-wider {
+  letter-spacing: normal;
+}
+:lang(lo) .uppercase {
+  text-transform: none;
+}

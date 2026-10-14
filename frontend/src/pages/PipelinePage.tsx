@@ -17,7 +17,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { errorMessage } from '../api/client'
 import { moveDeal, useBoard } from '../api/hooks'
-import { STAGE_LABELS, STAGES, type Deal, type Stage } from '../api/types'
+import { STAGES, type Deal, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
@@ -43,6 +43,7 @@ import {
   toColumns,
   type Columns,
 } from '../lib/kanban'
+import { t } from '../i18n'
 
 const ACCENT: Record<Stage, string> = {
   lead: 'border-t-slate-400',
@@ -73,7 +74,9 @@ function DealCard({ deal, overlay = false }: { deal: Deal; overlay?: boolean }) 
           <span className="text-xs text-slate-500">{formatDate(deal.expected_close_date)}</span>
         )}
         {deal.closed_at && (
-          <span className="text-xs text-slate-500">closed {formatDate(deal.closed_at)}</span>
+          <span className="text-xs text-slate-500">
+            {t('pipeline.closedOn', { date: formatDate(deal.closed_at) })}
+          </span>
         )}
       </div>
     </div>
@@ -110,7 +113,7 @@ function SortableCard({ deal, focus, onOpen, onKeyMove }: CardProps) {
         {...attributes}
         {...listeners}
         aria-label={`${deal.title}, ${formatMoney(deal.value, deal.currency)}`}
-        aria-description="Arrow keys move the deal between stages, Enter opens it"
+        aria-description={t('pipeline.cardHint')}
         onClick={() => onOpen(deal)}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -148,14 +151,14 @@ function BoardColumnView({
   return (
     <section
       ref={setNodeRef}
-      aria-label={`${STAGE_LABELS[stage]} column`}
+      aria-label={t('pipeline.column', { stage: t(`stage.${stage}`) })}
       className={`flex w-72 shrink-0 flex-col rounded-lg border-t-4 transition-colors ${ACCENT[stage]} ${
         isOver ? 'bg-indigo-50' : 'bg-slate-100'
       }`}
     >
       <header className="px-3 pt-3 pb-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900">{STAGE_LABELS[stage]}</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t(`stage.${stage}`)}</h2>
           <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-600">
             {deals.length}
           </span>
@@ -178,7 +181,7 @@ function BoardColumnView({
           ))}
           {deals.length === 0 && (
             <li className="rounded-md border border-dashed border-slate-300 px-3 py-6 text-center text-xs text-slate-400">
-              Drop deals here
+              {t('pipeline.drop')}
             </li>
           )}
         </ul>
@@ -189,7 +192,7 @@ function BoardColumnView({
           onClick={() => onAdd(stage)}
           className="mx-2 mb-2 flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-700"
         >
-          <Icon name="plus" className="size-3.5" /> Add deal
+          <Icon name="plus" className="size-3.5" /> {t('dealForm.new')}
         </button>
       )}
     </section>
@@ -225,10 +228,10 @@ export function PipelinePage() {
         queryClient.invalidateQueries({ queryKey: ['dashboard'] }),
       ])
       if (slot.stage !== locate(before, dealId)?.stage) {
-        toast.success(`Moved to ${STAGE_LABELS[slot.stage]}`)
+        toast.success(t('dealPage.movedTo', { stage: t(`stage.${slot.stage}`) }))
       }
     } catch (error) {
-      toast.error(`Could not move the deal: ${errorMessage(error)}`)
+      toast.error(t('pipeline.moveFailed', { reason: errorMessage(error) }))
     } finally {
       setLocalColumns(null)
     }
@@ -304,17 +307,15 @@ export function PipelinePage() {
   return (
     <>
       <PageHeader
-        title="Pipeline"
-        subtitle={
-          board.data ? `${openCount} open deal(s) · won and lost show the last 90 days` : undefined
-        }
+        title={t('nav.pipeline')}
+        subtitle={board.data ? t('pipeline.subtitle', { count: openCount }) : undefined}
         actions={
           <>
             {isAdmin && (
               <div className="w-48">
                 <OwnerSelect
-                  aria-label="Filter by owner"
-                  emptyLabel="All owners"
+                  aria-label={t('common.filterOwner')}
+                  emptyLabel={t('select.allOwners')}
                   value={values.owner_id}
                   onChange={(e) => set({ owner_id: e.target.value })}
                 />
@@ -322,7 +323,7 @@ export function PipelinePage() {
             )}
             <Button onClick={() => setDealForm({ stage: 'lead' })}>
               <Icon name="plus" className="size-4" />
-              New deal
+              {t('dealForm.new')}
             </Button>
           </>
         }
@@ -361,9 +362,9 @@ export function PipelinePage() {
       )}
 
       <p className="mt-2 text-xs text-slate-500">
-        Tip: drag cards between columns, or focus a card (Tab) and use the arrow keys.{' '}
+        {t('pipeline.tip')}{' '}
         <Link to="/contacts" className="text-indigo-600 hover:underline">
-          Deals are created from contacts too.
+          {t('pipeline.tipLink')}
         </Link>
       </p>
 

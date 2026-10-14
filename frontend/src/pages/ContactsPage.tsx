@@ -14,6 +14,7 @@ import { OwnerSelect } from '../forms/selects'
 import { formatDate } from '../lib/format'
 import { toId, useDebouncedInput, useUrlFilters } from '../lib/hooks'
 import { ContactsImportExport } from './contacts/ImportExport'
+import { t } from '../i18n'
 
 const PAGE_SIZE = 20
 
@@ -40,8 +41,8 @@ export function ContactsPage() {
   return (
     <>
       <PageHeader
-        title="Contacts"
-        subtitle={query.data ? `${query.data.total} contact(s)` : undefined}
+        title={t('nav.contacts')}
+        subtitle={query.data ? t('contacts.count', { count: query.data.total }) : undefined}
         actions={
           <>
             <ContactsImportExport
@@ -49,7 +50,7 @@ export function ContactsPage() {
             />
             <Button onClick={() => setCreating(true)}>
               <Icon name="plus" className="size-4" />
-              New contact
+              {t('contactForm.new')}
             </Button>
           </>
         }
@@ -63,8 +64,8 @@ export function ContactsPage() {
               className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400"
             />
             <Input
-              aria-label="Search contacts"
-              placeholder="Search name, email, phone or company…"
+              aria-label={t('contacts.searchLabel')}
+              placeholder={t('contacts.searchPlaceholder')}
               className="pl-9"
               value={searchInput}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -72,11 +73,11 @@ export function ContactsPage() {
           </div>
           <div className="w-full sm:w-44">
             <Select
-              aria-label="Filter by tag"
+              aria-label={t('contacts.filterTag')}
               value={values.tag}
               onChange={(e) => set({ tag: e.target.value })}
             >
-              <option value="">All tags</option>
+              <option value="">{t('contacts.allTags')}</option>
               {tags.data?.map((tag) => (
                 <option key={tag} value={tag}>
                   {tag}
@@ -87,8 +88,8 @@ export function ContactsPage() {
           {isAdmin && (
             <div className="w-full sm:w-48">
               <OwnerSelect
-                aria-label="Filter by owner"
-                emptyLabel="All owners"
+                aria-label={t('common.filterOwner')}
+                emptyLabel={t('select.allOwners')}
                 value={values.owner_id}
                 onChange={(e) => set({ owner_id: e.target.value })}
               />
@@ -101,21 +102,21 @@ export function ContactsPage() {
         ) : query.isError ? (
           <ErrorState error={query.error} onRetry={() => query.refetch()} />
         ) : query.data.items.length === 0 ? (
-          <EmptyState title={filtered ? 'No contacts match these filters' : 'No contacts yet'}>
-            {!filtered && 'Add your first contact or import a CSV file.'}
+          <EmptyState title={t(filtered ? 'contacts.noMatch' : 'contacts.none')}>
+            {!filtered && t('contacts.noneHint')}
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
                 <tr>
-                  <th className="px-4 py-2.5">Name</th>
-                  <th className="px-4 py-2.5">Company</th>
-                  <th className="hidden px-4 py-2.5 md:table-cell">Email</th>
-                  <th className="hidden px-4 py-2.5 md:table-cell">Phone</th>
-                  <th className="px-4 py-2.5">Tags</th>
-                  {isAdmin && <th className="hidden px-4 py-2.5 lg:table-cell">Owner</th>}
-                  <th className="hidden px-4 py-2.5 xl:table-cell">Updated</th>
+                  <th className="px-4 py-2.5">{t('f.name')}</th>
+                  <th className="px-4 py-2.5">{t('f.company')}</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">{t('f.email')}</th>
+                  <th className="hidden px-4 py-2.5 md:table-cell">{t('f.phone')}</th>
+                  <th className="px-4 py-2.5">{t('f.tags')}</th>
+                  {isAdmin && <th className="hidden px-4 py-2.5 lg:table-cell">{t('f.owner')}</th>}
+                  <th className="hidden px-4 py-2.5 xl:table-cell">{t('common.updated')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

@@ -11,6 +11,7 @@ import { FormFooter } from './FormFooter'
 import { companySchema, toCompanyBody, type CompanyFormValues } from './schemas'
 import { OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
+import { t } from '../i18n'
 
 const FIELDS = Object.keys(companySchema.shape)
 
@@ -46,7 +47,7 @@ function CompanyForm({ company, onClose, onSaved }: Props) {
     setFormError(null)
     try {
       const saved = await save.mutateAsync({ id: company?.id, body: toCompanyBody(values) })
-      toast.success(company ? 'Company updated' : 'Company created')
+      toast.success(t(company ? 'companyForm.updated' : 'companyForm.created'))
       onSaved?.(saved)
       onClose()
     } catch (error) {
@@ -57,26 +58,26 @@ function CompanyForm({ company, onClose, onSaved }: Props) {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
-      <Field label="Name" required error={errors.name?.message}>
+      <Field label={t('f.name')} required error={errors.name?.message}>
         {(c) => <Input {...c} {...register('name')} autoComplete="off" />}
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Phone" error={errors.phone?.message}>
+        <Field label={t('f.phone')} error={errors.phone?.message}>
           {(c) => <Input {...c} {...register('phone')} type="tel" autoComplete="off" />}
         </Field>
-        <Field label="Website" error={errors.website?.message}>
+        <Field label={t('f.website')} error={errors.website?.message}>
           {(c) => <Input {...c} {...register('website')} placeholder="https://" />}
         </Field>
       </div>
-      <Field label="Address" error={errors.address?.message}>
+      <Field label={t('f.address')} error={errors.address?.message}>
         {(c) => <Textarea {...c} {...register('address')} rows={2} />}
       </Field>
       {isAdmin && (
-        <Field label="Owner" error={errors.owner_id?.message}>
+        <Field label={t('f.owner')} error={errors.owner_id?.message}>
           {(c) => <OwnerSelect {...c} {...register('owner_id')} current={company?.owner} />}
         </Field>
       )}
-      <Field label="Notes" error={errors.notes?.message}>
+      <Field label={t('f.notes')} error={errors.notes?.message}>
         {(c) => <Textarea {...c} {...register('notes')} />}
       </Field>
       <FormFooter onCancel={onClose} saving={save.isPending} />
@@ -88,7 +89,7 @@ export function CompanyFormModal({ open, ...props }: Props & { open: boolean }) 
   return (
     <Modal
       open={open}
-      title={props.company ? 'Edit company' : 'New company'}
+      title={t(props.company ? 'companyForm.edit' : 'companyForm.new')}
       onClose={props.onClose}
     >
       <CompanyForm {...props} />

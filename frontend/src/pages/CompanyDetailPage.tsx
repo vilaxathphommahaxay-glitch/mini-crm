@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
 import { CompanyFormModal } from '../forms/CompanyForm'
 import { ContactFormModal } from '../forms/ContactForm'
 import { NotFoundPage } from './NotFoundPage'
+import { t } from '../i18n'
 
 function safeHref(url: string) {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`
@@ -41,7 +42,7 @@ export function CompanyDetailPage() {
   async function confirmDelete() {
     try {
       await remove.mutateAsync(c.id)
-      toast.success('Company deleted')
+      toast.success(t('companyDetail.deleted'))
       navigate('/companies', { replace: true })
     } catch (error) {
       setDeleting(false)
@@ -55,28 +56,28 @@ export function CompanyDetailPage() {
         title={c.name}
         subtitle={
           <Link to="/companies" className="hover:text-indigo-600">
-            Companies
+            {t('nav.companies')}
           </Link>
         }
         actions={
           <>
             <Button variant="secondary" onClick={() => setEditing(true)}>
-              Edit
+              {t('common.edit')}
             </Button>
             <Button variant="secondary" onClick={() => setDeleting(true)}>
-              Delete
+              {t('common.delete')}
             </Button>
           </>
         }
       />
       <div className="grid gap-6 xl:grid-cols-[22rem_1fr]">
         <Card className="self-start">
-          <CardHeader title="Details" />
+          <CardHeader title={t('common.details')} />
           <DetailList
             items={[
-              { label: 'Phone', value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
+              { label: t('f.phone'), value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
               {
-                label: 'Website',
+                label: t('f.website'),
                 value: c.website && (
                   <a
                     href={safeHref(c.website)}
@@ -89,12 +90,12 @@ export function CompanyDetailPage() {
                 ),
               },
               {
-                label: 'Address',
+                label: t('f.address'),
                 value: c.address && <span className="whitespace-pre-line">{c.address}</span>,
               },
-              ...(isAdmin ? [{ label: 'Owner', value: c.owner.name }] : []),
+              ...(isAdmin ? [{ label: t('f.owner'), value: c.owner.name }] : []),
               {
-                label: 'Notes',
+                label: t('f.notes'),
                 value: c.notes && <span className="whitespace-pre-line">{c.notes}</span>,
               },
             ]}
@@ -104,11 +105,11 @@ export function CompanyDetailPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader
-              title="Contacts"
+              title={t('nav.contacts')}
               actions={
                 <Button size="sm" variant="secondary" onClick={() => setAddingContact(true)}>
                   <Icon name="plus" className="size-3.5" />
-                  Add contact
+                  {t('companyDetail.addContact')}
                 </Button>
               }
             />
@@ -117,7 +118,7 @@ export function CompanyDetailPage() {
             ) : contacts.isError ? (
               <ErrorState error={contacts.error} onRetry={() => contacts.refetch()} />
             ) : contacts.data.items.length === 0 ? (
-              <EmptyState title="No contacts at this company" />
+              <EmptyState title={t('companyDetail.noContacts')} />
             ) : (
               <ul className="divide-y divide-slate-100">
                 {contacts.data.items.map((contact) => (
@@ -138,13 +139,13 @@ export function CompanyDetailPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Deals" />
+            <CardHeader title={t('deals.title')} />
             {deals.isPending ? (
               <LoadingState />
             ) : deals.isError ? (
               <ErrorState error={deals.error} onRetry={() => deals.refetch()} />
             ) : deals.data.items.length === 0 ? (
-              <EmptyState title="No deals with this company" />
+              <EmptyState title={t('companyDetail.noDeals')} />
             ) : (
               <DealsTable
                 deals={deals.data.items}
@@ -164,8 +165,8 @@ export function CompanyDetailPage() {
       />
       <ConfirmDialog
         open={deleting}
-        title="Delete company?"
-        message={`${c.name} will be deleted. Companies that still have contacts or deals can't be deleted.`}
+        title={t('companyDetail.deleteTitle')}
+        message={t('companyDetail.deleteMessage', { name: c.name })}
         loading={remove.isPending}
         onConfirm={confirmDelete}
         onCancel={() => setDeleting(false)}

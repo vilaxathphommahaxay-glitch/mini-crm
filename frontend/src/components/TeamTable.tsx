@@ -1,5 +1,6 @@
 import { useTeam } from '../api/hooks'
 import type { CurrencyTotal } from '../api/types'
+import { t } from '../i18n'
 import { formatMoney } from '../lib/format'
 import { Card, CardHeader } from './ui/layout'
 import { ErrorState, LoadingState } from './ui/states'
@@ -8,9 +9,9 @@ function Amounts({ totals }: { totals: CurrencyTotal[] }) {
   if (!totals.length) return <span className="text-slate-400">—</span>
   return (
     <>
-      {totals.map((t) => (
-        <div key={t.currency} className="whitespace-nowrap">
-          {formatMoney(t.amount, t.currency)}
+      {totals.map((total) => (
+        <div key={total.currency} className="whitespace-nowrap">
+          {formatMoney(total.amount, total.currency)}
         </div>
       ))}
     </>
@@ -22,7 +23,7 @@ export function TeamTable({ onSelect }: { onSelect: (userId: number) => void }) 
   const team = useTeam(true)
   return (
     <Card>
-      <CardHeader title="Team" />
+      <CardHeader title={t('team.title')} />
       {team.isPending ? (
         <LoadingState />
       ) : team.isError ? (
@@ -32,11 +33,11 @@ export function TeamTable({ onSelect }: { onSelect: (userId: number) => void }) 
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs font-medium tracking-wide text-slate-500 uppercase">
               <tr>
-                <th className="px-4 py-2.5">Person</th>
-                <th className="px-4 py-2.5 text-right">Open deals</th>
-                <th className="px-4 py-2.5 text-right">Open value</th>
-                <th className="px-4 py-2.5 text-right">Won this month</th>
-                <th className="px-4 py-2.5 text-right">Overdue tasks</th>
+                <th className="px-4 py-2.5">{t('team.person')}</th>
+                <th className="px-4 py-2.5 text-right">{t('team.openDeals')}</th>
+                <th className="px-4 py-2.5 text-right">{t('team.openValue')}</th>
+                <th className="px-4 py-2.5 text-right">{t('team.wonThisMonth')}</th>
+                <th className="px-4 py-2.5 text-right">{t('team.overdueTasks')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -50,7 +51,9 @@ export function TeamTable({ onSelect }: { onSelect: (userId: number) => void }) 
                     >
                       {row.user.name}
                     </button>
-                    {!row.is_active && <span className="ml-2 text-xs text-red-600">disabled</span>}
+                    {!row.is_active && (
+                      <span className="ml-2 text-xs text-red-600">{t('team.disabled')}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">{row.open_deals}</td>
                   <td className="px-4 py-3 text-right tabular-nums">

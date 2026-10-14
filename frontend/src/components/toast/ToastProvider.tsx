@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
+import { t } from '../../i18n'
 import { ToastContext, type ToastApi, type ToastKind } from './context'
 
 interface Toast {
@@ -51,7 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <span className="flex-1">{toast.message}</span>
             <button
               type="button"
-              aria-label="Dismiss"
+              aria-label={t('common.dismiss')}
               className="opacity-60 hover:opacity-100"
               onClick={() => dismiss(toast.id)}
             >

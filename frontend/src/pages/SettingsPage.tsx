@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { api, errorMessage, fieldErrors } from '../api/client'
 import { useCurrentUser } from '../auth/context'
+import { LanguageSwitch } from '../components/LanguageSwitch'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
 import { Field, FormError, Input } from '../components/ui/form'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
+import { msg, t } from '../i18n'
 
 const MIN_PASSWORD = 8
 
@@ -21,8 +23,8 @@ export function SettingsPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
     const problems: Record<string, string> = {}
-    if (next.length < MIN_PASSWORD) problems.new_password = `At least ${MIN_PASSWORD} characters`
-    if (next !== confirm) problems.confirm = 'Passwords do not match'
+    if (next.length < MIN_PASSWORD) problems.new_password = msg('validation.minChars', MIN_PASSWORD)
+    if (next !== confirm) problems.confirm = msg('validation.mismatch')
     setErrors(problems)
     setFormError(null)
     if (Object.keys(problems).length) return
@@ -36,7 +38,7 @@ export function SettingsPage() {
       setCurrent('')
       setNext('')
       setConfirm('')
-      toast.success('Password changed')
+      toast.success(t('settings.changed'))
     } catch (err) {
       const fields = fieldErrors(err)
       setErrors(fields)
@@ -48,12 +50,12 @@ export function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle={`${user.name} · ${user.email}`} />
+      <PageHeader title={t('nav.settings')} subtitle={`${user.name} · ${user.email}`} />
       <Card className="max-w-md">
-        <CardHeader title="Change password" />
+        <CardHeader title={t('settings.changePassword')} />
         <form onSubmit={onSubmit} className="space-y-4 p-4" noValidate>
           <FormError message={formError} />
-          <Field label="Current password" error={errors.current_password}>
+          <Field label={t('settings.current')} error={errors.current_password}>
             {(control) => (
               <Input
                 {...control}
@@ -64,7 +66,11 @@ export function SettingsPage() {
               />
             )}
           </Field>
-          <Field label="New password" error={errors.new_password} hint="At least 8 characters">
+          <Field
+            label={t('settings.new')}
+            error={errors.new_password}
+            hint={t('settings.newHint', { n: MIN_PASSWORD })}
+          >
             {(control) => (
               <Input
                 {...control}
@@ -75,7 +81,7 @@ export function SettingsPage() {
               />
             )}
           </Field>
-          <Field label="Confirm new password" error={errors.confirm}>
+          <Field label={t('settings.confirm')} error={errors.confirm}>
             {(control) => (
               <Input
                 {...control}
@@ -87,9 +93,15 @@ export function SettingsPage() {
             )}
           </Field>
           <Button type="submit" loading={saving} disabled={!current || !next}>
-            Change password
+            {t('settings.changePassword')}
           </Button>
         </form>
+      </Card>
+      <Card className="mt-6 max-w-md">
+        <CardHeader title={t('lang.label')} />
+        <div className="p-4">
+          <LanguageSwitch tone="light" />
+        </div>
       </Card>
     </>
   )

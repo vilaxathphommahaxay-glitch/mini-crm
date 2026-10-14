@@ -1,4 +1,5 @@
-import { ACTIVITY_LABELS, STAGE_LABELS, type ActivityType, type Stage } from '../api/types'
+import type { ActivityType, Stage } from '../api/types'
+import { t } from '../i18n'
 import { Badge } from './ui/layout'
 
 const STAGE_COLORS = {
@@ -11,13 +12,13 @@ const STAGE_COLORS = {
 } as const
 
 export function StageBadge({ stage }: { stage: Stage }) {
-  return <Badge color={STAGE_COLORS[stage]}>{STAGE_LABELS[stage]}</Badge>
+  return <Badge color={STAGE_COLORS[stage]}>{t(`stage.${stage}`)}</Badge>
 }
 
 const ACTIVITY_COLORS = { call: 'sky', meeting: 'indigo', note: 'slate', task: 'amber' } as const
 
 export function ActivityBadge({ type }: { type: ActivityType }) {
-  return <Badge color={ACTIVITY_COLORS[type]}>{ACTIVITY_LABELS[type]}</Badge>
+  return <Badge color={ACTIVITY_COLORS[type]}>{t(`activity.${type}`)}</Badge>
 }
 
 export function TagList({ tags }: { tags: string[] }) {

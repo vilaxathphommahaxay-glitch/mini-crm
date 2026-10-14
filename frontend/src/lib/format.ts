@@ -1,4 +1,5 @@
 import type { Currency, CurrencyTotal } from '../api/types'
+import { t } from '../i18n'
 
 const DECIMALS: Record<Currency, number> = { LAK: 0, THB: 2, USD: 2 }
 
@@ -9,7 +10,7 @@ export function formatMoney(amount: string, currency: Currency): string {
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   const digits = DECIMALS[currency]
   const decimals = digits ? `.${fraction.padEnd(digits, '0').slice(0, digits)}` : ''
-  return `${negative ? '-' : ''}${grouped}${decimals} ${currency}`
+  return `${negative ? '-' : ''}${grouped}${decimals} ${t(`currency.${currency}`)}`
 }
 
 export function formatTotals(totals: CurrencyTotal[]): string {

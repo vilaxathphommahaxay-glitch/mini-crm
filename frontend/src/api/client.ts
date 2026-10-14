@@ -1,3 +1,6 @@
+import { t } from '../i18n'
+import { apiErrorText, fieldErrorText, type ApiDetail } from './errorText'
+
 const TOKEN_KEY = 'crm.token'
 
 // localStorage can throw (private mode, blocked storage) — treat that as "no token".
@@ -25,18 +28,13 @@ export const tokenStore = {
   },
 }
 
-export interface FieldError {
-  field: string
-  message: string
-}
-
 /** The backend's error shape: {"error": {"code", "message", "details"}}. */
 export class ApiError extends Error {
   status: number
   code: string
-  details: FieldError[]
+  details: ApiDetail[]
 
-  constructor(status: number, code: string, message: string, details: FieldError[] = []) {
+  constructor(status: number, code: string, message: string, details: ApiDetail[] = []) {
     super(message)
     this.name = 'ApiError'
     this.status = status
@@ -114,15 +112,14 @@ async function toApiError(response: Response): Promise<ApiError> {
   }
 }
 
-/** Map field-level validation errors to {field: message} for forms. */
+/** Field-level problems as {field: text in the user's language} for forms. */
 export function fieldErrors(error: unknown): Record<string, string> {
   if (!(error instanceof ApiError)) return {}
   return Object.fromEntries(
-    error.details.filter((d) => d.field && d.message).map((d) => [d.field, d.message]),
+    error.details.filter((d) => d.field).map((d) => [d.field, fieldErrorText(d)]),
   )
 }
 
 export function errorMessage(error: unknown): string {
-  if (error instanceof ApiError) return error.message
-  return 'Something went wrong. Please try again.'
+  return error instanceof ApiError ? apiErrorText(error) : t('error.generic')
 }

@@ -4,6 +4,7 @@ import { errorMessage } from '../api/client'
 import { useDeleteActivity, useSaveActivity } from '../api/hooks'
 import type { Activity } from '../api/types'
 import { ActivityFormModal } from '../forms/ActivityForm'
+import { t } from '../i18n'
 import { formatDate, formatDateTime, todayISO } from '../lib/format'
 import { ActivityBadge } from './badges'
 import { useToast } from './toast/context'
@@ -24,9 +25,9 @@ function DueLabel({ activity }: { activity: Activity }) {
         : 'text-slate-600'
   return (
     <span className={`text-xs ${color}`}>
-      Due {formatDate(activity.due_date)}
-      {late && ' · overdue'}
-      {isToday && !activity.done && ' · today'}
+      {t('act.due', { date: formatDate(activity.due_date) })}
+      {late && ` · ${t('act.overdue')}`}
+      {isToday && !activity.done && ` · ${t('act.today')}`}
     </span>
   )
 }
@@ -55,7 +56,7 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
     try {
       // resolves after the list has been refetched (see useSave)
       await save.mutateAsync({ id: activity.id, body: { done } })
-      toast.success(done ? 'Marked as done' : 'Marked as not done')
+      toast.success(t(done ? 'act.markedDone' : 'act.markedNotDone'))
     } catch (error) {
       toast.error(errorMessage(error))
     } finally {
@@ -71,7 +72,7 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
     if (!deleting) return
     try {
       await remove.mutateAsync(deleting.id)
-      toast.success('Activity deleted')
+      toast.success(t('act.deleted'))
       setDeleting(null)
     } catch (error) {
       toast.error(errorMessage(error))
@@ -89,7 +90,7 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
               {activity.due_date || activity.done ? (
                 <input
                   type="checkbox"
-                  aria-label={`Done: ${activity.subject}`}
+                  aria-label={t('act.doneAria', { subject: activity.subject })}
                   checked={done}
                   onChange={() => toggleDone(activity)}
                   className="mt-1 size-4 shrink-0 rounded border-slate-300"
@@ -120,7 +121,7 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
                   )}
                   {showDeal && activity.deal && (
                     <Link className="hover:text-indigo-600" to={`/deals/${activity.deal.id}`}>
-                      Deal: {activity.deal.title}
+                      {t('act.dealLink', { title: activity.deal.title })}
                     </Link>
                   )}
                   <span>
@@ -130,10 +131,10 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
               </div>
               <div className="flex shrink-0 items-start gap-1">
                 <Button variant="ghost" size="sm" onClick={() => setEditing(activity)}>
-                  Edit
+                  {t('common.edit')}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setDeleting(activity)}>
-                  Delete
+                  {t('common.delete')}
                 </Button>
               </div>
             </li>
@@ -147,8 +148,8 @@ export function ActivityList({ activities, showLinks = true, showDeal = true }: 
       />
       <ConfirmDialog
         open={deleting !== null}
-        title="Delete activity?"
-        message={`“${deleting?.subject}” will be removed permanently.`}
+        title={t('act.deleteTitle')}
+        message={t('act.deleteMessage', { subject: deleting?.subject ?? '' })}
         loading={remove.isPending}
         onConfirm={confirmDelete}
         onCancel={() => setDeleting(null)}

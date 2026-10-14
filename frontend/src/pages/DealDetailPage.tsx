@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError, errorMessage } from '../api/client'
 import { moveDeal, useActivities, useDeal } from '../api/hooks'
-import { STAGE_LABELS, STAGES, type Stage } from '../api/types'
+import { STAGES, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { DetailList } from '../components/DetailList'
@@ -17,6 +17,7 @@ import { ActivityFormModal } from '../forms/ActivityForm'
 import { DealFormModal } from '../forms/DealForm'
 import { formatDate, formatDateTime, formatMoney } from '../lib/format'
 import { NotFoundPage } from './NotFoundPage'
+import { t } from '../i18n'
 
 export function DealDetailPage() {
   const id = Number(useParams().id)
@@ -44,7 +45,7 @@ export function DealDetailPage() {
       await Promise.all(
         ['deals', 'dashboard'].map((key) => queryClient.invalidateQueries({ queryKey: [key] })),
       )
-      toast.success(`Moved to ${STAGE_LABELS[stage]}`)
+      toast.success(t('dealPage.movedTo', { stage: t(`stage.${stage}`) }))
     } catch (error) {
       toast.error(errorMessage(error))
     } finally {
@@ -59,7 +60,7 @@ export function DealDetailPage() {
         subtitle={
           <>
             <Link to="/pipeline" className="hover:text-indigo-600">
-              Pipeline
+              {t('nav.pipeline')}
             </Link>
             {' · '}
             <Link to={`/contacts/${d.contact.id}`} className="hover:text-indigo-600">
@@ -78,10 +79,10 @@ export function DealDetailPage() {
         actions={
           <>
             <ButtonLink to="/pipeline" variant="secondary">
-              Open board
+              {t('dealPage.openBoard')}
             </ButtonLink>
             <Button variant="secondary" onClick={() => setEditing(true)}>
-              Edit
+              {t('common.edit')}
             </Button>
           </>
         }
@@ -91,12 +92,12 @@ export function DealDetailPage() {
         <div className="space-y-6 self-start">
           <Card>
             <div className="space-y-3 p-4">
-              <p className="text-sm text-slate-500">Value</p>
+              <p className="text-sm text-slate-500">{t('f.value')}</p>
               <p className="text-2xl font-semibold text-slate-900 tabular-nums">
                 {formatMoney(d.value, d.currency)}
               </p>
               <label className="block">
-                <span className="mb-1 block text-sm text-slate-500">Stage</span>
+                <span className="mb-1 block text-sm text-slate-500">{t('f.stage')}</span>
                 <Select
                   value={d.stage}
                   disabled={moving}
@@ -104,7 +105,7 @@ export function DealDetailPage() {
                 >
                   {STAGES.map((s) => (
                     <option key={s} value={s}>
-                      {STAGE_LABELS[s]}
+                      {t(`stage.${s}`)}
                     </option>
                   ))}
                 </Select>
@@ -112,11 +113,11 @@ export function DealDetailPage() {
             </div>
           </Card>
           <Card>
-            <CardHeader title="Details" />
+            <CardHeader title={t('common.details')} />
             <DetailList
               items={[
                 {
-                  label: 'Contact',
+                  label: t('f.contact'),
                   value: (
                     <Link to={`/contacts/${d.contact.id}`} className="hover:text-indigo-600">
                       {d.contact.name}
@@ -124,17 +125,19 @@ export function DealDetailPage() {
                   ),
                 },
                 {
-                  label: 'Company',
+                  label: t('f.company'),
                   value: d.company && (
                     <Link to={`/companies/${d.company.id}`} className="hover:text-indigo-600">
                       {d.company.name}
                     </Link>
                   ),
                 },
-                { label: 'Expected close', value: formatDate(d.expected_close_date) },
-                ...(d.closed_at ? [{ label: 'Closed', value: formatDateTime(d.closed_at) }] : []),
-                ...(isAdmin ? [{ label: 'Owner', value: d.owner.name }] : []),
-                { label: 'Created', value: formatDate(d.created_at) },
+                { label: t('f.expectedClose'), value: formatDate(d.expected_close_date) },
+                ...(d.closed_at
+                  ? [{ label: t('dealPage.closed'), value: formatDateTime(d.closed_at) }]
+                  : []),
+                ...(isAdmin ? [{ label: t('f.owner'), value: d.owner.name }] : []),
+                { label: t('dealPage.created'), value: formatDate(d.created_at) },
               ]}
             />
           </Card>
@@ -142,11 +145,11 @@ export function DealDetailPage() {
 
         <Card className="min-w-0">
           <CardHeader
-            title="Activity"
+            title={t('act.title')}
             actions={
               <Button size="sm" onClick={() => setLogging(true)}>
                 <Icon name="plus" className="size-3.5" />
-                Log activity
+                {t('act.log')}
               </Button>
             }
           />
@@ -155,9 +158,7 @@ export function DealDetailPage() {
           ) : timeline.isError ? (
             <ErrorState error={timeline.error} onRetry={() => timeline.refetch()} />
           ) : timeline.data.items.length === 0 ? (
-            <EmptyState title="No activity on this deal yet">
-              Log calls, meetings and next steps here.
-            </EmptyState>
+            <EmptyState title={t('dealPage.noActivity')}>{t('dealPage.noActivityHint')}</EmptyState>
           ) : (
             <ActivityList activities={timeline.data.items} showDeal={false} />
           )}

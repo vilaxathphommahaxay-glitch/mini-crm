@@ -7,6 +7,7 @@ import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
 import { Field, FormError, Select } from '../components/ui/form'
 import { Modal } from '../components/ui/Modal'
+import { t } from '../i18n'
 
 interface Moved {
   companies: number
@@ -34,10 +35,7 @@ function TransferForm({ from, onClose }: { from: User; onClose: () => void }) {
         body: { to_user_id: Number(to) },
       })
       const name = candidates.find((u) => String(u.id) === to)?.name
-      toast.success(
-        `Moved to ${name}: ${moved.contacts} contacts, ${moved.companies} companies, ` +
-          `${moved.deals} deals, ${moved.activities} activities`,
-      )
+      toast.success(t('transfer.done', { name: name ?? '', ...moved }))
       await queryClient.invalidateQueries() // ownership changed everywhere
       onClose()
     } catch (err) {
@@ -50,14 +48,11 @@ function TransferForm({ from, onClose }: { from: User; onClose: () => void }) {
   return (
     <div className="space-y-4">
       <FormError message={error} />
-      <p className="text-sm text-slate-600">
-        Every contact, company, deal and activity owned by <strong>{from.name}</strong> will be
-        given to the person you choose. Use this when someone leaves or changes role.
-      </p>
-      <Field label="Give everything to" required>
+      <p className="text-sm text-slate-600">{t('transfer.intro', { name: from.name })}</p>
+      <Field label={t('transfer.giveTo')} required>
         {(c) => (
           <Select {...c} value={to} onChange={(e) => setTo(e.target.value)}>
-            <option value="">— Choose a user —</option>
+            <option value="">{t('transfer.choose')}</option>
             {candidates.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name}
@@ -68,10 +63,10 @@ function TransferForm({ from, onClose }: { from: User; onClose: () => void }) {
       </Field>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={transfer} disabled={!to} loading={busy}>
-          Transfer records
+          {t('transfer.action')}
         </Button>
       </div>
     </div>
@@ -80,7 +75,11 @@ function TransferForm({ from, onClose }: { from: User; onClose: () => void }) {
 
 export function TransferModal({ from, onClose }: { from: User | null; onClose: () => void }) {
   return (
-    <Modal open={from !== null} title={`Transfer ${from?.name ?? ''}'s records`} onClose={onClose}>
+    <Modal
+      open={from !== null}
+      title={t('transfer.title', { name: from?.name ?? '' })}
+      onClose={onClose}
+    >
       {from && <TransferForm from={from} onClose={onClose} />}
     </Modal>
   )

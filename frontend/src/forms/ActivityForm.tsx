@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useSaveActivity } from '../api/hooks'
-import { ACTIVITY_LABELS, ACTIVITY_TYPES, type Activity, type ActivityType } from '../api/types'
+import { ACTIVITY_TYPES, type Activity, type ActivityType } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { useToast } from '../components/toast/context'
 import { Field, FormError, Input, Select, Textarea } from '../components/ui/form'
@@ -12,6 +12,7 @@ import { addDaysISO } from '../lib/format'
 import { activitySchema, toActivityBody, toFollowUpBody, type ActivityFormValues } from './schemas'
 import { ContactSelect, DealSelect, OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
+import { t } from '../i18n'
 
 const FIELDS = [
   'type',
@@ -65,7 +66,7 @@ function ActivityForm({
       deal_id: String(activity?.deal?.id ?? dealId ?? ''),
       owner_id: activity ? String(activity.owner.id) : '',
       follow_up: false,
-      follow_up_subject: 'Follow up',
+      follow_up_subject: t('activityForm.followUpDefault'),
       follow_up_date: addDaysISO(FOLLOW_UP_DAYS),
     },
   })
@@ -102,31 +103,31 @@ function ActivityForm({
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormError message={formError} />
       <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
-        <Field label="Type" error={errors.type?.message}>
+        <Field label={t('f.type')} error={errors.type?.message}>
           {(c) => (
             <Select {...c} {...register('type')}>
-              {ACTIVITY_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {ACTIVITY_LABELS[t]}
+              {ACTIVITY_TYPES.map((kind) => (
+                <option key={kind} value={kind}>
+                  {t(`activity.${kind}`)}
                 </option>
               ))}
             </Select>
           )}
         </Field>
-        <Field label="Subject" required error={errors.subject?.message}>
+        <Field label={t('f.subject')} required error={errors.subject?.message}>
           {(c) => <Input {...c} {...register('subject')} autoComplete="off" />}
         </Field>
       </div>
-      <Field label="Details" error={errors.description?.message}>
+      <Field label={t('f.details')} error={errors.description?.message}>
         {(c) => <Textarea {...c} {...register('description')} />}
       </Field>
       {/* calls and notes record what already happened; tasks and meetings have a date */}
       {showDate && (
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label={type === 'meeting' ? 'Date' : 'Due date'}
+            label={t(type === 'meeting' ? 'f.date' : 'f.dueDate')}
             error={errors.due_date?.message}
-            hint={type === 'meeting' ? 'Set it for an upcoming meeting' : undefined}
+            hint={type === 'meeting' ? t('activityForm.meetingHint') : undefined}
           >
             {(c) => <Input {...c} {...register('due_date')} type="date" />}
           </Field>
@@ -136,22 +137,22 @@ function ActivityForm({
               {...register('done')}
               className="size-4 rounded border-slate-300"
             />
-            Done
+            {t('f.done')}
           </label>
         </div>
       )}
       {!lockedContact && (
-        <Field label="Contact" error={errors.contact_id?.message}>
+        <Field label={t('f.contact')} error={errors.contact_id?.message}>
           {(c) => <ContactSelect {...c} {...register('contact_id')} />}
         </Field>
       )}
       {dealId === undefined && (
-        <Field label="Deal" error={errors.deal_id?.message}>
+        <Field label={t('f.deal')} error={errors.deal_id?.message}>
           {(c) => <DealSelect {...c} {...register('deal_id')} contactId={selectedContact} />}
         </Field>
       )}
       {isAdmin && (
-        <Field label="Owner" error={errors.owner_id?.message}>
+        <Field label={t('f.owner')} error={errors.owner_id?.message}>
           {(c) => <OwnerSelect {...c} {...register('owner_id')} current={activity?.owner} />}
         </Field>
       )}
@@ -163,14 +164,18 @@ function ActivityForm({
               {...register('follow_up')}
               className="size-4 rounded border-slate-300"
             />
-            Schedule a follow-up task
+            {t('activityForm.followUp')}
           </label>
           {followUp && (
             <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_11rem]">
-              <Field label="Next step" required error={errors.follow_up_subject?.message}>
+              <Field
+                label={t('activityForm.nextStep')}
+                required
+                error={errors.follow_up_subject?.message}
+              >
                 {(c) => <Input {...c} {...register('follow_up_subject')} autoComplete="off" />}
               </Field>
-              <Field label="Due" required error={errors.follow_up_date?.message}>
+              <Field label={t('activityForm.due')} required error={errors.follow_up_date?.message}>
                 {(c) => <Input {...c} {...register('follow_up_date')} type="date" />}
               </Field>
             </div>
@@ -186,7 +191,7 @@ export function ActivityFormModal({ open, ...props }: Props & { open: boolean })
   return (
     <Modal
       open={open}
-      title={props.activity ? 'Edit activity' : 'New activity'}
+      title={t(props.activity ? 'activityForm.edit' : 'activityForm.new')}
       onClose={props.onClose}
     >
       <ActivityForm {...props} />

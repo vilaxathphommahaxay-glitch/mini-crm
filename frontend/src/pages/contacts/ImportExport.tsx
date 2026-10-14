@@ -6,12 +6,36 @@ import { useToast } from '../../components/toast/context'
 import { Button } from '../../components/ui/Button'
 import { FormError } from '../../components/ui/form'
 import { Modal } from '../../components/ui/Modal'
+import { t, type MessageKey } from '../../i18n'
 import { filenameFrom, saveBlob } from '../../lib/download'
 
 const COLUMNS = 'first_name,last_name,email,phone,company,tags,notes'
 const TEMPLATE = `﻿${COLUMNS}\r\nSomchai,Vongsa,somchai@example.la,+856 20 5555 1234,Mekong Trading,vip;wholesale,Met at trade fair\r\n`
 
 type Filters = Record<string, string>
+
+const CSV_FIELDS: Record<string, MessageKey> = {
+  first_name: 'f.firstName',
+  last_name: 'f.lastName',
+  email: 'f.email',
+  phone: 'f.phone',
+  company: 'f.company',
+  tags: 'f.tags',
+  notes: 'f.notes',
+}
+
+/** One skipped row's reason, in the user's language. */
+function rowErrorText(e: ImportResult['errors'][number]): string {
+  if (e.code === 'duplicate_email') return t('csv.duplicate', { email: e.value ?? '' })
+  const field = e.field && CSV_FIELDS[e.field] ? t(CSV_FIELDS[e.field]) : (e.field ?? '')
+  const key =
+    e.reason === 'required'
+      ? 'csv.invalidRequired'
+      : e.reason === 'too_long'
+        ? 'csv.invalidTooLong'
+        : 'csv.invalidInvalid'
+  return t(key, { field })
+}
 
 function ImportDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
@@ -31,7 +55,7 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
       form.append('file', file)
       const outcome = await api<ImportResult>('/contacts/import', { method: 'POST', body: form })
       setResult(outcome)
-      if (outcome.created) toast.success(`Imported ${outcome.created} contact(s)`)
+      if (outcome.created) toast.success(t('csv.importedToast', { count: outcome.created }))
       await Promise.all(
         ['contacts', 'companies', 'tags'].map((key) =>
           queryClient.invalidateQueries({ queryKey: [key] }),
@@ -49,9 +73,13 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
       <div className="space-y-4">
         <dl className="grid grid-cols-3 gap-3 text-center">
           {[
-            ['Imported', result.created, 'text-green-700'],
-            ['Skipped', result.skipped, result.skipped ? 'text-amber-700' : 'text-slate-900'],
-            ['New companies', result.companies_created, 'text-slate-900'],
+            [t('csv.imported'), result.created, 'text-green-700'],
+            [
+              t('csv.skipped'),
+              result.skipped,
+              result.skipped ? 'text-amber-700' : 'text-slate-900',
+            ],
+            [t('csv.newCompanies'), result.companies_created, 'text-slate-900'],
           ].map(([label, value, color]) => (
             <div key={label} className="rounded-md border border-slate-200 p-3">
               <dt className="text-xs text-slate-500">{label}</dt>
@@ -61,21 +89,21 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
         </dl>
         {result.errors.length > 0 && (
           <div>
-            <p className="mb-2 text-sm font-medium text-slate-700">Rows that were skipped</p>
+            <p className="mb-2 text-sm font-medium text-slate-700">{t('csv.skippedRows')}</p>
             <ul className="max-h-60 divide-y divide-slate-100 overflow-y-auto rounded-md border border-slate-200 text-sm">
               {result.errors.map((e) => (
                 <li key={e.row} className="flex gap-3 px-3 py-2">
                   <span className="shrink-0 font-medium text-slate-500 tabular-nums">
-                    Row {e.row}
+                    {t('csv.row', { n: e.row })}
                   </span>
-                  <span className="text-slate-700">{e.message}</span>
+                  <span className="text-slate-700">{rowErrorText(e)}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
         <div className="flex justify-end">
-          <Button onClick={onClose}>Done</Button>
+          <Button onClick={onClose}>{t('common.done')}</Button>
         </div>
       </div>
     )
@@ -86,15 +114,12 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
       <FormError message={error} />
       <ul className="list-disc space-y-1 pl-5">
         <li>
-          Columns: <code className="text-xs text-slate-800">{COLUMNS}</code> (only{' '}
-          <code className="text-xs">first_name</code> is required)
+          {t('csv.columns')} <code className="text-xs text-slate-800">{COLUMNS}</code>
         </li>
-        <li>
-          Separate tags with <code className="text-xs">;</code> — e.g.{' '}
-          <code className="text-xs">vip;wholesale</code>
-        </li>
-        <li>Companies are matched by name; unknown names become new companies.</li>
-        <li>Rows with an email you already have are skipped. Max 1,000 rows / 1 MB, UTF-8.</li>
+        <li>{t('csv.required', { field: 'first_name' })}</li>
+        <li>{t('csv.tags', { example: 'vip;wholesale' })}</li>
+        <li>{t('csv.companies')}</li>
+        <li>{t('csv.limits')}</li>
       </ul>
       <button
         type="button"
@@ -103,28 +128,28 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
           saveBlob(new Blob([TEMPLATE], { type: 'text/csv' }), 'contacts-template.csv')
         }
       >
-        Download a template
+        {t('csv.template')}
       </button>
       <div className="rounded-md border border-dashed border-slate-300 p-4 text-center">
         <input
           ref={input}
           type="file"
           accept=".csv,text/csv"
-          aria-label="CSV file"
+          aria-label={t('csv.fileAria')}
           className="sr-only"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
         <Button variant="secondary" onClick={() => input.current?.click()}>
-          Choose CSV file
+          {t('csv.chooseFile')}
         </Button>
-        <p className="mt-2 text-xs text-slate-500">{file ? file.name : 'No file chosen'}</p>
+        <p className="mt-2 text-xs text-slate-500">{file ? file.name : t('csv.noFile')}</p>
       </div>
       <div className="flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={runImport} disabled={!file} loading={busy}>
-          Import
+          {t('csv.importButton')}
         </Button>
       </div>
     </div>
@@ -153,12 +178,12 @@ export function ContactsImportExport({ filters }: { filters: Filters }) {
   return (
     <>
       <Button variant="secondary" onClick={runExport} loading={exporting}>
-        Export CSV
+        {t('csv.export')}
       </Button>
       <Button variant="secondary" onClick={() => setImporting(true)}>
-        Import CSV
+        {t('csv.import')}
       </Button>
-      <Modal open={importing} title="Import contacts from CSV" onClose={() => setImporting(false)}>
+      <Modal open={importing} title={t('csv.dialogTitle')} onClose={() => setImporting(false)}>
         <ImportDialog onClose={() => setImporting(false)} />
       </Modal>
     </>

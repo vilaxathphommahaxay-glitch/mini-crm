@@ -5,8 +5,9 @@
 // the saved choice shows up correctly instead of falling back to the first option.
 import type { ComponentProps, ReactNode } from 'react'
 import { useCompanies, useContacts, useDeals, useUsers } from '../api/hooks'
-import { STAGE_LABELS, type Ref } from '../api/types'
+import type { Ref } from '../api/types'
 import { Select } from '../components/ui/form'
+import { t } from '../i18n'
 import { NEW_COMPANY } from './schemas'
 
 type SelectProps = ComponentProps<'select'>
@@ -22,7 +23,7 @@ function AsyncSelect({
   if (loading) {
     return (
       <Select key="loading" id={props.id} disabled>
-        <option>Loading…</option>
+        <option>{t('common.loading')}</option>
       </Select>
     )
   }
@@ -40,13 +41,13 @@ export function CompanySelect({
 }: SelectProps & { allowCreate?: boolean }) {
   const { data, isPending } = useCompanies(ALL)
   return (
-    <AsyncSelect {...props} loading={isPending} empty="— No company —">
+    <AsyncSelect {...props} loading={isPending} empty={t('select.noCompany')}>
       {data?.items.map((c) => (
         <option key={c.id} value={c.id}>
           {c.name}
         </option>
       ))}
-      {allowCreate && <option value={NEW_COMPANY}>+ New company…</option>}
+      {allowCreate && <option value={NEW_COMPANY}>{t('select.newCompany')}</option>}
     </AsyncSelect>
   )
 }
@@ -54,7 +55,7 @@ export function CompanySelect({
 export function ContactSelect(props: SelectProps) {
   const { data, isPending } = useContacts(ALL)
   return (
-    <AsyncSelect {...props} loading={isPending} empty="— Choose a contact —">
+    <AsyncSelect {...props} loading={isPending} empty={t('select.chooseContact')}>
       {data?.items.map((c) => (
         <option key={c.id} value={c.id}>
           {c.full_name}
@@ -68,10 +69,10 @@ export function ContactSelect(props: SelectProps) {
 export function DealSelect({ contactId, ...props }: SelectProps & { contactId?: string }) {
   const { data, isPending } = useDeals({ ...ALL, contact_id: contactId || undefined })
   return (
-    <AsyncSelect {...props} loading={isPending} empty="— No deal —">
+    <AsyncSelect {...props} loading={isPending} empty={t('select.noDeal')}>
       {data?.items.map((d) => (
         <option key={d.id} value={d.id}>
-          {d.title} · {STAGE_LABELS[d.stage]}
+          {d.title} · {t(`stage.${d.stage}`)}
         </option>
       ))}
     </AsyncSelect>
@@ -83,7 +84,7 @@ export function DealSelect({ contactId, ...props }: SelectProps & { contactId?: 
  * listed even if their account has since been disabled, so the form shows the real value.
  */
 export function OwnerSelect({
-  emptyLabel = '— Me —',
+  emptyLabel = t('select.me'),
   current,
   ...props
 }: SelectProps & { emptyLabel?: string; current?: Ref }) {
@@ -91,7 +92,9 @@ export function OwnerSelect({
   const missing = current && data && !data.items.some((u) => u.id === current.id)
   return (
     <AsyncSelect {...props} loading={isPending} empty={emptyLabel}>
-      {missing && <option value={current.id}>{current.name} (disabled)</option>}
+      {missing && (
+        <option value={current.id}>{t('select.disabledOwner', { name: current.name })}</option>
+      )}
       {data?.items.map((u) => (
         <option key={u.id} value={u.id}>
           {u.name}

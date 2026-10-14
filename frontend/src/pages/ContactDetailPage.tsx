@@ -17,6 +17,7 @@ import { ActivityFormModal } from '../forms/ActivityForm'
 import { ContactFormModal } from '../forms/ContactForm'
 import { DealFormModal } from '../forms/DealForm'
 import { NotFoundPage } from './NotFoundPage'
+import { t } from '../i18n'
 
 export function ContactDetailPage() {
   const id = Number(useParams().id)
@@ -41,7 +42,7 @@ export function ContactDetailPage() {
   async function confirmDelete() {
     try {
       await remove.mutateAsync(c.id)
-      toast.success('Contact deleted')
+      toast.success(t('contactDetail.deleted'))
       navigate('/contacts', { replace: true })
     } catch (error) {
       setDeleting(false)
@@ -56,7 +57,7 @@ export function ContactDetailPage() {
         subtitle={
           <>
             <Link to="/contacts" className="hover:text-indigo-600">
-              Contacts
+              {t('nav.contacts')}
             </Link>
             {c.company && (
               <>
@@ -71,10 +72,10 @@ export function ContactDetailPage() {
         actions={
           <>
             <Button variant="secondary" onClick={() => setEditing(true)}>
-              Edit
+              {t('common.edit')}
             </Button>
             <Button variant="secondary" onClick={() => setDeleting(true)}>
-              Delete
+              {t('common.delete')}
             </Button>
           </>
         }
@@ -82,16 +83,19 @@ export function ContactDetailPage() {
 
       <div className="grid gap-6 xl:grid-cols-[22rem_1fr]">
         <Card className="self-start">
-          <CardHeader title="Details" />
+          <CardHeader title={t('common.details')} />
           <DetailList
             items={[
-              { label: 'Email', value: c.email && <a href={`mailto:${c.email}`}>{c.email}</a> },
-              { label: 'Phone', value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
-              { label: 'Company', value: c.company?.name },
-              { label: 'Tags', value: <TagList tags={c.tags} /> },
-              ...(isAdmin ? [{ label: 'Owner', value: c.owner.name }] : []),
               {
-                label: 'Notes',
+                label: t('f.email'),
+                value: c.email && <a href={`mailto:${c.email}`}>{c.email}</a>,
+              },
+              { label: t('f.phone'), value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
+              { label: t('f.company'), value: c.company?.name },
+              { label: t('f.tags'), value: <TagList tags={c.tags} /> },
+              ...(isAdmin ? [{ label: t('f.owner'), value: c.owner.name }] : []),
+              {
+                label: t('f.notes'),
                 value: c.notes && <span className="whitespace-pre-line">{c.notes}</span>,
               },
             ]}
@@ -101,11 +105,11 @@ export function ContactDetailPage() {
         <div className="min-w-0 space-y-6">
           <Card>
             <CardHeader
-              title="Deals"
+              title={t('deals.title')}
               actions={
                 <Button size="sm" variant="secondary" onClick={() => setCreatingDeal(true)}>
                   <Icon name="plus" className="size-3.5" />
-                  New deal
+                  {t('dealForm.new')}
                 </Button>
               }
             />
@@ -114,7 +118,7 @@ export function ContactDetailPage() {
             ) : deals.isError ? (
               <ErrorState error={deals.error} onRetry={() => deals.refetch()} />
             ) : deals.data.items.length === 0 ? (
-              <EmptyState title="No deals yet" />
+              <EmptyState title={t('contactDetail.noDeals')} />
             ) : (
               <DealsTable
                 deals={deals.data.items}
@@ -125,11 +129,11 @@ export function ContactDetailPage() {
 
           <Card>
             <CardHeader
-              title="Activity"
+              title={t('act.title')}
               actions={
                 <Button size="sm" onClick={() => setLogging(true)}>
                   <Icon name="plus" className="size-3.5" />
-                  Log activity
+                  {t('act.log')}
                 </Button>
               }
             />
@@ -138,7 +142,7 @@ export function ContactDetailPage() {
             ) : timeline.isError ? (
               <ErrorState error={timeline.error} onRetry={() => timeline.refetch()} />
             ) : timeline.data.items.length === 0 ? (
-              <EmptyState title="No activity yet">Log a call, meeting, note or task.</EmptyState>
+              <EmptyState title={t('act.none')}>{t('act.noneHint')}</EmptyState>
             ) : (
               <ActivityList activities={timeline.data.items} showLinks={false} />
             )}
@@ -156,8 +160,8 @@ export function ContactDetailPage() {
       <DealFormModal open={creatingDeal} contactId={c.id} onClose={() => setCreatingDeal(false)} />
       <ConfirmDialog
         open={deleting}
-        title="Delete contact?"
-        message={`${c.full_name} and their activity history will be deleted. Contacts with deals can't be deleted.`}
+        title={t('contactDetail.deleteTitle')}
+        message={t('contactDetail.deleteMessage', { name: c.full_name })}
         loading={remove.isPending}
         onConfirm={confirmDelete}
         onCancel={() => setDeleting(false)}
