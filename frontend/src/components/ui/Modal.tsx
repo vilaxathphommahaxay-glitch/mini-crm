@@ -14,6 +14,13 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }: M
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // Parents pass a new onClose on every render; keep the latest in a ref so the effects
+  // below run only when the dialog opens or closes (re-running them would steal focus).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
+
   useEffect(() => {
     if (!open) return
     const previous = document.activeElement as HTMLElement | null
@@ -23,13 +30,13 @@ export function Modal({ open, title, onClose, children, footer, size = 'md' }: M
     )
     ;(first ?? panelRef.current)?.focus()
 
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCloseRef.current()
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
       previous?.focus?.()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
   return (
