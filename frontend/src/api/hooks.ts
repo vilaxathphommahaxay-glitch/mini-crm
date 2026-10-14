@@ -16,6 +16,7 @@ import type {
   Contact,
   DashboardSummary,
   Deal,
+  HistoryEvent,
   Page,
   Quote,
   QuoteSummary,
@@ -48,12 +49,12 @@ function useOne<T>(resource: string, id: number | undefined) {
 
 /** Mutations that touch one resource also refresh whatever views depend on it. */
 const DEPENDENTS: Record<string, string[]> = {
-  contacts: ['contacts', 'tags', 'deals', 'activities', 'dashboard', 'quotes'],
-  companies: ['companies', 'contacts', 'deals', 'quotes'],
-  deals: ['deals', 'activities', 'dashboard', 'quotes'],
-  quotes: ['quotes'],
-  activities: ['activities', 'dashboard'],
-  users: ['users'],
+  contacts: ['contacts', 'tags', 'deals', 'activities', 'dashboard', 'quotes', 'history'],
+  companies: ['companies', 'contacts', 'deals', 'quotes', 'history'],
+  deals: ['deals', 'activities', 'dashboard', 'quotes', 'history'],
+  quotes: ['quotes', 'history'],
+  activities: ['activities', 'dashboard', 'history'],
+  users: ['users', 'history'],
 }
 
 function useInvalidate() {
@@ -178,6 +179,10 @@ export function useReminders() {
     retry: false, // a missing badge is harmless; don't hammer the server for it
   })
 }
+
+// --- edit history ---
+export const useHistory = (params: Params, enabled = true) =>
+  useList<HistoryEvent>('history', params, enabled)
 
 // --- users (admin) ---
 export const useUsers = (params: Params, enabled = true) => useList<User>('users', params, enabled)

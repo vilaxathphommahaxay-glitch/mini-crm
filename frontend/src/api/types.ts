@@ -210,3 +210,28 @@ export interface BusinessProfile {
   tax_id: string | null
   quote_terms: string | null
 }
+
+export type HistoryEntity = 'company' | 'contact' | 'deal' | 'activity' | 'quote' | 'user'
+
+/** One field's change: plain values, plus names for links to other records. */
+export interface HistoryChange {
+  field: string
+  from?: string | number | boolean | null
+  to?: string | number | boolean | null
+  from_label?: string | null
+  to_label?: string | null
+  added?: string[]
+  removed?: string[]
+  [count: string]: unknown
+}
+
+export interface HistoryEvent {
+  id: number
+  created_at: string
+  actor: { id: number; name: string } | null
+  entity_type: HistoryEntity
+  entity_id: number
+  entity_label: string
+  action: 'created' | 'updated' | 'deleted' | 'transferred'
+  changes: HistoryChange[] | null
+}

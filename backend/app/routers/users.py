@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.clock import utcnow
 from app.deps import AdminUser, DbSession
 from app.errors import AppError, field_error, not_found
-from app.models import Activity, Company, Contact, Deal, Role, User
+from app.models import Activity, AuditEvent, Company, Contact, Deal, Role, User
 from app.pagination import Page, Pagination, paginate
 from app.schemas.users import TransferIn, TransferOut, UserCreate, UserOut, UserUpdate
 from app.security import hash_password
@@ -82,7 +82,7 @@ def update_user(user_id: int, body: UserUpdate, admin: AdminUser, db: DbSession)
 
 
 @router.post("/{user_id}/transfer", response_model=TransferOut)
-def transfer_records(user_id: int, body: TransferIn, _: AdminUser, db: DbSession):
+def transfer_records(user_id: int, body: TransferIn, admin: AdminUser, db: DbSession):
     """Hand every company, contact, deal and activity of one user to another
     (e.g. when someone leaves). One transaction; returns how many of each moved."""
     source = db.get(User, user_id)
@@ -108,5 +108,25 @@ def transfer_records(user_id: int, body: TransferIn, _: AdminUser, db: DbSession
             .values(owner_id=target.id, updated_at=now)
         )
         moved[key] = result.rowcount
+    # bulk updates bypass the per-record history, so the hand-over is logged once, as a whole
+    db.add(
+        AuditEvent(
+            actor_id=admin.id,
+            entity_type="user",
+            entity_id=source.id,
+            entity_label=source.name,
+            action="transferred",
+            changes=[
+                {
+                    "field": "owner_id",
+                    "from": source.id,
+                    "to": target.id,
+                    "from_label": source.name,
+                    "to_label": target.name,
+                },
+                {"field": "counts", **moved},
+            ],
+        )
+    )
     db.commit()
     return moved

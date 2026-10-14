@@ -4,6 +4,7 @@ import { ApiError, errorMessage } from '../api/client'
 import { useActivities, useContact, useDeals, useDeleteContact } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
+import { HistoryCard } from '../components/HistoryList'
 import { TagList } from '../components/badges'
 import { DealsTable } from '../components/DealsTable'
 import { DetailList } from '../components/DetailList'
@@ -167,6 +168,9 @@ export function ContactDetailPage() {
             )}
           </Card>
         </div>
+      </div>
+      <div className="mt-6">
+        <HistoryCard type="contact" id={c.id} />
       </div>
 
       <ContactFormModal open={editing} contact={c} onClose={() => setEditing(false)} />

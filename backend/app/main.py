@@ -8,6 +8,7 @@ from app.routers import (
     contacts,
     dashboard,
     deals,
+    history,
     quotes,
     search,
     tags,
@@ -36,6 +37,7 @@ for module in (
     activities,
     dashboard,
     search,
+    history,
 ):
     api.include_router(module.router)
 

@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: '/pipeline', label: 'nav.pipeline', icon: 'pipeline' },
   { to: '/tasks', label: 'nav.tasks', icon: 'tasks' },
   { to: '/users', label: 'nav.users', icon: 'users', adminOnly: true },
+  { to: '/history', label: 'nav.history', icon: 'history', adminOnly: true },
   { to: '/settings', label: 'nav.settings', icon: 'settings' },
 ]
 

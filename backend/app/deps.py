@@ -4,6 +4,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.audit import set_actor
 from app.db import get_db
 from app.errors import AppError
 from app.models import Role, User
@@ -31,6 +32,7 @@ def get_current_user(
     # Checked on every request, so deactivating a user locks them out immediately.
     if user is None or not user.is_active:
         raise _unauthorized("Invalid or expired token")
+    set_actor(db, user.id)  # changes made in this request go into the edit history as this user
     return user
 
 

@@ -21,6 +21,7 @@ const NewQuotePage = page(() => import('./pages/QuoteEditorPage'), 'NewQuotePage
 const EditQuotePage = page(() => import('./pages/QuoteEditorPage'), 'EditQuotePage')
 const TasksPage = page(() => import('./pages/TasksPage'), 'TasksPage')
 const UsersPage = page(() => import('./pages/UsersPage'), 'UsersPage')
+const HistoryPage = page(() => import('./pages/HistoryPage'), 'HistoryPage')
 const SettingsPage = page(() => import('./pages/SettingsPage'), 'SettingsPage')
 const NotFoundPage = page(() => import('./pages/NotFoundPage'), 'NotFoundPage')
 
@@ -52,6 +53,14 @@ export default function App() {
             element={
               <RequireAdmin>
                 <UsersPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="history"
+            element={
+              <RequireAdmin>
+                <HistoryPage />
               </RequireAdmin>
             }
           />

@@ -25,6 +25,7 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 - **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
+- **Edit history** — every add, change and delete is recorded with who did it and the old and new values (“Phone: 020 1111 → 020 2222”). Each contact, company and deal has a *Show history* section; admins get a *Change history* page with everything, including deleted records and hand-overs.
 - **For managers** — a team table (open pipeline, wins this month, overdue tasks per person) and a one-click *Transfer records* when someone leaves.
 - **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
 - **Lao and English** — the whole interface, error messages and demo data are available in Lao (ພາສາລາວ) for people who don't read English. Switch with the EN / ລາວ buttons; see [Languages](#languages).
@@ -178,5 +179,5 @@ PLAN.md              scope, data model, API and the phase-by-phase plan
 - The access token (8 hours, no refresh token) is kept in `localStorage`. That's fine for a demo but would need hardening (httpOnly cookies, refresh tokens) for production.
 - The sign-in rate limit is kept in memory, so it is per backend process; running several workers or servers would need a shared store such as Redis.
 - Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
-- No currency conversion, email/SMS sending, file attachments or audit log. Quotes are made into PDFs by the browser's own *Save as PDF*, not by the server (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
+- No currency conversion, email/SMS sending or file attachments. Quotes are made into PDFs by the browser's own *Save as PDF*, not by the server (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
 - The UI is available in Lao and English only, and has no dark mode.

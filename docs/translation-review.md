@@ -361,6 +361,34 @@ Please check these first; a change here should be applied everywhere.
 | `business.terms` | Standard terms | ເງື່ອນໄຂມາດຕະຖານ |
 | `business.termsHint` | Printed at the bottom of every quote, e.g. how to pay or your bank account. | ຈະພິມຢູ່ລຸ່ມສຸດຂອງທຸກໃບສະເໜີລາຄາ ເຊັ່ນ: ວິທີຈ່າຍເງິນ ຫຼື ເລກບັນຊີທະນາຄານ. |
 | `business.saved` | Business details saved | ບັນທຶກຂໍ້ມູນຮ້ານແລ້ວ |
+| `nav.history` | Change history | ປະຫວັດການແກ້ໄຂ |
+| `history.title` | Edit history | ປະຫວັດການແກ້ໄຂ |
+| `history.subtitle` | Every change anyone made, newest first. | ທຸກການແກ້ໄຂຂອງທຸກຄົນ, ລ່າສຸດຢູ່ເທິງ. |
+| `history.show` | Show history | ເບິ່ງປະຫວັດການແກ້ໄຂ |
+| `history.hide` | Hide history | ເຊື່ອງປະຫວັດການແກ້ໄຂ |
+| `history.empty` | No changes recorded yet | ຍັງບໍ່ມີການແກ້ໄຂ |
+| `history.emptyHint` | From now on, every change is recorded here. | ຕໍ່ຈາກນີ້ໄປ ທຸກການແກ້ໄຂຈະຖືກບັນທຶກໄວ້ທີ່ນີ້. |
+| `history.created` | {actor} added {what} | {actor} ເພີ່ມ{what} |
+| `history.updated` | {actor} changed {what} | {actor} ແກ້ໄຂ{what} |
+| `history.deleted` | {actor} deleted {what} | {actor} ລຶບ{what} |
+| `history.transferred` | {actor} handed everything of {what} to {to} | {actor} ໂອນຂໍ້ມູນທັງໝົດຂອງ {what} ໃຫ້ {to} |
+| `history.someone` | Someone | ບາງຄົນ |
+| `history.entity.company` | company | ບໍລິສັດ |
+| `history.entity.contact` | contact | ລູກຄ້າ |
+| `history.entity.deal` | deal | ລາຍການຂາຍ |
+| `history.entity.activity` | activity | ກິດຈະກຳ |
+| `history.entity.quote` | quote | ໃບສະເໜີລາຄາ |
+| `history.entity.user` | user | ຜູ້ໃຊ້ |
+| `history.allTypes` | All records | ທຸກປະເພດ |
+| `history.filterType` | Show changes to | ສະແດງການແກ້ໄຂຂອງ |
+| `history.deals` | Deals | ລາຍການຂາຍ |
+| `history.activities` | Activities | ກິດຈະກຳ |
+| `history.tagsAdded` | added {tags} | ເພີ່ມ {tags} |
+| `history.tagsRemoved` | removed {tags} | ເອົາອອກ {tags} |
+| `history.itemsChanged` | Products and services were changed | ມີການແກ້ໄຂລາຍການສິນຄ້າ ແລະ ບໍລິການ |
+| `history.yes` | Yes | ແມ່ນ |
+| `history.no` | No | ບໍ່ |
+| `history.counts` | {companies} companies, {contacts} contacts, {deals} deals, {activities} activities | ບໍລິສັດ {companies}, ລູກຄ້າ {contacts}, ລາຍການຂາຍ {deals}, ກິດຈະກຳ {activities} |
 | `validation.descriptionRequired` | Describe the item | ໃສ່ລາຍລະອຽດຂອງລາຍການ |
 | `validation.quantity` | Enter a number above 0 | ໃສ່ຕົວເລກທີ່ຫຼາຍກວ່າ 0 |
 | `validation.amount` | Enter an amount like 150000 or 99.50 | ໃສ່ຈຳນວນເງິນ ເຊັ່ນ 150000 ຫຼື 99.50 |

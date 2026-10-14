@@ -6,6 +6,7 @@ import { moveDeal, useActivities, useDeal, useDealQuotes } from '../api/hooks'
 import { STAGES, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
+import { HistoryCard } from '../components/HistoryList'
 import { DetailList } from '../components/DetailList'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
@@ -43,7 +44,9 @@ export function DealDetailPage() {
     try {
       await moveDeal(d.id, stage, null) // end of the new column
       await Promise.all(
-        ['deals', 'dashboard'].map((key) => queryClient.invalidateQueries({ queryKey: [key] })),
+        ['deals', 'dashboard', 'history'].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        ),
       )
       toast.success(t('dealPage.movedTo', { stage: t(`stage.${stage}`) }))
     } catch (error) {
@@ -164,6 +167,9 @@ export function DealDetailPage() {
             <ActivityList activities={timeline.data.items} showDeal={false} />
           )}
         </Card>
+      </div>
+      <div className="mt-6">
+        <HistoryCard type="deal" id={d.id} />
       </div>
 
       <DealFormModal

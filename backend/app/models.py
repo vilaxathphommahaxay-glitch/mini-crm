@@ -3,6 +3,7 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     Column,
@@ -260,3 +261,24 @@ class QuoteItem(Base):
     @property
     def amount(self) -> Decimal:
         return cents(self.quantity * self.unit_price)
+
+
+class AuditEvent(Base):
+    """One change to a record: who, when, what (see app/audit.py, which writes these)."""
+
+    __tablename__ = "audit_events"
+    __table_args__ = (Index("ix_audit_events_entity", "entity_type", "entity_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        UTCDateTime, default=utcnow, nullable=False, index=True
+    )
+    actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    entity_type: Mapped[str] = mapped_column(String(20))
+    entity_id: Mapped[int] = mapped_column(Integer)
+    # the record's name at the time, so the entry still reads well after it is deleted
+    entity_label: Mapped[str] = mapped_column(String(200))
+    action: Mapped[str] = mapped_column(String(20))
+    changes: Mapped[list | None] = mapped_column(JSON)
+
+    actor: Mapped[User | None] = relationship()

@@ -5,6 +5,7 @@ import { useCompany, useContacts, useDeals, useDeleteCompany } from '../api/hook
 import { useCurrentUser } from '../auth/context'
 import { DealsTable } from '../components/DealsTable'
 import { DetailList } from '../components/DetailList'
+import { HistoryCard } from '../components/HistoryList'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
@@ -156,6 +157,9 @@ export function CompanyDetailPage() {
             )}
           </Card>
         </div>
+      </div>
+      <div className="mt-6">
+        <HistoryCard type="company" id={c.id} />
       </div>
 
       <CompanyFormModal open={editing} company={c} onClose={() => setEditing(false)} />

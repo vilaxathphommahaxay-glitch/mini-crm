@@ -49,7 +49,7 @@ Port: backend `8000`, frontend dev `5173` (Vite proxy `/api` → backend ไม�
 
 ### ไม่ทำในเวอร์ชันแรก
 ส่งอีเมล/SMS อัตโนมัติ, เชื่อม Facebook/WhatsApp, multi-tenant, แอปมือถือ, แปลงค่าเงิน,
-refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์, audit log, sync แบบ real-time, UI หลายภาษา (ทำแล้วหลังส่งงาน: ลาว/อังกฤษ), rate limiting
+refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์, audit log (ทำแล้วหลังส่งงาน: ประวัติการแก้ไข), sync แบบ real-time, UI หลายภาษา (ทำแล้วหลังส่งงาน: ลาว/อังกฤษ), rate limiting
 
 ## 5. Data model
 ทุกตารางมี `id` (int PK), `created_at`, `updated_at` (timezone-aware, UTC)
@@ -264,3 +264,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
   `GET/POST /deals/{id}/quotes`, `GET/PUT/DELETE /quotes/{id}`, `GET/PUT /settings/business` (แก้ได้เฉพาะ admin);
   สิทธิ์ตามดีล, เลขที่ `Q-ปี-0001` ไม่ใช้ซ้ำแม้ลบ, ส่วนลด + VAT (ภาษีคิดหลังหักส่วนลด, ปัดเศษ half-up),
   หน้า A4 สำหรับพิมพ์/บันทึก PDF จากเบราว์เซอร์, ส่งเป็นข้อความ WhatsApp, ปุ่มใช้ยอดรวมเป็นมูลค่าดีล
+- [x] ประวัติการแก้ไข: ตาราง `audit_events` บันทึกอัตโนมัติหลัง flush (`app/audit.py`) — ใคร, เมื่อไหร่, ค่าเก่า → ใหม่,
+  ชื่อของ record ที่อ้างถึง; ไม่บันทึก position/updated_at ฯลฯ; การโอนข้อมูลบันทึกเป็นรายการเดียว;
+  `GET /history?entity_type=&entity_id=` (ตามสิทธิ์ของ record) และทั้งหมด (admin), การ์ดในหน้า contact/company/deal,
+  หน้า "Change history" สำหรับ admin
