@@ -73,7 +73,7 @@ npm run dev
 
 ```bash
 # backend (in backend/, venv active)
-pytest                        # 84 tests on in-memory SQLite
+pytest                        # 86 tests on in-memory SQLite
 ruff check . && ruff format --check .
 
 # the same tests on PostgreSQL
@@ -85,6 +85,18 @@ TEST_DATABASE_URL=postgresql+psycopg://crm:crm@localhost:55432/crm_test pytest
 npm test                      # Vitest + Testing Library
 npm run lint && npm run format:check && npm run build
 ```
+
+**Browser tests** (`e2e/`) drive a real Chrome or Edge through the whole app — login and roles, search and filters, forms, drag and drop on the pipeline, dashboard numbers, CSV import/export and phone-width layouts. They expect a freshly seeded app:
+
+```bash
+docker compose down -v && docker compose up -d --build
+cd e2e
+npm install
+npm test                      # E2E_BROWSER=chrome|msedge, BASE_URL=http://localhost:8080
+npm run screenshots           # refresh docs/screenshots
+```
+
+**CI** (`.github/workflows/ci.yml`) runs all of the above on every push: backend lint and tests on SQLite and PostgreSQL plus `alembic check`, frontend lint/tests/build, then the browser tests against the Docker stack.
 
 ## Project structure
 
@@ -110,6 +122,7 @@ frontend/
     forms/           react-hook-form + zod forms
     lib/             formatting, URL filters, Kanban logic
     pages/           one component per screen
+e2e/                 browser tests (Playwright) against the running app
 docker-compose.yml   postgres + backend + frontend (nginx)
 PLAN.md              scope, data model, API and the phase-by-phase plan
 ```

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useAuth, useCurrentUser } from '../auth/context'
 import { Icon, type IconName } from './icons'
+import { LoadingState } from './ui/states'
 
 interface NavItem {
   to: string
@@ -101,7 +102,10 @@ export function Layout() {
       )}
 
       <main className="px-4 py-6 sm:px-6 lg:ml-60 lg:px-8">
-        <Outlet />
+        {/* pages load lazily; keep the sidebar on screen while they do */}
+        <Suspense fallback={<LoadingState />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   )
