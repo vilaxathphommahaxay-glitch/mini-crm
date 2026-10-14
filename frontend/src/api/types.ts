@@ -130,3 +130,16 @@ export interface ImportResult {
   companies_created: number
   errors: { row: number; message: string }[]
 }
+
+export interface SearchResults {
+  contacts: { id: number; full_name: string; email: string | null; company: Ref | null }[]
+  companies: { id: number; name: string; phone: string | null }[]
+  deals: {
+    id: number
+    title: string
+    stage: Stage
+    value: string
+    currency: Currency
+    contact: Ref
+  }[]
+}

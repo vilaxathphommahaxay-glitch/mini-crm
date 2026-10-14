@@ -16,6 +16,7 @@ import type {
   DashboardSummary,
   Deal,
   Page,
+  SearchResults,
   Stage,
   User,
 } from './types'
@@ -128,5 +129,16 @@ export function useDashboard(ownerId?: number) {
   return useQuery({
     queryKey: ['dashboard', ownerId ?? null],
     queryFn: () => api<DashboardSummary>('/dashboard/summary', { query: { owner_id: ownerId } }),
+  })
+}
+
+// --- global search (Ctrl+K) ---
+export function useSearch(q: string) {
+  return useQuery({
+    queryKey: ['search', q],
+    queryFn: () => api<SearchResults>('/search', { query: { q } }),
+    enabled: q.trim().length > 0,
+    placeholderData: keepPreviousData, // no flicker between keystrokes
+    staleTime: 10_000,
   })
 }

@@ -1,6 +1,7 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useAuth, useCurrentUser } from '../auth/context'
+import { CommandPalette } from './CommandPalette'
 import { Icon, type IconName } from './icons'
 import { LoadingState } from './ui/states'
 
@@ -21,7 +22,10 @@ const NAV: NavItem[] = [
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ]
 
-function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+const SHORTCUT = isMac ? '⌘K' : 'Ctrl K'
+
+function Sidebar({ onNavigate, onSearch }: { onNavigate?: () => void; onSearch: () => void }) {
   const user = useCurrentUser()
   const { logout } = useAuth()
   const items = NAV.filter((item) => !item.adminOnly || user.role === 'admin')
@@ -33,6 +37,17 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           C
         </span>
         <span className="text-base font-semibold text-white">Mini CRM</span>
+      </div>
+      <div className="px-3 pb-3">
+        <button
+          type="button"
+          onClick={onSearch}
+          className="flex w-full items-center gap-2 rounded-md bg-slate-800 px-3 py-2 text-sm text-slate-400 hover:text-white"
+        >
+          <Icon name="search" className="size-4" />
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="text-xs text-slate-500">{SHORTCUT}</kbd>
+        </button>
       </div>
       <nav className="flex-1 space-y-1 px-3" aria-label="Main">
         {items.map((item) => (
@@ -72,12 +87,29 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  // Ctrl+K / ⌘K opens the quick search from anywhere
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+  const openSearch = () => {
+    setMenuOpen(false)
+    setSearchOpen(true)
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-60 lg:block">
-        <Sidebar />
+        <Sidebar onSearch={openSearch} />
       </aside>
 
       {/* mobile / tablet: top bar + drawer */}
@@ -90,13 +122,21 @@ export function Layout() {
         >
           <Icon name="menu" />
         </button>
-        <span className="font-semibold text-slate-900">Mini CRM</span>
+        <span className="flex-1 font-semibold text-slate-900">Mini CRM</span>
+        <button
+          type="button"
+          aria-label="Search"
+          onClick={openSearch}
+          className="rounded p-1 text-slate-600 hover:bg-slate-100"
+        >
+          <Icon name="search" />
+        </button>
       </header>
       {menuOpen && (
         <div className="fixed inset-0 z-30 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/40" onClick={() => setMenuOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-64 shadow-xl">
-            <Sidebar onNavigate={() => setMenuOpen(false)} />
+            <Sidebar onNavigate={() => setMenuOpen(false)} onSearch={openSearch} />
           </aside>
         </div>
       )}
@@ -107,6 +147,7 @@ export function Layout() {
           <Outlet />
         </Suspense>
       </main>
+      <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   )
 }
