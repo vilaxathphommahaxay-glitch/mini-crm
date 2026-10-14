@@ -136,7 +136,7 @@ function DealForm({ deal, contactId, stage, onClose }: Props) {
       </Field>
       {isAdmin && (
         <Field label="Owner" error={errors.owner_id?.message}>
-          {(c) => <OwnerSelect {...c} {...register('owner_id')} />}
+          {(c) => <OwnerSelect {...c} {...register('owner_id')} current={deal?.owner} />}
         </Field>
       )}
 

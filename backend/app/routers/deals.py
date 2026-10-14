@@ -107,7 +107,7 @@ def update_deal(deal_id: int, body: DealUpdate, user: CurrentUser, db: DbSession
     if changes.get("company_id") is not None:
         get_referenced(db, Company, changes["company_id"], user, "company_id")
     if "owner_id" in changes:
-        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"])
+        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"], deal.owner_id)
 
     apply_patch(deal, changes, required={"title", "value", "currency", "contact_id"})
     deal.updated_at = utcnow()

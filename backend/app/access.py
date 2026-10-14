@@ -50,8 +50,16 @@ def get_referenced[M: Owned](db: Session, model: type[M], obj_id: int, user: Use
     return obj
 
 
-def resolve_owner(db: Session, user: User, requested: int | None) -> int:
-    """Owner for a new or reassigned row. Staff can only assign to themselves."""
+def resolve_owner(
+    db: Session, user: User, requested: int | None, current: int | None = None
+) -> int:
+    """Owner for a new or reassigned row. Staff can only assign to themselves.
+
+    `current` is the row's existing owner: sending it back unchanged is not a reassignment,
+    so records of a since-deactivated user stay editable.
+    """
+    if current is not None and requested == current:
+        return current
     if requested is None or requested == user.id:
         return user.id
     if not is_admin(user):

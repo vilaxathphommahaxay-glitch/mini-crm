@@ -116,7 +116,7 @@ function ActivityForm({
       )}
       {isAdmin && (
         <Field label="Owner" error={errors.owner_id?.message}>
-          {(c) => <OwnerSelect {...c} {...register('owner_id')} />}
+          {(c) => <OwnerSelect {...c} {...register('owner_id')} current={activity?.owner} />}
         </Field>
       )}
       <FormFooter onCancel={onClose} saving={save.isPending} />

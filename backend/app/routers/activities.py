@@ -112,7 +112,7 @@ def update_activity(activity_id: int, body: ActivityUpdate, user: CurrentUser, d
         changes["contact_id"] = activity.contact_id
     _check_links(db, user, changes)
     if "owner_id" in changes:
-        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"])
+        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"], activity.owner_id)
 
     apply_patch(activity, changes, required={"type", "subject", "done"})
     _sync_completed_at(activity)

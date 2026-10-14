@@ -5,7 +5,7 @@
 // the saved choice shows up correctly instead of falling back to the first option.
 import type { ComponentProps, ReactNode } from 'react'
 import { useCompanies, useContacts, useDeals, useUsers } from '../api/hooks'
-import { STAGE_LABELS } from '../api/types'
+import { STAGE_LABELS, type Ref } from '../api/types'
 import { Select } from '../components/ui/form'
 
 type SelectProps = ComponentProps<'select'>
@@ -73,14 +73,20 @@ export function DealSelect({ contactId, ...props }: SelectProps & { contactId?: 
   )
 }
 
-/** Admin-only: assign to (or filter by) any active user. */
+/**
+ * Admin-only: assign to (or filter by) any active user. `current` is the record's owner,
+ * listed even if their account has since been disabled, so the form shows the real value.
+ */
 export function OwnerSelect({
   emptyLabel = '— Me —',
+  current,
   ...props
-}: SelectProps & { emptyLabel?: string }) {
+}: SelectProps & { emptyLabel?: string; current?: Ref }) {
   const { data, isPending } = useUsers({ ...ALL, is_active: true })
+  const missing = current && data && !data.items.some((u) => u.id === current.id)
   return (
     <AsyncSelect {...props} loading={isPending} empty={emptyLabel}>
+      {missing && <option value={current.id}>{current.name} (disabled)</option>}
       {data?.items.map((u) => (
         <option key={u.id} value={u.id}>
           {u.name}

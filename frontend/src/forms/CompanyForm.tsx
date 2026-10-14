@@ -73,7 +73,7 @@ function CompanyForm({ company, onClose, onSaved }: Props) {
       </Field>
       {isAdmin && (
         <Field label="Owner" error={errors.owner_id?.message}>
-          {(c) => <OwnerSelect {...c} {...register('owner_id')} />}
+          {(c) => <OwnerSelect {...c} {...register('owner_id')} current={company?.owner} />}
         </Field>
       )}
       <Field label="Notes" error={errors.notes?.message}>

@@ -51,7 +51,7 @@ def update_company(company_id: int, body: CompanyUpdate, user: CurrentUser, db: 
     company = get_owned(db, Company, company_id, user)
     changes = body.model_dump(exclude_unset=True)
     if "owner_id" in changes:
-        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"])
+        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"], company.owner_id)
     apply_patch(company, changes, required={"name"})
     company.updated_at = utcnow()
     db.commit()

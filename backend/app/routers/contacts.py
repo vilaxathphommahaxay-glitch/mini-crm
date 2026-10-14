@@ -183,7 +183,7 @@ def update_contact(contact_id: int, body: ContactUpdate, user: CurrentUser, db: 
     if changes.get("company_id") is not None:
         get_referenced(db, Company, changes["company_id"], user, "company_id")
     if "owner_id" in changes:
-        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"])
+        changes["owner_id"] = resolve_owner(db, user, changes["owner_id"], contact.owner_id)
     if "tags" in changes:
         contact.tags = get_or_create_tags(db, changes.pop("tags") or [])
     apply_patch(contact, changes, required={"first_name"})

@@ -142,3 +142,32 @@ def test_delete_contact_removes_its_activities(client, db, factory, staff):
 
     assert response.status_code == 204
     assert db.scalar(select(func.count()).select_from(Activity)) == 0
+
+
+def test_admin_can_edit_record_of_deactivated_owner(client, db, factory, admin, staff):
+    """Forms send the current owner back unchanged; that must not count as reassigning."""
+    contact = factory.contact(staff)
+    staff.is_active = False
+    db.commit()
+
+    response = client.patch(
+        f"/api/contacts/{contact.id}",
+        headers=auth(admin),
+        json={"last_name": "Updated", "owner_id": staff.id},
+    )
+
+    assert response.status_code == 200, response.text
+    assert response.json()["owner"]["id"] == staff.id
+
+
+def test_assigning_to_a_deactivated_user_is_still_refused(
+    client, db, factory, admin, staff, make_user
+):
+    contact = factory.contact(staff)
+    inactive = make_user(is_active=False)
+
+    response = client.patch(
+        f"/api/contacts/{contact.id}", headers=auth(admin), json={"owner_id": inactive.id}
+    )
+
+    assert response.status_code == 422
