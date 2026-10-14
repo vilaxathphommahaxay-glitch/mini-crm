@@ -1,4 +1,4 @@
-import { BASE, check, login, logout, shot, start } from '../lib.mjs'
+import { BASE, check, login, logout, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start()
 try {
@@ -53,6 +53,9 @@ try {
   await shot(page, 'p6-tablet')
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

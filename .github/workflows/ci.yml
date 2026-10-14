@@ -94,3 +94,4 @@ jobs:
         with:
           name: e2e-output
           path: e2e/.output/
+          include-hidden-files: true  # .output starts with a dot

@@ -1,5 +1,5 @@
 // Records owned by a disabled user must stay editable, and the form must show the real owner.
-import { BASE, check, login, start } from '../lib.mjs'
+import { BASE, check, login, saveFailure, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start()
 const main = page.locator('main')
@@ -42,6 +42,9 @@ try {
 
   await setActive('Keo Phommachanh', true)
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

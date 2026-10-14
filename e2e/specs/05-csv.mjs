@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs'
-import { BASE, SHOTS, check, login, shot, start } from '../lib.mjs'
+import { BASE, SHOTS, check, login, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start()
 const main = page.locator('main')
@@ -80,6 +80,9 @@ try {
   check((await page.getByRole('dialog').getByRole('alert').textContent()).length > 5, 'bad file shows an error message')
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

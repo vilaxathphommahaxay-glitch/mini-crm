@@ -1,5 +1,5 @@
 // Ctrl+K quick search and the deal page (timeline, stage change, links).
-import { BASE, check, login, shot, start } from '../lib.mjs'
+import { BASE, check, login, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start()
 const main = page.locator('main')
@@ -82,6 +82,9 @@ try {
   check(true, 'search button on phones')
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

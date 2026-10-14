@@ -1,5 +1,5 @@
 // A manager's tasks: compare the team, then hand a leaving salesperson's records to someone else.
-import { BASE, check, login, logout, shot, start } from '../lib.mjs'
+import { BASE, check, login, logout, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start({ width: 1440, height: 1000 })
 const main = page.locator('main')
@@ -61,6 +61,9 @@ try {
   check(after === somchaiBefore + moved, `Somchai sees ${somchaiBefore} + ${moved} = ${after} contacts`)
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

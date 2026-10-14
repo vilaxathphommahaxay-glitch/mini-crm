@@ -1,4 +1,4 @@
-import { BASE, check, login, shot, start } from '../lib.mjs'
+import { BASE, check, login, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start({ width: 1920, height: 1000 })
 const column = (name) => page.getByRole('region', { name: `${name} column` })
@@ -98,6 +98,9 @@ try {
   await shot(page, 'p8-board-after')
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

@@ -1,5 +1,6 @@
 // Shared helpers for the browser tests (Playwright driving an installed Chrome or Edge).
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
 
@@ -60,4 +61,16 @@ export function check(condition, message) {
 
 export async function shot(page, name) {
   await page.screenshot({ path: `${SHOTS}${name}.png`, fullPage: true })
+}
+
+/** On failure: screenshot + HTML of the page, named after the spec, for CI artifacts. */
+export async function saveFailure(page) {
+  const name = `FAILED-${basename(process.argv[1], '.mjs')}`
+  try {
+    await page.screenshot({ path: `${SHOTS}${name}.png`, fullPage: true })
+    writeFileSync(`${SHOTS}${name}.html`, await page.content())
+    console.log(`  saved ${name}.png/.html`)
+  } catch (error) {
+    console.log(`  could not save failure output: ${error.message}`)
+  }
 }

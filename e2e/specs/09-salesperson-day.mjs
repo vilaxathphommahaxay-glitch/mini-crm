@@ -1,6 +1,6 @@
 // A salesperson's day: new customer from an unknown company, log the call with a follow-up,
 // open a deal, and see deals that have no next step on the dashboard.
-import { BASE, check, login, shot, start } from '../lib.mjs'
+import { BASE, check, login, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start()
 const main = page.locator('main')
@@ -115,6 +115,9 @@ try {
   await shot(page, 'p13-dashboard')
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }

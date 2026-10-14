@@ -1,4 +1,4 @@
-import { BASE, check, login, shot, start } from '../lib.mjs'
+import { BASE, check, login, saveFailure, shot, start } from '../lib.mjs'
 
 const { browser, page, problems } = await start({ width: 390, height: 844 })
 try {
@@ -19,6 +19,9 @@ try {
   const pageScroll = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
   check(pageScroll, 'pipeline: only the board scrolls sideways, not the page')
   check(problems.length === 0, `no errors ${problems.join(' | ')}`)
+} catch (error) {
+  await saveFailure(page)
+  throw error
 } finally {
   await browser.close()
 }
