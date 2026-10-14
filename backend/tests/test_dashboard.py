@@ -119,3 +119,40 @@ def test_deals_without_a_next_step(client, factory, staff, other_staff):
     assert block["count"] == 3
     assert forgotten.id in {d["id"] for d in block["items"]}
     assert block["items"][0]["contact"]["name"] == "Noy"
+
+
+def test_team_overview(client, factory, admin, staff, other_staff, make_user):
+    headers = auth(admin)
+    clock.freeze(NOW)
+    contact = factory.contact(staff)
+    factory.deal(staff, contact=contact, value=Decimal("100"))
+    factory.deal(staff, contact=contact, value=Decimal("5"), currency="USD")
+    factory.deal(staff, contact=contact, stage=Stage.won, value=Decimal("70"), closed_at=NOW)
+    # won last month: not "this month"
+    factory.deal(
+        staff,
+        contact=contact,
+        stage=Stage.won,
+        value=Decimal("1"),
+        closed_at=datetime(2026, 9, 20, tzinfo=UTC),
+    )
+    factory.activity(staff, due_date=date(2026, 10, 1))
+    make_user(name="Gone", is_active=False)  # owns nothing -> hidden
+
+    rows = {r["user"]["name"]: r for r in client.get("/api/dashboard/team", headers=headers).json()}
+
+    assert set(rows) == {"Admin", "Staff A", "Staff B"}
+    a = rows["Staff A"]
+    assert a["open_deals"] == 2
+    assert a["open_value"] == [
+        {"currency": "LAK", "amount": "100.00"},
+        {"currency": "USD", "amount": "5.00"},
+    ]
+    assert a["won_this_month"] == 1
+    assert a["won_value"] == [{"currency": "LAK", "amount": "70.00"}]
+    assert a["overdue_tasks"] == 1
+    assert rows["Staff B"]["open_deals"] == 0
+
+
+def test_team_overview_is_admin_only(client, staff):
+    assert client.get("/api/dashboard/team", headers=auth(staff)).status_code == 403

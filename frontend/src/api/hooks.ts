@@ -18,6 +18,7 @@ import type {
   Page,
   SearchResults,
   Stage,
+  TeamMember,
   User,
 } from './types'
 
@@ -140,5 +141,13 @@ export function useSearch(q: string) {
     enabled: q.trim().length > 0,
     placeholderData: keepPreviousData, // no flicker between keystrokes
     staleTime: 10_000,
+  })
+}
+
+export function useTeam(enabled: boolean) {
+  return useQuery({
+    queryKey: ['dashboard', 'team'],
+    queryFn: () => api<TeamMember[]>('/dashboard/team'),
+    enabled,
   })
 }

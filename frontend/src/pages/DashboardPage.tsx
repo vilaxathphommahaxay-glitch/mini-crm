@@ -5,6 +5,7 @@ import { STAGE_LABELS } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { StageBadge } from '../components/badges'
+import { TeamTable } from '../components/TeamTable'
 import { Button } from '../components/ui/Button'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
@@ -139,6 +140,10 @@ export function DashboardPage() {
               </table>
             </Card>
           </div>
+
+          {isAdmin && !values.owner_id && (
+            <TeamTable onSelect={(id) => set({ owner_id: String(id) })} />
+          )}
 
           <Card>
             <CardHeader title={`Deals without a next step (${summary.data.no_next_step.count})`} />

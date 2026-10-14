@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.access import scope
 from app.clock import app_tz, local_today
-from app.deps import CurrentUser, DbSession
+from app.deps import AdminUser, CurrentUser, DbSession
 from app.models import CLOSED_STAGES, STAGES, Activity, Deal, Stage, User
 from app.pipeline import totals_by_currency
 from app.routers.activities import LOAD, Due, filter_due
-from app.schemas.dashboard import DashboardSummary
+from app.schemas.dashboard import DashboardSummary, TeamMember
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -107,3 +107,55 @@ def summary(user: CurrentUser, db: DbSession, owner_id: int | None = None):
         "tasks": _tasks(db, user, owner_id),
         "no_next_step": _deals_without_next_step(db, user, owner_id),
     }
+
+
+@router.get("/team", response_model=list[TeamMember])
+def team(_: AdminUser, db: DbSession):
+    """Per-person overview for managers: open pipeline, wins this month, overdue tasks."""
+    today = local_today()
+    month_start = datetime(today.year, today.month, 1, tzinfo=app_tz()).astimezone(UTC)
+
+    open_rows = db.execute(
+        select(Deal.owner_id, Deal.currency, func.count(), func.sum(Deal.value))
+        .where(Deal.stage.not_in(CLOSED_STAGES))
+        .group_by(Deal.owner_id, Deal.currency)
+    ).all()
+    won_rows = db.execute(
+        select(Deal.owner_id, Deal.currency, func.count(), func.sum(Deal.value))
+        .where(Deal.stage == Stage.won, Deal.closed_at >= month_start)
+        .group_by(Deal.owner_id, Deal.currency)
+    ).all()
+    overdue = dict(
+        db.execute(
+            filter_due(
+                select(Activity.owner_id, func.count()).where(Activity.done.is_(False)),
+                Due.overdue,
+            ).group_by(Activity.owner_id)
+        ).all()
+    )
+
+    def per_owner(rows):
+        counts: dict[int, int] = defaultdict(int)
+        sums: dict[int, list] = defaultdict(list)
+        for owner, currency, count, total in rows:
+            counts[owner] += count
+            sums[owner].append((currency, total))
+        return counts, sums
+
+    open_counts, open_sums = per_owner(open_rows)
+    won_counts, won_sums = per_owner(won_rows)
+    users = db.scalars(select(User).order_by(User.is_active.desc(), User.name)).all()
+    return [
+        {
+            "user": u,
+            "is_active": u.is_active,
+            "open_deals": open_counts[u.id],
+            "open_value": totals_by_currency(open_sums[u.id]),
+            "won_this_month": won_counts[u.id],
+            "won_value": totals_by_currency(won_sums[u.id]),
+            "overdue_tasks": overdue.get(u.id, 0),
+        }
+        for u in users
+        # skip disabled people who no longer own anything open
+        if u.is_active or open_counts[u.id] or overdue.get(u.id)
+    ]

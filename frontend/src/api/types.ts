@@ -155,3 +155,13 @@ export interface SearchResults {
     contact: Ref
   }[]
 }
+
+export interface TeamMember {
+  user: Ref
+  is_active: boolean
+  open_deals: number
+  open_value: CurrencyTotal[]
+  won_this_month: number
+  won_value: CurrencyTotal[]
+  overdue_tasks: number
+}

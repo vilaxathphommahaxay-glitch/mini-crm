@@ -2,7 +2,7 @@ from datetime import datetime
 
 from app.models import Currency, Stage
 from app.schemas.activities import ActivityOut
-from app.schemas.common import ContactRef, OutputModel
+from app.schemas.common import ContactRef, OutputModel, UserRef
 from app.schemas.deals import CurrencyTotal, Money
 
 
@@ -45,3 +45,13 @@ class DashboardSummary(OutputModel):
     won_by_month: list[MonthTotal]
     tasks: TaskSummary
     no_next_step: NoNextStep
+
+
+class TeamMember(OutputModel):
+    user: UserRef
+    is_active: bool
+    open_deals: int
+    open_value: list[CurrencyTotal]
+    won_this_month: int
+    won_value: list[CurrencyTotal]
+    overdue_tasks: int
