@@ -19,6 +19,7 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 - **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
+- **For managers** — a team table (open pipeline, wins this month, overdue tasks per person) and a one-click *Transfer records* when someone leaves.
 - **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
 
 ## Quick start (Docker)

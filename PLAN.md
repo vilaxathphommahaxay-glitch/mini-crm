@@ -247,3 +247,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
   - สร้างบริษัทใหม่ได้จากฟอร์ม contact (`company_name` ใน API; ชื่อซ้ำ → ใช้บริษัทเดิม)
   - บันทึกการโทร/ประชุมพร้อมนัดงานติดตามในฟอร์มเดียว; ปุ่ม "Log activity" เริ่มที่ Call; ช่องวันที่มีเฉพาะ Task/Meeting
   - Dashboard: "Deals without a next step" (ดีลที่เปิดอยู่แต่ไม่มีงานค้าง) + ปุ่ม Add task
+- [x] จากการลองใช้แบบผู้จัดการ (e2e `10-manager`):
+  - `POST /users/{id}/transfer` โอน companies/contacts/deals/activities ทั้งหมดให้อีกคน (admin เท่านั้น)
+  - `GET /dashboard/team` + ตาราง Team บน Dashboard ของ admin (คลิกชื่อเพื่อกรอง)
+  - ข้อมูลตัวอย่างมีประวัติย้อนหลัง (วันที่สร้าง/แก้ไขกระจายหลายเดือน)

@@ -92,6 +92,15 @@ def wipe(db: Session) -> None:
     db.commit()
 
 
+def _backdate(rows, rng: random.Random, now, max_days: int) -> None:
+    """Give demo rows a believable history instead of all being created "today"."""
+    for row in rows:
+        age = timedelta(days=rng.randint(max_days // 2, max_days), hours=rng.randint(0, 23))
+        created = now - age
+        row.created_at = created
+        row.updated_at = min(now, created + timedelta(days=rng.randint(0, max_days // 2)))
+
+
 def seed(db: Session, rng: random.Random | None = None) -> None:
     rng = rng or random.Random(42)
     now = utcnow()
@@ -118,6 +127,7 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
         )
         for i, name in enumerate(COMPANY_NAMES)
     ]
+    _backdate(companies, rng, now, 300)
     db.add_all(companies)
 
     contacts = []
@@ -137,6 +147,7 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
                 tags=rng.sample(list(tags.values()), k=rng.randint(0, 2)),
             )
         )
+    _backdate(contacts, rng, now, 200)
     db.add_all(contacts)
 
     positions = dict.fromkeys(Stage, 0)
@@ -187,6 +198,11 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
             )
         )
         positions[Stage.won] += 1
+    _backdate(deals, rng, now, 90)
+    for deal in deals:  # a deal can't have been closed before it existed
+        if deal.closed_at is not None:
+            deal.created_at = min(deal.created_at, deal.closed_at - timedelta(days=7))
+            deal.updated_at = max(deal.updated_at, deal.closed_at)
     db.add_all(deals)
 
     # Tasks: overdue / today / upcoming / later / done. Other types are past events.

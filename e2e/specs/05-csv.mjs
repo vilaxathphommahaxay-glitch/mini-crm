@@ -6,7 +6,9 @@ const main = page.locator('main')
 
 try {
   await login(page, 'somchai@example.com', 'staff123')
-  await page.goto(`${BASE}/contacts?tag=vip`)
+  await page.goto(`${BASE}/contacts`)
+  const tag = await page.getByLabel('Filter by tag').locator('option').nth(1).getAttribute('value')
+  await page.goto(`${BASE}/contacts?tag=${tag}`)
   await main.getByRole('table').waitFor()
   const visibleVip = await main.locator('tbody tr').count()
 
@@ -21,7 +23,7 @@ try {
   check(raw[0] === 0xef && raw[1] === 0xbb && raw[2] === 0xbf, 'export starts with a UTF-8 BOM')
   check(/^contacts-\d{4}-\d{2}-\d{2}\.csv$/.test(download.suggestedFilename()), `filename ${download.suggestedFilename()}`)
   const lines = raw.toString('utf8').trim().split('\r\n')
-  check(lines.length - 1 === visibleVip, `exported ${lines.length - 1} rows = ${visibleVip} shown with tag=vip`)
+  check(lines.length - 1 === visibleVip, `exported ${lines.length - 1} rows = ${visibleVip} shown with tag=${tag}`)
 
   // template download
   await main.getByRole('button', { name: 'Import CSV' }).click()

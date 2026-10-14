@@ -24,11 +24,13 @@ try {
   await page.waitForTimeout(500)
 
   // tag filter
-  await page.getByLabel('Filter by tag').selectOption('vip')
-  await page.waitForURL(/tag=vip/)
+  // first tag that this user's contacts actually use
+  const tag = await page.getByLabel('Filter by tag').locator('option').nth(1).getAttribute('value')
+  await page.getByLabel('Filter by tag').selectOption(tag)
+  await page.waitForURL(new RegExp(`tag=${tag}`))
   await page.waitForTimeout(300)
   const tagCells = await main.locator('tbody tr td:nth-child(5)').allTextContents()
-  check(tagCells.length > 0 && tagCells.every((t) => t.includes('vip')), 'tag filter shows only vip')
+  check(tagCells.length > 0 && tagCells.every((t) => t.includes(tag)), `tag filter shows only "${tag}"`)
   await page.getByLabel('Filter by tag').selectOption('')
 
   // create a contact
