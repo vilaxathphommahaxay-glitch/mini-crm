@@ -1,9 +1,16 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import type { Contact } from '../api/types'
 import { mockApi, renderApp, signIn, staffUser } from '../test/utils'
+
+// Make the contact page's code load slowly, like on a slow phone: while it loads, React keeps the
+// list page on screen, which is exactly when a leftover search timer used to pull users back.
+vi.mock('./ContactDetailPage', async (importOriginal) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  return importOriginal()
+})
 
 const noy: Contact = {
   id: 7,

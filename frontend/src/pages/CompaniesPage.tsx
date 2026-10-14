@@ -20,7 +20,7 @@ export function CompaniesPage() {
   const isAdmin = useCurrentUser().role === 'admin'
   const navigate = useNavigate()
   const { values, page, set } = useUrlFilters(['search', 'owner_id'] as const)
-  const [searchInput, onSearchChange] = useDebouncedInput(values.search, (search) =>
+  const [searchInput, onSearchChange, commitSearch] = useDebouncedInput(values.search, (search) =>
     set({ search }),
   )
   const [creating, setCreating] = useState(false)
@@ -58,6 +58,7 @@ export function CompaniesPage() {
               className="pl-9"
               value={searchInput}
               onChange={(e) => onSearchChange(e.target.value)}
+              onBlur={commitSearch}
             />
           </div>
           {isAdmin && (

@@ -32,18 +32,33 @@ export const toId = (value: string): number | undefined => (value ? Number(value
 
 /**
  * A search box that updates instantly but commits (e.g. to the URL) only after typing stops.
- * The pending commit is cancelled when the page unmounts — otherwise clicking a result within
- * the delay would run it after navigating away and yank the user back to the list.
+ *
+ * Leaving the box (blur) commits right away and cancels the timer. That ordering matters: when
+ * someone types and then clicks a result, the blur happens before the click, so the search is
+ * saved first and the click's navigation comes last. A timer left running could fire *after*
+ * the click — while the next page is still loading the list page is still mounted — and pull
+ * the user back to the list.
  */
 export function useDebouncedInput(initial: string, commit: (value: string) => void, delayMs = 300) {
   const [text, setText] = useState(initial)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const pending = useRef<string | null>(null)
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  function flush() {
+    clearTimeout(timer.current)
+    if (pending.current !== null) {
+      const value = pending.current
+      pending.current = null
+      commit(value)
+    }
+  }
 
   function onChange(value: string) {
     setText(value)
+    pending.current = value.trim()
     clearTimeout(timer.current)
-    timer.current = setTimeout(() => commit(value.trim()), delayMs)
+    timer.current = setTimeout(flush, delayMs)
   }
-  return [text, onChange] as const
+  return [text, onChange, flush] as const
 }
