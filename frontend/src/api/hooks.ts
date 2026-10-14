@@ -81,7 +81,8 @@ function useDelete(resource: string) {
 }
 
 // --- contacts / companies / tags ---
-export const useContacts = (params: Params) => useList<Contact>('contacts', params)
+export const useContacts = (params: Params, enabled = true) =>
+  useList<Contact>('contacts', params, enabled)
 export const useContact = (id?: number) => useOne<Contact>('contacts', id)
 export const useSaveContact = () => useSave<Contact>('contacts')
 export const useDeleteContact = () => useDelete('contacts')
@@ -126,10 +127,18 @@ export const useUsers = (params: Params, enabled = true) => useList<User>('users
 export const useSaveUser = () => useSave<User>('users')
 
 // --- dashboard ---
-export function useDashboard(ownerId?: number) {
+export function useDashboard(ownerId?: number, allWithoutNextStep = false) {
+  const limit = allWithoutNextStep ? 200 : undefined
   return useQuery({
-    queryKey: ['dashboard', ownerId ?? null],
-    queryFn: () => api<DashboardSummary>('/dashboard/summary', { query: { owner_id: ownerId } }),
+    queryKey: ['dashboard', ownerId ?? null, limit ?? null],
+    queryFn: () =>
+      api<DashboardSummary>('/dashboard/summary', {
+        query: { owner_id: ownerId, no_next_step_limit: limit },
+      }),
+    // Expanding the list keeps the page on screen, but another person's numbers must never
+    // stand in for the one just selected.
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === (ownerId ?? null) ? previous : undefined,
   })
 }
 

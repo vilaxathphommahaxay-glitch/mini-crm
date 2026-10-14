@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { useForm, useWatch } from 'react-hook-form'
-import { useSaveContact } from '../api/hooks'
+import { useContacts, useSaveContact } from '../api/hooks'
 import type { Contact } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { useToast } from '../components/toast/context'
@@ -64,6 +65,18 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
 
   const newCompany = useWatch({ control, name: 'company_id' }) === NEW_COMPANY
 
+  // Warn (but don't block) when the email already belongs to another contact.
+  const email = useWatch({ control, name: 'email' }).trim().toLowerCase()
+  const [lookup, setLookup] = useState('')
+  useEffect(() => {
+    const timer = setTimeout(() => setLookup(/^\S+@\S+\.\S+$/.test(email) ? email : ''), 400)
+    return () => clearTimeout(timer)
+  }, [email])
+  const matches = useContacts({ search: lookup, size: 5 }, lookup !== '')
+  const duplicate = lookup
+    ? matches.data?.items.find((c) => c.email === lookup && c.id !== contact?.id)
+    : undefined
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
     try {
@@ -86,9 +99,23 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
         <Field label="Last name" error={errors.last_name?.message}>
           {(c) => <Input {...c} {...register('last_name')} autoComplete="off" />}
         </Field>
-        <Field label="Email" error={errors.email?.message}>
-          {(c) => <Input {...c} {...register('email')} type="email" autoComplete="off" />}
-        </Field>
+        <div>
+          <Field label="Email" error={errors.email?.message}>
+            {(c) => <Input {...c} {...register('email')} type="email" autoComplete="off" />}
+          </Field>
+          {duplicate && (
+            <p role="status" className="mt-1 text-xs text-amber-700">
+              Already in your contacts:{' '}
+              <Link
+                to={`/contacts/${duplicate.id}`}
+                onClick={onClose}
+                className="font-medium underline hover:text-amber-900"
+              >
+                {duplicate.full_name}
+              </Link>
+            </p>
+          )}
+        </div>
         <Field label="Phone" error={errors.phone?.message}>
           {(c) => <Input {...c} {...register('phone')} type="tel" autoComplete="off" />}
         </Field>
