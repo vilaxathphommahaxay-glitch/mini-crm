@@ -42,5 +42,25 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Automatic backups to ./backups: one at start-up, then daily; 14 days are kept.
+  # Restore with: ./scripts/restore.sh backups/crm-YYYYMMDD-HHMMSS.sql.gz
+  backup:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-crm}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-crm}
+      PGDATABASE: ${POSTGRES_DB:-crm}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup-loop.sh:/backup-loop.sh:ro
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   db-data:
