@@ -15,6 +15,8 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 ## Features
 
 - **Quick search (Ctrl+K / ⌘K)** — find any contact, company or deal from anywhere; arrow keys and Enter to open.
+- **One tap to reach a customer** — *Call* and *WhatsApp* buttons on every contact; Lao numbers in local format (`020 …`) are converted for WhatsApp automatically.
+- **Installable on phones** — “Add to Home screen” gives the app its own icon and opens it full screen.
 - **Contacts and companies** — add a contact and a brand-new company in one form; search across name, email, phone and company; filter by tag and owner; filters live in the URL.
 - **Deals and a Kanban pipeline** — every deal has its own page with an activity timeline; six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
 - **Activities and tasks** — log calls, meetings and notes on a contact's or deal's timeline and schedule the follow-up in the same form; tasks show up under *Today*, *Overdue* and *Next 7 days*.
@@ -48,12 +50,14 @@ The interactive API documentation is at **http://localhost:8080/api/docs**.
 
 ### Backups
 
+The `backup` service saves the database to `backups/` **automatically** — once when it starts and then every day — and keeps the last 14 days (`BACKUP_INTERVAL_SECONDS`, `BACKUP_KEEP_DAYS`). File names use UTC time. Copy the folder somewhere safe now and then (it is git-ignored).
+
 ```bash
-./scripts/backup.sh                                   # -> backups/crm-YYYYMMDD-HHMMSS.sql.gz
+./scripts/backup.sh                                   # an extra backup right now
 ./scripts/restore.sh backups/crm-20261014-120000.sql.gz   # asks you to type "restore" first
 ```
 
-Run them from Git Bash on Windows. Copy the `backups/` folder somewhere safe (it is git-ignored); a daily scheduled backup is a good idea for real use.
+Run the scripts from Git Bash on Windows.
 
 ## Languages
 
