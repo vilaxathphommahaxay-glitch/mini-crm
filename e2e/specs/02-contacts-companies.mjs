@@ -61,6 +61,7 @@ try {
   // log an activity on the timeline
   await main.getByRole('button', { name: 'Log activity' }).click()
   const actDialog = page.getByRole('dialog')
+  await actDialog.getByLabel('Type').selectOption('task')
   await actDialog.getByLabel(/Subject/).fill('Call about pricing')
   await actDialog.getByLabel('Due date').fill('2030-01-15')
   await actDialog.getByRole('button', { name: 'Save' }).click()

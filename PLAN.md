@@ -243,3 +243,7 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] ค้นหาทั้งระบบ `GET /search?q=&limit=` + หน้าต่างค้นหา Ctrl+K (contacts, companies, deals ตามสิทธิ์)
 - [x] หน้ารายละเอียดดีล `/deals/:id`: timeline กิจกรรมของดีล, บันทึกกิจกรรม, เปลี่ยนขั้น, ลิงก์ไป contact/company
 - [x] Browser tests (`e2e/`) และ CI (GitHub Actions)
+- [x] จากการลองใช้จริงแบบพนักงานขาย (e2e `09-salesperson-day`):
+  - สร้างบริษัทใหม่ได้จากฟอร์ม contact (`company_name` ใน API; ชื่อซ้ำ → ใช้บริษัทเดิม)
+  - บันทึกการโทร/ประชุมพร้อมนัดงานติดตามในฟอร์มเดียว; ปุ่ม "Log activity" เริ่มที่ Call; ช่องวันที่มีเฉพาะ Task/Meeting
+  - Dashboard: "Deals without a next step" (ดีลที่เปิดอยู่แต่ไม่มีงานค้าง) + ปุ่ม Add task

@@ -8,11 +8,22 @@ import { useToast } from '../components/toast/context'
 import { Field, FormError, Input, Select, Textarea } from '../components/ui/form'
 import { Modal } from '../components/ui/Modal'
 import { FormFooter } from './FormFooter'
-import { activitySchema, toActivityBody, type ActivityFormValues } from './schemas'
+import { addDaysISO } from '../lib/format'
+import { activitySchema, toActivityBody, toFollowUpBody, type ActivityFormValues } from './schemas'
 import { ContactSelect, DealSelect, OwnerSelect } from './selects'
 import { applyServerErrors } from './serverErrors'
 
-const FIELDS = Object.keys(activitySchema.shape)
+const FIELDS = [
+  'type',
+  'subject',
+  'description',
+  'due_date',
+  'done',
+  'contact_id',
+  'deal_id',
+  'owner_id',
+]
+const FOLLOW_UP_DAYS = 3
 
 interface Props {
   activity?: Activity
@@ -53,16 +64,34 @@ function ActivityForm({
       contact_id: String(activity?.contact?.id ?? contactId ?? ''),
       deal_id: String(activity?.deal?.id ?? dealId ?? ''),
       owner_id: activity ? String(activity.owner.id) : '',
+      follow_up: false,
+      follow_up_subject: 'Follow up',
+      follow_up_date: addDaysISO(FOLLOW_UP_DAYS),
     },
   })
   const selectedContact = useWatch({ control, name: 'contact_id' })
+  const type = useWatch({ control, name: 'type' })
+  const followUp = useWatch({ control, name: 'follow_up' })
+  // a logged call/meeting/note can schedule its next step in the same form
+  const canFollowUp = !activity && type !== 'task'
+  const showDate = type === 'task' || type === 'meeting' || Boolean(activity?.due_date)
   const lockedContact = contactId !== undefined && !activity
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
+    // a hidden date (e.g. switched from Task to Call) must not be saved
+    const body = showDate ? values : { ...values, due_date: '', done: false }
     try {
-      await save.mutateAsync({ id: activity?.id, body: toActivityBody(values) })
-      toast.success(activity ? 'Activity updated' : 'Activity saved')
+      await save.mutateAsync({ id: activity?.id, body: toActivityBody(body) })
+      const next = canFollowUp ? toFollowUpBody(values) : null
+      if (next) await save.mutateAsync({ body: next })
+      toast.success(
+        activity
+          ? 'Activity updated'
+          : next
+            ? 'Activity saved, follow-up scheduled'
+            : 'Activity saved',
+      )
       onClose()
     } catch (error) {
       setFormError(applyServerErrors(error, setError, FIELDS))
@@ -91,19 +120,26 @@ function ActivityForm({
       <Field label="Details" error={errors.description?.message}>
         {(c) => <Textarea {...c} {...register('description')} />}
       </Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Due date" error={errors.due_date?.message} hint="Leave empty for a log entry">
-          {(c) => <Input {...c} {...register('due_date')} type="date" />}
-        </Field>
-        <label className="flex items-center gap-2 self-center text-sm text-slate-700 sm:mt-6">
-          <input
-            type="checkbox"
-            {...register('done')}
-            className="size-4 rounded border-slate-300"
-          />
-          Done
-        </label>
-      </div>
+      {/* calls and notes record what already happened; tasks and meetings have a date */}
+      {showDate && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label={type === 'meeting' ? 'Date' : 'Due date'}
+            error={errors.due_date?.message}
+            hint={type === 'meeting' ? 'Set it for an upcoming meeting' : undefined}
+          >
+            {(c) => <Input {...c} {...register('due_date')} type="date" />}
+          </Field>
+          <label className="flex items-center gap-2 self-center text-sm text-slate-700 sm:mt-6">
+            <input
+              type="checkbox"
+              {...register('done')}
+              className="size-4 rounded border-slate-300"
+            />
+            Done
+          </label>
+        </div>
+      )}
       {!lockedContact && (
         <Field label="Contact" error={errors.contact_id?.message}>
           {(c) => <ContactSelect {...c} {...register('contact_id')} />}
@@ -118,6 +154,28 @@ function ActivityForm({
         <Field label="Owner" error={errors.owner_id?.message}>
           {(c) => <OwnerSelect {...c} {...register('owner_id')} current={activity?.owner} />}
         </Field>
+      )}
+      {canFollowUp && (
+        <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              {...register('follow_up')}
+              className="size-4 rounded border-slate-300"
+            />
+            Schedule a follow-up task
+          </label>
+          {followUp && (
+            <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_11rem]">
+              <Field label="Next step" required error={errors.follow_up_subject?.message}>
+                {(c) => <Input {...c} {...register('follow_up_subject')} autoComplete="off" />}
+              </Field>
+              <Field label="Due" required error={errors.follow_up_date?.message}>
+                {(c) => <Input {...c} {...register('follow_up_date')} type="date" />}
+              </Field>
+            </div>
+          )}
+        </div>
       )}
       <FormFooter onCancel={onClose} saving={save.isPending} />
     </form>

@@ -30,16 +30,24 @@ function ownerPart(ownerId: string) {
 }
 
 // --- contact ---
-export const contactSchema = z.object({
-  first_name: requiredText('First name', 100),
-  last_name: optionalText(100),
-  email: emailField,
-  phone: optionalText(50),
-  company_id: z.string(),
-  tags: z.string().refine((v) => parseTags(v).every((t) => t.length <= 50), 'Tags are too long'),
-  notes: z.string(),
-  owner_id: z.string(),
-})
+export const NEW_COMPANY = 'new' // the "+ New company…" choice in the company select
+
+export const contactSchema = z
+  .object({
+    first_name: requiredText('First name', 100),
+    last_name: optionalText(100),
+    email: emailField,
+    phone: optionalText(50),
+    company_id: z.string(),
+    company_name: optionalText(200),
+    tags: z.string().refine((v) => parseTags(v).every((t) => t.length <= 50), 'Tags are too long'),
+    notes: z.string(),
+    owner_id: z.string(),
+  })
+  .refine((v) => v.company_id !== NEW_COMPANY || v.company_name.trim() !== '', {
+    path: ['company_name'],
+    message: 'Type the new company name',
+  })
 export type ContactFormValues = z.infer<typeof contactSchema>
 
 export function toContactBody(v: ContactFormValues) {
@@ -48,7 +56,10 @@ export function toContactBody(v: ContactFormValues) {
     last_name: blankToNull(v.last_name),
     email: blankToNull(v.email),
     phone: blankToNull(v.phone),
-    company_id: idOrNull(v.company_id),
+    // a new company is sent by name; the API reuses one with that name if it already exists
+    ...(v.company_id === NEW_COMPANY
+      ? { company_name: v.company_name.trim() }
+      : { company_id: idOrNull(v.company_id) }),
     tags: parseTags(v.tags),
     notes: blankToNull(v.notes),
     ...ownerPart(v.owner_id),
@@ -112,16 +123,29 @@ export function toDealBody(v: DealFormValues, isNew: boolean) {
 }
 
 // --- activity ---
-export const activitySchema = z.object({
-  type: z.enum(['call', 'meeting', 'note', 'task']),
-  subject: requiredText('Subject', 200),
-  description: z.string(),
-  due_date: z.string(),
-  done: z.boolean(),
-  contact_id: z.string(),
-  deal_id: z.string(),
-  owner_id: z.string(),
-})
+export const activitySchema = z
+  .object({
+    type: z.enum(['call', 'meeting', 'note', 'task']),
+    subject: requiredText('Subject', 200),
+    description: z.string(),
+    due_date: z.string(),
+    done: z.boolean(),
+    contact_id: z.string(),
+    deal_id: z.string(),
+    owner_id: z.string(),
+    // optional next step created together with a logged call/meeting/note
+    follow_up: z.boolean(),
+    follow_up_subject: optionalText(200),
+    follow_up_date: z.string(),
+  })
+  .refine((v) => !v.follow_up || v.follow_up_subject.trim() !== '', {
+    path: ['follow_up_subject'],
+    message: 'What needs to happen next?',
+  })
+  .refine((v) => !v.follow_up || v.follow_up_date !== '', {
+    path: ['follow_up_date'],
+    message: 'Pick a date',
+  })
 export type ActivityFormValues = z.infer<typeof activitySchema>
 
 export function toActivityBody(v: ActivityFormValues) {
@@ -131,6 +155,19 @@ export function toActivityBody(v: ActivityFormValues) {
     description: blankToNull(v.description),
     due_date: v.due_date || null,
     done: v.done,
+    contact_id: idOrNull(v.contact_id),
+    deal_id: idOrNull(v.deal_id),
+    ...ownerPart(v.owner_id),
+  }
+}
+
+/** The follow-up task that goes with a logged activity, or null. */
+export function toFollowUpBody(v: ActivityFormValues) {
+  if (!v.follow_up || v.type === 'task') return null
+  return {
+    type: 'task' as ActivityType,
+    subject: v.follow_up_subject.trim(),
+    due_date: v.follow_up_date,
     contact_id: idOrNull(v.contact_id),
     deal_id: idOrNull(v.deal_id),
     ...ownerPart(v.owner_id),

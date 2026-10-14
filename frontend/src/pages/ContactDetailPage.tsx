@@ -147,7 +147,12 @@ export function ContactDetailPage() {
       </div>
 
       <ContactFormModal open={editing} contact={c} onClose={() => setEditing(false)} />
-      <ActivityFormModal open={logging} contactId={c.id} onClose={() => setLogging(false)} />
+      <ActivityFormModal
+        open={logging}
+        defaultType="call"
+        contactId={c.id}
+        onClose={() => setLogging(false)}
+      />
       <DealFormModal open={creatingDeal} contactId={c.id} onClose={() => setCreatingDeal(false)} />
       <ConfirmDialog
         open={deleting}

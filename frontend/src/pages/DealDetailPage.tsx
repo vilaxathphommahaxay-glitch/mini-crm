@@ -172,6 +172,7 @@ export function DealDetailPage() {
       />
       <ActivityFormModal
         open={logging}
+        defaultType="call"
         contactId={d.contact.id}
         dealId={d.id}
         onClose={() => setLogging(false)}

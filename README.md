@@ -13,10 +13,10 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 ## Features
 
 - **Quick search (Ctrl+K / ⌘K)** — find any contact, company or deal from anywhere; arrow keys and Enter to open.
-- **Contacts and companies** — search across name, email, phone and company; filter by tag and owner; filters live in the URL.
+- **Contacts and companies** — add a contact and a brand-new company in one form; search across name, email, phone and company; filter by tag and owner; filters live in the URL.
 - **Deals and a Kanban pipeline** — every deal has its own page with an activity timeline; six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
-- **Activities and tasks** — log calls, meetings and notes on a contact's timeline; tasks with due dates show up under *Today*, *Overdue* and *Next 7 days*.
-- **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage.
+- **Activities and tasks** — log calls, meetings and notes on a contact's or deal's timeline and schedule the follow-up in the same form; tasks show up under *Today*, *Overdue* and *Next 7 days*.
+- **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
 - **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
