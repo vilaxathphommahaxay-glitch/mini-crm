@@ -49,7 +49,7 @@ Port: backend `8000`, frontend dev `5173` (Vite proxy `/api` → backend ไม�
 
 ### ไม่ทำในเวอร์ชันแรก
 ส่งอีเมล/SMS อัตโนมัติ, เชื่อม Facebook/WhatsApp, multi-tenant, แอปมือถือ, แปลงค่าเงิน,
-refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์, audit log, sync แบบ real-time, UI หลายภาษา, rate limiting
+refresh token / ลืมรหัสผ่านทางอีเมล, แนบไฟล์, audit log, sync แบบ real-time, UI หลายภาษา (ทำแล้วหลังส่งงาน: ลาว/อังกฤษ), rate limiting
 
 ## 5. Data model
 ทุกตารางมี `id` (int PK), `created_at`, `updated_at` (timezone-aware, UTC)
@@ -253,3 +253,6 @@ token หมดอายุหรือได้ `401` → ล้าง token �
   - ข้อมูลตัวอย่างมีประวัติย้อนหลัง (วันที่สร้าง/แก้ไขกระจายหลายเดือน)
 - [x] ความพร้อมใช้งานจริง: จำกัดการ login ผิด (5 ครั้ง/อีเมล, 20 ครั้ง/ที่อยู่ ใน 15 นาที → 429),
   security headers + CSP ใน nginx, สคริปต์ `scripts/backup.sh` / `scripts/restore.sh` (ทดสอบ backup → ลบ → restore แล้ว)
+- [x] ภาษาลาว (ผู้ใช้ที่อ่านอังกฤษไม่ออก): UI ทั้งหมด, ข้อความ error จาก server (แปลตาม `code`), ชื่อสกุลเงิน (ກີບ/ບາດ/ໂດລາ),
+  ฟอนต์ Noto Sans Lao ฝังในแอป, ข้อมูลตัวอย่างภาษาลาว (`SEED_LANGUAGE`), ตั้งภาษาเริ่มต้นของทีมได้ (`APP_LOCALE`),
+  ตารางตรวจคำแปลสำหรับเจ้าของภาษา `docs/translation-review.md` — คำแปลยังรอเจ้าของภาษาตรวจ

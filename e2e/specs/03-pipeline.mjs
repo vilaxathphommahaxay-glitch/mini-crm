@@ -85,7 +85,7 @@ try {
   check(q.indexOf(kbTitle) === 1, `ArrowDown reorders within the column (${q.join(', ')})`)
 
   // 6) add deal from a column
-  await column('Proposal').getByRole('button', { name: 'Add deal' }).click()
+  await column('Proposal').getByRole('button', { name: 'New deal' }).click()
   const dialog = page.getByRole('dialog', { name: 'New deal' })
   check((await dialog.getByLabel('Stage').inputValue()) === 'proposal', 'column add preselects stage')
   await dialog.getByLabel(/Title/).fill('E2E board deal')

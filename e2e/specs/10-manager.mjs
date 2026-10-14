@@ -56,8 +56,8 @@ try {
   // Somchai now has Keo's customers
   await login(page, 'somchai@example.com', 'staff123')
   await page.goto(`${BASE}/contacts`)
-  await main.getByText(/contact\(s\)/).waitFor()
-  const after = Number((await main.getByText(/contact\(s\)/).textContent()).match(/\d+/)[0])
+  await main.getByText(/^\d+ contacts?$/).waitFor()
+  const after = Number((await main.getByText(/^\d+ contacts?$/).textContent()).match(/\d+/)[0])
   check(after === somchaiBefore + moved, `Somchai sees ${somchaiBefore} + ${moved} = ${after} contacts`)
 
   check(problems.length === 0, `no console/page/5xx errors ${problems.join(' | ')}`)

@@ -6,7 +6,7 @@ try {
   await login(page, 'somchai@example.com', 'staff123')
   await page.goto(`${BASE}/contacts`)
   await main.getByRole('table').waitFor()
-  const subtitle = await main.getByText(/contact\(s\)/).textContent()
+  const subtitle = await main.getByText(/^\d+ contacts?$/).textContent()
   check(subtitle.startsWith('12 '), `staff sees own 12 contacts (${subtitle})`)
   await shot(page, 'p7-contacts')
 
@@ -119,7 +119,7 @@ try {
   await shot(page, 'p7-company')
   await main.getByRole('button', { name: 'Delete', exact: true }).first().click()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).click()
-  await page.getByRole('alert').filter({ hasText: 'contact(s)' }).waitFor()
+  await page.getByRole('alert').filter({ hasText: /still has \d+ contacts/ }).waitFor()
   check(true, 'company delete refused while it has contacts')
 
   // contact #2 belongs to Keo -> Somchai gets the not-found page

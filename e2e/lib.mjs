@@ -13,7 +13,11 @@ mkdirSync(SHOTS, { recursive: true })
 // `npx playwright install chromium`). Defaults to Edge on Windows, Chrome elsewhere.
 const CHANNEL = process.env.E2E_BROWSER ?? (process.platform === 'win32' ? 'msedge' : 'chrome')
 
-export async function start({ width = 1366, height = 860 } = {}) {
+/**
+ * `initialLocale`: the language the app is told to use before it loads, so specs don't depend on the
+ * stack's APP_LOCALE. Pass null to test first-visit behaviour.
+ */
+export async function start({ width = 1366, height = 860, initialLocale = 'en' } = {}) {
   const browser = await chromium.launch({
     channel: CHANNEL === 'chromium' ? undefined : CHANNEL,
     headless: process.env.HEADED !== '1',
@@ -23,6 +27,9 @@ export async function start({ width = 1366, height = 860 } = {}) {
     // E2E_TZ=UTC reproduces CI, whose runners use UTC
     ...(process.env.E2E_TZ ? { timezoneId: process.env.E2E_TZ } : {}),
   })
+  if (initialLocale) {
+    await page.addInitScript((locale) => localStorage.setItem('crm.locale', locale), initialLocale)
+  }
   const problems = []
   // 'Failed to load resource' is just the browser logging an expected 4xx; 5xx is caught below
   page.on('console', (m) => {

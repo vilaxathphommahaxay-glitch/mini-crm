@@ -23,6 +23,7 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
 - **For managers** — a team table (open pipeline, wins this month, overdue tasks per person) and a one-click *Transfer records* when someone leaves.
 - **Multi-currency** — LAK (default), THB and USD. Totals are always shown per currency, never mixed.
+- **Lao and English** — the whole interface, error messages and demo data are available in Lao (ພາສາລາວ) for people who don't read English. Switch with the EN / ລາວ buttons; see [Languages](#languages).
 
 ## Quick start (Docker)
 
@@ -53,6 +54,19 @@ The interactive API documentation is at **http://localhost:8080/api/docs**.
 ```
 
 Run them from Git Bash on Windows. Copy the `backups/` folder somewhere safe (it is git-ignored); a daily scheduled backup is a good idea for real use.
+
+## Languages
+
+The interface is fully translated into **Lao** and English: every screen, form, validation and server error message, the currency names (ກີບ, ບາດ, ໂດລາ), the chart's month names and the demo data.
+
+- **Switching:** the `EN` / `ລາວ` buttons are on the login page, in the sidebar and under *Settings*. The choice is remembered per browser.
+- **First visit:** follows the browser's language (a Lao browser starts in Lao).
+- **Team default:** to start everyone in Lao no matter what their device is set to, put `APP_LOCALE=lo` in `.env` and run `docker compose up --build`. The demo data then uses Lao names too (`SEED_LANGUAGE`, defaults to `APP_LOCALE`).
+- **Fonts:** Noto Sans Lao is bundled with the app, so Lao text looks the same on every device and works under the strict Content-Security-Policy.
+- **Reviewing the Lao:** [docs/translation-review.md](docs/translation-review.md) lists every text next to its English, with the key words explained. The Lao was written by an AI assistant and should be checked by a native speaker before real use.
+- **CSV files** keep English column names (`first_name`, `email`, …) in the first row so files stay compatible; the import dialog explains each one in Lao.
+
+**Adding or changing text:** add the key to `frontend/src/i18n/en.ts` first, then to `lo.ts` — TypeScript refuses to build if a language is missing a key, and a unit test checks that `{placeholders}` match and that no Lao text is left in English. Server errors carry a `code`; the front end translates by code (`frontend/src/api/errorText.ts`), so the API's own English messages are only a fallback.
 
 ## Local development
 
@@ -86,7 +100,7 @@ npm run dev
 
 ```bash
 # backend (in backend/, venv active)
-pytest                        # 105 tests on in-memory SQLite
+pytest                        # 109 tests on in-memory SQLite
 ruff check . && ruff format --check .
 
 # the same tests on PostgreSQL
@@ -124,7 +138,7 @@ backend/
     pipeline.py      deal ordering, closed_at and per-currency totals
     csv_io.py        CSV import/export
     clock.py         "now" and "today" in the app timezone (freezable in tests)
-    seed.py          demo data
+    seed.py          demo data (English or Lao)
   alembic/           database migrations
   tests/
 frontend/
@@ -133,6 +147,7 @@ frontend/
     auth/            session provider and route guards
     components/      layout, shared UI, activity list, chart
     forms/           react-hook-form + zod forms
+    i18n/            Lao and English text (en.ts is the source of truth)
     lib/             formatting, URL filters, Kanban logic
     pages/           one component per screen
 e2e/                 browser tests (Playwright) against the running app
@@ -158,4 +173,4 @@ PLAN.md              scope, data model, API and the phase-by-phase plan
 - The sign-in rate limit is kept in memory, so it is per backend process; running several workers or servers would need a shared store such as Redis.
 - Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
 - No currency conversion, email/SMS sending, file attachments or audit log (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
-- The UI is English only and has no dark mode.
+- The UI is available in Lao and English only, and has no dark mode.
