@@ -1,10 +1,12 @@
 """Sample data for development and the Docker demo.
 
-python -m app.seed            # seed only if the database is empty
-python -m app.seed --reset    # wipe all data, then seed
+python -m app.seed                 # seed only if the database is empty
+python -m app.seed --reset         # wipe all data, then seed
+python -m app.seed --language lo   # Lao names, companies, deals and notes (or SEED_LANGUAGE=lo)
 """
 
 import argparse
+import os
 import random
 from datetime import timedelta
 from decimal import Decimal
@@ -30,56 +32,189 @@ from app.models import (
 )
 from app.security import hash_password
 
-# Documented in README — demo only.
-SEED_USERS = [
-    ("Admin", "admin@example.com", "admin123", Role.admin),
-    ("Somchai Vongsa", "somchai@example.com", "staff123", Role.staff),
-    ("Keo Phommachanh", "keo@example.com", "staff123", Role.staff),
+# Logins are documented in README — demo only. Emails and passwords are the same in every language.
+LOGINS = [
+    ("admin@example.com", "admin123", Role.admin),
+    ("somchai@example.com", "staff123", Role.staff),
+    ("keo@example.com", "staff123", Role.staff),
 ]
 
-COMPANY_NAMES = [
-    "Vientiane Coffee House",
-    "Mekong Trading",
-    "Luang Prabang Crafts",
-    "Champa Hotel",
-    "Lao Fresh Market",
-    "Pakse Motors",
-    "Sabaidee Travel",
-    "Nam Ngum Water",
-    "Golden Rice Co.",
-    "That Luang Printing",
-]
-
-FIRST_NAMES = [
-    "Bounmy", "Chanthala", "Daovone", "Khamla", "Latsamy", "Manivone", "Noy", "Phet",
-    "Sengphet", "Souksavanh", "Thongdy", "Vanh", "Viengkham", "Xayasith", "Anousone",
-]  # fmt: skip
-LAST_NAMES = [
-    "Keomany", "Phommasack", "Sayavong", "Inthavong", "Douangdy", "Sisouk", "Vilayvong",
-    "Rattanavong", "Chanthavong", "Souvannavong", None,
-]  # fmt: skip
-TAGS = ["vip", "wholesale", "retail", "new", "follow-up", "hotel"]
-
-DEAL_TITLES = [
-    "Coffee machine lease", "Annual supply contract", "Website redesign", "Staff uniforms",
-    "Catering for event", "Delivery van", "POS system", "Room booking package",
-    "Bulk rice order", "Brochure printing", "Water dispenser rental", "Tour package",
-    "Office furniture", "Wedding banquet", "Signage and banners", "Cold storage unit",
-    "Loyalty card program", "Solar panels", "Motorbike fleet service", "Corporate gift boxes",
-]  # fmt: skip
-
-ACTIVITY_SUBJECTS = {
-    ActivityType.call: ["Intro call", "Follow-up call", "Price check call"],
-    ActivityType.meeting: ["Site visit", "Demo meeting", "Contract review"],
-    ActivityType.note: ["Prefers LINE over email", "Budget approved", "Asked for discount"],
-    ActivityType.task: [
-        "Send quotation",
-        "Prepare contract",
-        "Call back about delivery",
-        "Send product samples",
-        "Confirm payment",
-    ],
+# Everything a person reads in the demo data, per language. The numbers, dates and shape of the
+# data are identical, so the app behaves the same whichever language you seed.
+DATASETS = {
+    "en": {
+        "user_names": ["Admin", "Somchai Vongsa", "Keo Phommachanh"],
+        "companies": [
+            ("Vientiane Coffee House", "vientianecoffeehouse"),
+            ("Mekong Trading", "mekongtrading"),
+            ("Luang Prabang Crafts", "luangprabangcrafts"),
+            ("Champa Hotel", "champahotel"),
+            ("Lao Fresh Market", "laofreshmarket"),
+            ("Pakse Motors", "paksemotors"),
+            ("Sabaidee Travel", "sabaideetravel"),
+            ("Nam Ngum Water", "namngumwater"),
+            ("Golden Rice Co.", "goldenriceco"),
+            ("That Luang Printing", "thatluangprinting"),
+        ],
+        "first_names": [
+            "Bounmy",
+            "Chanthala",
+            "Daovone",
+            "Khamla",
+            "Latsamy",
+            "Manivone",
+            "Noy",
+            "Phet",
+            "Sengphet",
+            "Souksavanh",
+            "Thongdy",
+            "Vanh",
+            "Viengkham",
+            "Xayasith",
+            "Anousone",
+        ],  # fmt: skip
+        "last_names": [
+            "Keomany",
+            "Phommasack",
+            "Sayavong",
+            "Inthavong",
+            "Douangdy",
+            "Sisouk",
+            "Vilayvong",
+            "Rattanavong",
+            "Chanthavong",
+            "Souvannavong",
+            None,
+        ],  # fmt: skip
+        "tags": ["vip", "wholesale", "retail", "new", "follow-up", "hotel"],
+        "cities": ["Vientiane", "Luang Prabang", "Pakse", "Savannakhet"],
+        "deal_titles": [
+            "Coffee machine lease",
+            "Annual supply contract",
+            "Website redesign",
+            "Staff uniforms",
+            "Catering for event",
+            "Delivery van",
+            "POS system",
+            "Room booking package",
+            "Bulk rice order",
+            "Brochure printing",
+            "Water dispenser rental",
+            "Tour package",
+            "Office furniture",
+            "Wedding banquet",
+            "Signage and banners",
+            "Cold storage unit",
+            "Loyalty card program",
+            "Solar panels",
+            "Motorbike fleet service",
+            "Corporate gift boxes",
+        ],  # fmt: skip
+        "repeat_order": "Repeat order #{n}",
+        "description": "Details discussed with the customer.",
+        "activities": {
+            ActivityType.call: ["Intro call", "Follow-up call", "Price check call"],
+            ActivityType.meeting: ["Site visit", "Demo meeting", "Contract review"],
+            ActivityType.note: ["Prefers LINE over email", "Budget approved", "Asked for discount"],
+            ActivityType.task: [
+                "Send quotation",
+                "Prepare contract",
+                "Call back about delivery",
+                "Send product samples",
+                "Confirm payment",
+            ],
+        },
+    },
+    "lo": {
+        "user_names": ["ຜູ້ດູແລລະບົບ", "ສົມໃຈ ວົງສາ", "ແກ້ວ ພົມມະຈັນ"],
+        "companies": [
+            ("ຮ້ານກາເຟວຽງຈັນ", "vientianecoffeehouse"),
+            ("ແມ່ຂອງ ການຄ້າ", "mekongtrading"),
+            ("ເຄື່ອງຫັດຖະກຳຫຼວງພະບາງ", "luangprabangcrafts"),
+            ("ໂຮງແຮມຈຳປາ", "champahotel"),
+            ("ຕະຫຼາດສົດລາວ", "laofreshmarket"),
+            ("ປາກເຊ ມໍເຕີ", "paksemotors"),
+            ("ສະບາຍດີ ທ່ອງທ່ຽວ", "sabaideetravel"),
+            ("ນ້ຳງື່ມ ນ້ຳດື່ມ", "namngumwater"),
+            ("ເຂົ້າຄຳ ຈຳກັດ", "goldenriceco"),
+            ("ໂຮງພິມທາດຫຼວງ", "thatluangprinting"),
+        ],
+        "first_names": [
+            "ບຸນມີ",
+            "ຈັນທະລາ",
+            "ດາວອນ",
+            "ຄຳລາ",
+            "ລັດສະໝີ",
+            "ມະນີວອນ",
+            "ນ້ອຍ",
+            "ເພັດ",
+            "ແສງເພັດ",
+            "ສຸກສະຫວັນ",
+            "ທອງດີ",
+            "ວັນ",
+            "ວຽງຄຳ",
+            "ໄຊຍະສິດ",
+            "ອານຸສອນ",
+        ],  # fmt: skip
+        "last_names": [
+            "ແກ້ວມະນີ",
+            "ພົມມະສັກ",
+            "ສາຍະວົງ",
+            "ອິນທະວົງ",
+            "ດວງດີ",
+            "ສີສຸກ",
+            "ວິໄລວົງ",
+            "ຣັດຕະນະວົງ",
+            "ຈັນທະວົງ",
+            "ສຸວັນນະວົງ",
+            None,
+        ],  # fmt: skip
+        "tags": ["ລູກຄ້າສຳຄັນ", "ຂາຍສົ່ງ", "ຂາຍຍ່ອຍ", "ລູກຄ້າໃໝ່", "ຕ້ອງຕິດຕາມ", "ໂຮງແຮມ"],
+        "cities": ["ວຽງຈັນ", "ຫຼວງພະບາງ", "ປາກເຊ", "ສະຫວັນນະເຂດ"],
+        "deal_titles": [
+            "ເຊົ່າເຄື່ອງຊົງກາເຟ",
+            "ສັນຍາສະໜອງປະຈຳປີ",
+            "ອອກແບບເວັບໄຊ",
+            "ເຄື່ອງແບບພະນັກງານ",
+            "ຈັດງານລ້ຽງ",
+            "ລົດຕູ້ສົ່ງເຄື່ອງ",
+            "ລະບົບຂາຍໜ້າຮ້ານ (POS)",
+            "ແພັກເກດຫ້ອງພັກ",
+            "ເຂົ້າສານຈຳນວນຫຼາຍ",
+            "ພິມແຜ່ນພັບ",
+            "ເຊົ່າຕູ້ນ້ຳດື່ມ",
+            "ແພັກເກດທ່ອງທ່ຽວ",
+            "ເຄື່ອງເຟີນິເຈີຫ້ອງການ",
+            "ງານແຕ່ງດອງ",
+            "ປ້າຍໂຄສະນາ",
+            "ຫ້ອງເຢັນເກັບສິນຄ້າ",
+            "ໂປຣແກຣມບັດສະມາຊິກ",
+            "ແຜງໂຊລາ",
+            "ບໍລິການລົດຈັກ",
+            "ກ່ອງຂອງຂວັນບໍລິສັດ",
+        ],  # fmt: skip
+        "repeat_order": "ສັ່ງຊື້ຊ້ຳ #{n}",
+        "description": "ໄດ້ປຶກສາຫາລືກັບລູກຄ້າແລ້ວ.",
+        "activities": {
+            ActivityType.call: ["ໂທຫາຄັ້ງທຳອິດ", "ໂທຕິດຕາມ", "ໂທສອບຖາມລາຄາ"],
+            ActivityType.meeting: ["ໄປເບິ່ງສະຖານທີ່", "ນັດສາທິດສິນຄ້າ", "ທົບທວນສັນຍາ"],
+            ActivityType.note: ["ມັກຕິດຕໍ່ທາງໂທລະສັບ", "ເຈົ້າຂອງອະນຸມັດງົບແລ້ວ", "ຂໍຕໍ່ລາຄາ"],
+            ActivityType.task: [
+                "ສົ່ງໃບສະເໜີລາຄາ",
+                "ກະກຽມສັນຍາ",
+                "ໂທຕິດຕາມການສົ່ງເຄື່ອງ",
+                "ສົ່ງຕົວຢ່າງສິນຄ້າ",
+                "ຢືນຢັນການຊຳລະເງິນ",
+            ],
+        },
+    },
 }
+
+# Email addresses stay Latin in every language (they are the same people either way).
+EMAIL_NAMES = [
+    "bounmy", "chanthala", "daovone", "khamla", "latsamy", "manivone", "noy", "phet",
+    "sengphet", "souksavanh", "thongdy", "vanh", "viengkham", "xayasith", "anousone",
+]  # fmt: skip
 
 
 def is_empty(db: Session) -> bool:
@@ -101,31 +236,32 @@ def _backdate(rows, rng: random.Random, now, max_days: int) -> None:
         row.updated_at = min(now, created + timedelta(days=rng.randint(0, max_days // 2)))
 
 
-def seed(db: Session, rng: random.Random | None = None) -> None:
+def seed(db: Session, rng: random.Random | None = None, language: str = "en") -> None:
+    data = DATASETS[language]
     rng = rng or random.Random(42)
     now = utcnow()
     today = local_today()
 
     users = [
         User(name=name, email=email, password_hash=hash_password(pw), role=role)
-        for name, email, pw, role in SEED_USERS
+        for name, (email, pw, role) in zip(data["user_names"], LOGINS, strict=True)
     ]
     db.add_all(users)
     staff = [u for u in users if u.role == Role.staff]
     owners = staff + users[:1]  # most data belongs to staff, some to admin
 
-    tags = {name: Tag(name=name) for name in TAGS}
+    tags = {name: Tag(name=name) for name in data["tags"]}
     db.add_all(tags.values())
 
     companies = [
         Company(
             name=name,
             phone=f"+856 21 {rng.randint(200000, 999999)}",
-            address=rng.choice(["Vientiane", "Luang Prabang", "Pakse", "Savannakhet"]),
-            website=f"https://{name.lower().replace(' ', '').replace('.', '')}.la",
+            address=rng.choice(data["cities"]),
+            website=f"https://{slug}.la",
             owner=owners[i % len(owners)],
         )
-        for i, name in enumerate(COMPANY_NAMES)
+        for i, (name, slug) in enumerate(data["companies"])
     ]
     _backdate(companies, rng, now, 300)
     db.add_all(companies)
@@ -134,13 +270,14 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
     for i in range(30):
         company = companies[i % len(companies)] if i < 24 else None
         owner = company.owner if company else owners[i % len(owners)]
-        first = FIRST_NAMES[i % len(FIRST_NAMES)]
-        last = LAST_NAMES[(i * 7) % len(LAST_NAMES)]
+        n = i % len(data["first_names"])
+        first = data["first_names"][n]
+        last = data["last_names"][(i * 7) % len(data["last_names"])]
         contacts.append(
             Contact(
                 first_name=first,
                 last_name=last,
-                email=f"{first.lower()}{i}@example.la" if i % 5 != 4 else None,
+                email=f"{EMAIL_NAMES[n]}{i}@example.la" if i % 5 != 4 else None,
                 phone=f"+856 20 {rng.randint(10000000, 99999999)}",
                 company=company,
                 owner=owner,
@@ -167,7 +304,7 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
             closed_at = now - timedelta(days=rng.randint(0, 60))
         deals.append(
             Deal(
-                title=DEAL_TITLES[i % len(DEAL_TITLES)],
+                title=data["deal_titles"][i % len(data["deal_titles"])],
                 value=value,
                 currency=currency,
                 stage=stage,
@@ -186,7 +323,7 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
         contact = rng.choice(contacts)
         deals.append(
             Deal(
-                title=f"Repeat order #{months_ago + 1}",
+                title=data["repeat_order"].format(n=months_ago + 1),
                 value=Decimal(rng.randint(10, 150) * 100_000),
                 currency=Currency.LAK,
                 stage=Stage.won,
@@ -223,8 +360,8 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
         activities.append(
             Activity(
                 type=kind,
-                subject=rng.choice(ACTIVITY_SUBJECTS[kind]),
-                description=None if i % 2 else "Details discussed with the customer.",
+                subject=rng.choice(data["activities"][kind]),
+                description=None if i % 2 else data["description"],
                 due_date=due_date,
                 done=done,
                 completed_at=now - timedelta(days=rng.randint(0, 3)) if done else None,
@@ -241,7 +378,15 @@ def seed(db: Session, rng: random.Random | None = None) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed sample data")
     parser.add_argument("--reset", action="store_true", help="delete all data first")
+    parser.add_argument(
+        "--language",
+        choices=sorted(DATASETS),
+        default=os.environ.get("SEED_LANGUAGE", "en"),
+        help="language of the sample names and text (default: $SEED_LANGUAGE or en)",
+    )
     args = parser.parse_args()
+    if args.language not in DATASETS:
+        parser.error(f"unknown language {args.language!r}; choose from {sorted(DATASETS)}")
 
     with SessionLocal() as db:
         if args.reset:
@@ -249,7 +394,7 @@ def main() -> None:
         elif not is_empty(db):
             print("Database already has data - skipping (use --reset to start over).")
             return
-        seed(db)
+        seed(db, language=args.language)
         print("Seeded sample data. Demo logins are listed in README.md.")
 
 
