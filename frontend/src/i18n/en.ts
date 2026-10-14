@@ -22,6 +22,8 @@ export const en = {
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',
   'common.edit': 'Edit',
+  'common.call': 'Call',
+  'common.whatsapp': 'WhatsApp',
   'common.close': 'Close',
   'common.dismiss': 'Dismiss',
   'common.done': 'Done',

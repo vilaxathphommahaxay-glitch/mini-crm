@@ -23,6 +23,8 @@ export const lo: Record<keyof typeof en, string> = {
   'common.cancel': 'ຍົກເລີກ',
   'common.delete': 'ລຶບ',
   'common.edit': 'ແກ້ໄຂ',
+  'common.call': 'ໂທ',
+  'common.whatsapp': 'ແຊັດ WhatsApp',
   'common.close': 'ປິດ',
   'common.dismiss': 'ປິດ',
   'common.done': 'ສຳເລັດ',

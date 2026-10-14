@@ -10,6 +10,8 @@ import { DetailList } from '../components/DetailList'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
+import { buttonClass } from '../components/ui/buttonClass'
+import { telLink, whatsappLink } from '../lib/phone'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
 import { ConfirmDialog } from '../components/ui/Modal'
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
@@ -71,6 +73,23 @@ export function ContactDetailPage() {
         }
         actions={
           <>
+            {c.phone && (
+              <a href={telLink(c.phone)} className={buttonClass('secondary')}>
+                <Icon name="phone" className="size-4" />
+                {t('common.call')}
+              </a>
+            )}
+            {whatsappLink(c.phone) && (
+              <a
+                href={whatsappLink(c.phone)!}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonClass('secondary', 'md', 'text-green-700')}
+              >
+                <Icon name="chat" className="size-4" />
+                {t('common.whatsapp')}
+              </a>
+            )}
             <Button variant="secondary" onClick={() => setEditing(true)}>
               {t('common.edit')}
             </Button>
@@ -90,7 +109,7 @@ export function ContactDetailPage() {
                 label: t('f.email'),
                 value: c.email && <a href={`mailto:${c.email}`}>{c.email}</a>,
               },
-              { label: t('f.phone'), value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
+              { label: t('f.phone'), value: c.phone && <a href={telLink(c.phone)}>{c.phone}</a> },
               { label: t('f.company'), value: c.company?.name },
               { label: t('f.tags'), value: <TagList tags={c.tags} /> },
               ...(isAdmin ? [{ label: t('f.owner'), value: c.owner.name }] : []),

@@ -8,6 +8,7 @@ import { DetailList } from '../components/DetailList'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
+import { telLink } from '../lib/phone'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
 import { ConfirmDialog } from '../components/ui/Modal'
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
@@ -75,7 +76,7 @@ export function CompanyDetailPage() {
           <CardHeader title={t('common.details')} />
           <DetailList
             items={[
-              { label: t('f.phone'), value: c.phone && <a href={`tel:${c.phone}`}>{c.phone}</a> },
+              { label: t('f.phone'), value: c.phone && <a href={telLink(c.phone)}>{c.phone}</a> },
               {
                 label: t('f.website'),
                 value: c.website && (
