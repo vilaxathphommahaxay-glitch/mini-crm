@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 /**
@@ -28,3 +29,21 @@ export function useUrlFilters<K extends string>(keys: readonly K[]) {
 }
 
 export const toId = (value: string): number | undefined => (value ? Number(value) : undefined)
+
+/**
+ * A search box that updates instantly but commits (e.g. to the URL) only after typing stops.
+ * The pending commit is cancelled when the page unmounts — otherwise clicking a result within
+ * the delay would run it after navigating away and yank the user back to the list.
+ */
+export function useDebouncedInput(initial: string, commit: (value: string) => void, delayMs = 300) {
+  const [text, setText] = useState(initial)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  function onChange(value: string) {
+    setText(value)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => commit(value.trim()), delayMs)
+  }
+  return [text, onChange] as const
+}

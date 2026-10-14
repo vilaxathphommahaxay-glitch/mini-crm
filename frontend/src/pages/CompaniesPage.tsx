@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useCompanies } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
@@ -11,7 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
 import { CompanyFormModal } from '../forms/CompanyForm'
 import { OwnerSelect } from '../forms/selects'
 import { formatDate } from '../lib/format'
-import { toId, useUrlFilters } from '../lib/hooks'
+import { toId, useDebouncedInput, useUrlFilters } from '../lib/hooks'
 
 const PAGE_SIZE = 20
 
@@ -19,15 +19,10 @@ export function CompaniesPage() {
   const isAdmin = useCurrentUser().role === 'admin'
   const navigate = useNavigate()
   const { values, page, set } = useUrlFilters(['search', 'owner_id'] as const)
-  const [searchInput, setSearchInput] = useState(values.search)
-  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [searchInput, onSearchChange] = useDebouncedInput(values.search, (search) =>
+    set({ search }),
+  )
   const [creating, setCreating] = useState(false)
-
-  function onSearchChange(text: string) {
-    setSearchInput(text)
-    clearTimeout(searchTimer.current)
-    searchTimer.current = setTimeout(() => set({ search: text.trim() }), 300)
-  }
 
   const query = useCompanies({
     search: values.search,

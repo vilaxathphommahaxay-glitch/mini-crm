@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useContacts, useTags } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
@@ -12,7 +12,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
 import { ContactFormModal } from '../forms/ContactForm'
 import { OwnerSelect } from '../forms/selects'
 import { formatDate } from '../lib/format'
-import { toId, useUrlFilters } from '../lib/hooks'
+import { toId, useDebouncedInput, useUrlFilters } from '../lib/hooks'
 import { ContactsImportExport } from './contacts/ImportExport'
 
 const PAGE_SIZE = 20
@@ -22,16 +22,10 @@ export function ContactsPage() {
   const isAdmin = user.role === 'admin'
   const navigate = useNavigate()
   const { values, page, set } = useUrlFilters(['search', 'tag', 'owner_id'] as const)
-  const [searchInput, setSearchInput] = useState(values.search)
-  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const [searchInput, onSearchChange] = useDebouncedInput(values.search, (search) =>
+    set({ search }),
+  )
   const [creating, setCreating] = useState(false)
-
-  // the box updates instantly; the URL (and the query) 300 ms after typing stops
-  function onSearchChange(text: string) {
-    setSearchInput(text)
-    clearTimeout(searchTimer.current)
-    searchTimer.current = setTimeout(() => set({ search: text.trim() }), 300)
-  }
 
   const tags = useTags()
   const query = useContacts({
