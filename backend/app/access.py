@@ -46,7 +46,7 @@ def get_referenced[M: Owned](db: Session, model: type[M], obj_id: int, user: Use
     """Load a row referenced from a request body: missing or not yours -> 422 on that field."""
     obj = db.get(model, obj_id)
     if obj is None or not can_access(user, obj):
-        raise field_error(field, f"{LABELS[model]} not found")
+        raise field_error(field, f"{LABELS[model]} not found", code="not_found")
     return obj
 
 
@@ -66,7 +66,7 @@ def resolve_owner(
         raise AppError(403, "You can only assign records to yourself")
     target = db.get(User, requested)
     if target is None or not target.is_active:
-        raise field_error("owner_id", "Owner must be an active user")
+        raise field_error("owner_id", "Owner must be an active user", code="inactive_user")
     return target.id
 
 
@@ -74,5 +74,5 @@ def apply_patch(obj: Any, changes: dict[str, Any], required: set[str]) -> None:
     """Copy PATCH fields onto `obj`; required fields may be changed but not cleared."""
     for field, value in changes.items():
         if value is None and field in required:
-            raise field_error(field, "Cannot be empty")
+            raise field_error(field, "Cannot be empty", code="cannot_be_empty")
         setattr(obj, field, value)

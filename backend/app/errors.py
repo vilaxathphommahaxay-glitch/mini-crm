@@ -38,9 +38,9 @@ def not_found(what: str) -> AppError:
     return AppError(404, f"{what} not found")
 
 
-def field_error(field: str, message: str) -> AppError:
-    """422 pointing at one input field, same shape as FastAPI's own validation errors."""
-    return AppError(422, message, details=[{"field": field, "message": message}])
+def field_error(field: str, message: str, code: str = "invalid") -> AppError:
+    """422 pointing at one input field. `code` lets the UI explain it in the user's language."""
+    return AppError(422, message, details=[{"field": field, "message": message, "code": code}])
 
 
 def _response(status: int, code: str, message: str, details=None, headers=None) -> JSONResponse:
@@ -66,6 +66,7 @@ def register_error_handlers(app: FastAPI) -> None:
                 # drop the "body"/"query" prefix: the client cares about the field name
                 "field": ".".join(str(p) for p in err["loc"][1:]) or str(err["loc"][0]),
                 "message": err["msg"],
+                "code": err["type"],  # pydantic's error type: missing, too_long, value_error, ...
             }
             for err in exc.errors()
         ]

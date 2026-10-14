@@ -20,7 +20,21 @@ _PHONE_LIKE = re.compile(r"^[+-][\d\s().-]*$")
 
 
 class CsvError(ValueError):
-    """The file as a whole can't be imported."""
+    """The file as a whole can't be imported. `code` lets the UI show it in the user's language."""
+
+    def __init__(self, code: str, message: str, status: int = 422):
+        super().__init__(message)
+        self.code = code
+        self.status = status
+
+
+class RowError(ValueError):
+    """One row can't be imported: which field, and why (required / invalid / too_long)."""
+
+    def __init__(self, field: str, reason: str):
+        super().__init__(f"{field}: {reason}")
+        self.field = field
+        self.reason = reason
 
 
 def _safe_cell(value: str | None) -> str:
@@ -55,21 +69,26 @@ def export_contacts(contacts: Iterable[Contact]) -> str:
 
 def decode(raw: bytes) -> str:
     if len(raw) > MAX_BYTES:
-        raise CsvError(f"The file is larger than {MAX_BYTES // 1_000_000} MB")
+        raise CsvError(
+            "file_too_large", f"The file is larger than {MAX_BYTES // 1_000_000} MB", status=413
+        )
     try:
         return raw.decode("utf-8-sig")  # also strips a BOM if there is one
     except UnicodeDecodeError as exc:
-        raise CsvError("The file must be saved as UTF-8 CSV") from exc
+        raise CsvError("file_not_utf8", "The file must be saved as UTF-8 CSV") from exc
 
 
 def read_rows(text: str) -> list[tuple[int, dict[str, str]]]:
     """(line number, row) pairs with lower-cased headers; blank rows dropped."""
     reader = csv.DictReader(io.StringIO(text))
     if not reader.fieldnames:
-        raise CsvError("The file is empty")
+        raise CsvError("file_empty", "The file is empty")
     headers = [(h or "").strip().lower() for h in reader.fieldnames]
     if "first_name" not in headers:
-        raise CsvError(f"Missing a first_name column. Expected columns: {', '.join(COLUMNS)}")
+        raise CsvError(
+            "file_missing_column",
+            f"Missing a first_name column. Expected columns: {', '.join(COLUMNS)}",
+        )
     reader.fieldnames = headers
 
     rows = []
@@ -78,7 +97,9 @@ def read_rows(text: str) -> list[tuple[int, dict[str, str]]]:
         if any(values.values()):
             rows.append((reader.line_num, values))
         if len(rows) > MAX_ROWS:
-            raise CsvError(f"Too many rows: at most {MAX_ROWS} contacts per file")
+            raise CsvError(
+                "file_too_many_rows", f"Too many rows: at most {MAX_ROWS} contacts per file"
+            )
     return rows
 
 
@@ -94,13 +115,21 @@ def validate_row(values: dict[str, str]) -> tuple[ContactCreate, str | None]:
     )
     company = values.get("company") or None
     if company and len(company) > 200:
-        raise ValueError("company: at most 200 characters")
+        raise RowError("company", "too_long")
     return contact, company
 
 
-def error_message(exc: Exception) -> str:
+def row_error(exc: Exception) -> tuple[str, str]:
+    """(field, reason) of the first problem in a bad row; reason is required/invalid/too_long."""
+    if isinstance(exc, RowError):
+        return exc.field, exc.reason
     if isinstance(exc, ValidationError):
-        return "; ".join(
-            f"{'.'.join(str(p) for p in err['loc'])}: {err['msg']}" for err in exc.errors()
-        )
-    return str(exc)
+        first = exc.errors()[0]
+        field = str(first["loc"][0]) if first["loc"] else "row"
+        kind = first["type"]
+        if kind in ("missing", "too_short", "string_too_short"):
+            return field, "required"
+        if kind in ("too_long", "string_too_long"):
+            return field, "too_long"
+        return field, "invalid"
+    return "row", "invalid"

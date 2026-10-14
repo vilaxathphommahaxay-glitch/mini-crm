@@ -72,7 +72,11 @@ class ContactOut(OutputModel):
 
 class ImportRowError(OutputModel):
     row: int
-    message: str
+    code: str  # "invalid_row" or "duplicate_email"
+    field: str | None = None
+    reason: str | None = None  # for invalid_row: required / invalid / too_long
+    value: str | None = None  # for duplicate_email: the email
+    message: str  # English, for logs and API users
 
 
 class ImportResult(OutputModel):

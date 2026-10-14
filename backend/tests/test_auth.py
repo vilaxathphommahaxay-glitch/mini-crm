@@ -101,6 +101,7 @@ def test_change_password_requires_current_password(client, staff):
 
     assert response.status_code == 422
     assert response.json()["error"]["details"][0]["field"] == "current_password"
+    assert response.json()["error"]["details"][0]["code"] == "wrong_password"
 
 
 def test_password_limit_counts_bytes_not_characters(client, staff):
@@ -126,6 +127,7 @@ def test_too_many_failed_logins_are_blocked_for_a_while(client, staff):
     assert blocked.status_code == 429
     assert blocked.json()["error"]["code"] == "too_many_attempts"
     assert "15 minute" in blocked.json()["error"]["message"]
+    assert blocked.json()["error"]["details"] == [{"minutes": 15}]
 
     clock.freeze(clock.utcnow() + timedelta(minutes=16))
     assert attempt(PASSWORD).status_code == 200

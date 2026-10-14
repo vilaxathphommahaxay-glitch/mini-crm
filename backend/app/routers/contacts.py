@@ -46,7 +46,11 @@ def _resolve_company(db: Session, user: User, changes: dict, owner_id: int) -> N
     """Turn company_id / company_name from the body into a checked company_id."""
     name = changes.pop("company_name", None)
     if name and changes.get("company_id") is not None:
-        raise field_error("company_name", "Choose an existing company or type a new name, not both")
+        raise field_error(
+            "company_name",
+            "Choose an existing company or type a new name, not both",
+            code="company_conflict",
+        )
     if name:
         changes["company_id"] = company_by_name(db, user, name, owner_id).id
     elif changes.get("company_id") is not None:
@@ -131,8 +135,7 @@ async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
     try:
         rows = csv_io.read_rows(csv_io.decode(raw))
     except csv_io.CsvError as exc:
-        status = 413 if "larger" in str(exc) else 422
-        raise AppError(status, str(exc), code="invalid_file") from exc
+        raise AppError(exc.status, str(exc), code=exc.code) from exc
 
     visible = scope(select(Contact.email), Contact, user).where(Contact.email.is_not(None))
     seen_emails = {email.lower() for email in db.scalars(visible)}
@@ -142,11 +145,28 @@ async def import_contacts(file: UploadFile, user: CurrentUser, db: DbSession):
     for line, values in rows:
         try:
             data, company_name = csv_io.validate_row(values)
-        except (ValidationError, ValueError) as exc:
-            errors.append({"row": line, "message": csv_io.error_message(exc)})
+        except (ValidationError, ValueError) as exc:  # includes csv_io.RowError
+            field, reason = csv_io.row_error(exc)
+            errors.append(
+                {
+                    "row": line,
+                    "code": "invalid_row",
+                    "field": field,
+                    "reason": reason,
+                    "message": f"{field}: {reason}",
+                }
+            )
             continue
         if data.email and data.email in seen_emails:
-            errors.append({"row": line, "message": f"Duplicate email {data.email} - skipped"})
+            errors.append(
+                {
+                    "row": line,
+                    "code": "duplicate_email",
+                    "field": "email",
+                    "value": data.email,
+                    "message": f"Duplicate email {data.email} - skipped",
+                }
+            )
             continue
 
         company = None

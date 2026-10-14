@@ -26,6 +26,7 @@ def login(body: LoginIn, request: Request, db: DbSession):
             429,
             f"Too many failed sign-ins. Try again in {minutes} minute(s).",
             code="too_many_attempts",
+            details=[{"minutes": minutes}],
         )
 
     user = db.scalar(select(User).where(User.email == body.email))
@@ -48,6 +49,8 @@ def me(user: CurrentUser):
 @router.post("/change-password", status_code=204)
 def change_password(body: ChangePasswordIn, user: CurrentUser, db: DbSession):
     if not verify_password(body.current_password, user.password_hash):
-        raise field_error("current_password", "Current password is incorrect")
+        raise field_error(
+            "current_password", "Current password is incorrect", code="wrong_password"
+        )
     user.password_hash = hash_password(body.new_password)
     db.commit()

@@ -74,7 +74,7 @@ def update_user(user_id: int, body: UserUpdate, admin: AdminUser, db: DbSession)
         user.password_hash = hash_password(changes.pop("password"))
     for field, value in changes.items():
         if value is None:
-            raise field_error(field, "Cannot be empty")
+            raise field_error(field, "Cannot be empty", code="cannot_be_empty")
         setattr(user, field, value)
 
     db.commit()
@@ -90,9 +90,9 @@ def transfer_records(user_id: int, body: TransferIn, _: AdminUser, db: DbSession
         raise not_found("User")
     target = db.get(User, body.to_user_id)
     if target is None or not target.is_active:
-        raise field_error("to_user_id", "Choose an active user")
+        raise field_error("to_user_id", "Choose an active user", code="inactive_user")
     if target.id == source.id:
-        raise field_error("to_user_id", "Choose a different user")
+        raise field_error("to_user_id", "Choose a different user", code="same_user")
 
     moved = {}
     now = utcnow()

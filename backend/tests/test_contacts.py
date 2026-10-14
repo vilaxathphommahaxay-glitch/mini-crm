@@ -37,6 +37,7 @@ def test_invalid_email_is_rejected(client, staff):
 
     assert response.status_code == 422
     assert response.json()["error"]["details"][0]["field"] == "email"
+    assert response.json()["error"]["details"][0]["code"] == "value_error"
 
 
 def test_cannot_link_to_someone_elses_company(client, factory, staff, other_staff):

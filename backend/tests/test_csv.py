@@ -164,3 +164,37 @@ def test_export_then_import_round_trip(client, db, factory, staff, other_staff):
     assert copy.tag_names == ["new", "vip"]
     assert copy.notes == "multi\nline, with comma"
     assert copy.company.name == "Golden Rice Co."
+
+
+def test_row_errors_carry_codes_the_ui_can_translate(client, factory, staff):
+    factory.contact(staff, email="taken@example.la")
+    text = HEADER + (
+        ",,no-name@example.la,,,,\n"
+        "Bad,,not-an-email,,,,\n"
+        f"Long,,,,{'x' * 201},,\n"
+        "Dup,,taken@example.la,,,,\n"
+    )
+
+    errors = {e["row"]: e for e in upload(client, staff, text).json()["errors"]}
+
+    assert (errors[2]["code"], errors[2]["field"], errors[2]["reason"]) == (
+        "invalid_row",
+        "first_name",
+        "required",
+    )
+    assert (errors[3]["field"], errors[3]["reason"]) == ("email", "invalid")
+    assert (errors[4]["field"], errors[4]["reason"]) == ("company", "too_long")
+    assert (errors[5]["code"], errors[5]["value"]) == ("duplicate_email", "taken@example.la")
+
+
+def test_whole_file_errors_have_distinct_codes(client, staff, monkeypatch):
+    def code(text):
+        return upload(client, staff, text).json()["error"]["code"]
+
+    assert code("name,email\nA,a@example.la\n") == "file_missing_column"
+    assert code("") == "file_empty"
+    assert code((HEADER + "Ånder,,,,,,\n").encode("latin-1")) == "file_not_utf8"
+    monkeypatch.setattr(csv_io, "MAX_ROWS", 1)
+    assert code(HEADER + "A,,,,,,\nB,,,,,,\n") == "file_too_many_rows"
+    monkeypatch.setattr(csv_io, "MAX_BYTES", 10)
+    assert code(HEADER) == "file_too_large"

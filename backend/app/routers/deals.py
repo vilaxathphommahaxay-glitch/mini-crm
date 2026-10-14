@@ -121,10 +121,14 @@ def move(deal_id: int, body: DealMove, user: CurrentUser, db: DbSession):
     before = None
     if body.before_id is not None:
         if body.before_id == deal.id:
-            raise field_error("before_id", "A deal cannot be placed before itself")
+            raise field_error(
+                "before_id", "A deal cannot be placed before itself", code="bad_position"
+            )
         before = get_referenced(db, Deal, body.before_id, user, "before_id")
         if before.stage != body.stage:
-            raise field_error("before_id", "That deal is not in the target stage")
+            raise field_error(
+                "before_id", "That deal is not in the target stage", code="bad_position"
+            )
 
     move_deal(db, deal, body.stage, before)
     deal.updated_at = utcnow()
