@@ -57,3 +57,14 @@ class TokenOut(OutputModel):
 class ChangePasswordIn(InputModel):
     current_password: str
     new_password: Password
+
+
+class TransferIn(InputModel):
+    to_user_id: int
+
+
+class TransferOut(OutputModel):
+    companies: int
+    contacts: int
+    deals: int
+    activities: int

@@ -115,6 +115,12 @@ function UserForm({ user, onClose }: Props) {
           </label>
         )}
       </div>
+      {user && !isSelf && (
+        <p className="text-xs text-slate-500">
+          Disabling keeps their records. To hand them to someone else, use <em>Transfer records</em>{' '}
+          on the users list.
+        </p>
+      )}
       <FormFooter onCancel={onClose} saving={save.isPending} />
     </form>
   )

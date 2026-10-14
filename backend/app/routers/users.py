@@ -1,14 +1,15 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Query
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
+from app.clock import utcnow
 from app.deps import AdminUser, DbSession
 from app.errors import AppError, field_error, not_found
-from app.models import Role, User
+from app.models import Activity, Company, Contact, Deal, Role, User
 from app.pagination import Page, Pagination, paginate
-from app.schemas.users import UserCreate, UserOut, UserUpdate
+from app.schemas.users import TransferIn, TransferOut, UserCreate, UserOut, UserUpdate
 from app.security import hash_password
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -78,3 +79,34 @@ def update_user(user_id: int, body: UserUpdate, admin: AdminUser, db: DbSession)
 
     db.commit()
     return user
+
+
+@router.post("/{user_id}/transfer", response_model=TransferOut)
+def transfer_records(user_id: int, body: TransferIn, _: AdminUser, db: DbSession):
+    """Hand every company, contact, deal and activity of one user to another
+    (e.g. when someone leaves). One transaction; returns how many of each moved."""
+    source = db.get(User, user_id)
+    if source is None:
+        raise not_found("User")
+    target = db.get(User, body.to_user_id)
+    if target is None or not target.is_active:
+        raise field_error("to_user_id", "Choose an active user")
+    if target.id == source.id:
+        raise field_error("to_user_id", "Choose a different user")
+
+    moved = {}
+    now = utcnow()
+    for key, model in (
+        ("companies", Company),
+        ("contacts", Contact),
+        ("deals", Deal),
+        ("activities", Activity),
+    ):
+        result = db.execute(
+            update(model)
+            .where(model.owner_id == source.id)
+            .values(owner_id=target.id, updated_at=now)
+        )
+        moved[key] = result.rowcount
+    db.commit()
+    return moved

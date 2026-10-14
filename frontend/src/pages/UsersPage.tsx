@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Badge, Card, PageHeader } from '../components/ui/layout'
 import { Pagination } from '../components/ui/Pagination'
 import { ErrorState, LoadingState } from '../components/ui/states'
+import { TransferModal } from '../forms/TransferForm'
 import { UserFormModal } from '../forms/UserForm'
 import { formatDate } from '../lib/format'
 import { useUrlFilters } from '../lib/hooks'
@@ -18,6 +19,7 @@ export function UsersPage() {
   const { page, set } = useUrlFilters([] as const)
   const query = useUsers({ page, size: PAGE_SIZE })
   const [form, setForm] = useState<{ user?: User } | null>(null)
+  const [transferFrom, setTransferFrom] = useState<User | null>(null)
 
   return (
     <>
@@ -75,9 +77,14 @@ export function UsersPage() {
                       {formatDate(user.created_at)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button variant="ghost" size="sm" onClick={() => setForm({ user })}>
-                        Edit
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => setTransferFrom(user)}>
+                          Transfer records
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setForm({ user })}>
+                          Edit
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -95,6 +102,7 @@ export function UsersPage() {
         )}
       </Card>
       <UserFormModal open={form !== null} user={form?.user} onClose={() => setForm(null)} />
+      <TransferModal from={transferFrom} onClose={() => setTransferFrom(null)} />
     </>
   )
 }
