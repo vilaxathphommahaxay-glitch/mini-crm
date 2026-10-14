@@ -88,10 +88,17 @@ try {
   await page.getByRole('alert').filter({ hasText: 'deal' }).waitFor()
   check(page.url().match(/\/contacts\/\d+$/) !== null, 'delete refused while a deal exists (toast)')
 
-  // remove the deal, then the contact can be deleted
+  // remove the deal (from its own page), then the contact can be deleted
+  const contactUrl = page.url()
   await main.getByRole('cell', { name: 'Test deal' }).click()
+  await page.getByRole('heading', { name: 'Test deal' }).waitFor()
+  check(/\/deals\/\d+$/.test(page.url()), 'clicking a deal opens its page')
+  await main.getByRole('button', { name: 'Edit', exact: true }).first().click()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete deal' }).click()
   await page.getByRole('dialog', { name: 'Delete deal?' }).getByRole('button', { name: 'Delete' }).click()
+  await page.waitForURL(/\/pipeline$/)
+  check(true, 'deleting a deal from its page returns to the pipeline')
+  await page.goto(contactUrl)
   await main.getByText('No deals yet').waitFor()
   await main.getByRole('button', { name: 'Delete', exact: true }).first().click()
   await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).click()

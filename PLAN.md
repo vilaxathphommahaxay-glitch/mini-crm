@@ -237,3 +237,9 @@ token หมดอายุหรือได้ `401` → ล้าง token �
 - [x] Phase 9 – Tasks & Dashboard UI
 - [x] Phase 10 – Import/Export CSV
 - [x] Phase 11 – ส่งงาน
+
+## 14. หลัง MVP (เพิ่มเติมหลังส่งงาน)
+ฟีเจอร์ที่เพิ่มหลังจบ Phase 11 โดยได้รับอนุญาตจากเจ้าของโปรเจกต์
+- [x] ค้นหาทั้งระบบ `GET /search?q=&limit=` + หน้าต่างค้นหา Ctrl+K (contacts, companies, deals ตามสิทธิ์)
+- [x] หน้ารายละเอียดดีล `/deals/:id`: timeline กิจกรรมของดีล, บันทึกกิจกรรม, เปลี่ยนขั้น, ลิงก์ไป contact/company
+- [x] Browser tests (`e2e/`) และ CI (GitHub Actions)

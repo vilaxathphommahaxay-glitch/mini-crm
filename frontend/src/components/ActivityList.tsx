@@ -35,9 +35,11 @@ interface Props {
   activities: Activity[]
   /** show which contact/deal each item belongs to (off on a contact's own timeline) */
   showLinks?: boolean
+  /** hide the "Deal: …" link (on the deal's own page) */
+  showDeal?: boolean
 }
 
-export function ActivityList({ activities, showLinks = true }: Props) {
+export function ActivityList({ activities, showLinks = true, showDeal = true }: Props) {
   const save = useSaveActivity()
   const remove = useDeleteActivity()
   const toast = useToast()
@@ -116,7 +118,11 @@ export function ActivityList({ activities, showLinks = true }: Props) {
                       {activity.contact.name}
                     </Link>
                   )}
-                  {activity.deal && <span>Deal: {activity.deal.title}</span>}
+                  {showDeal && activity.deal && (
+                    <Link className="hover:text-indigo-600" to={`/deals/${activity.deal.id}`}>
+                      Deal: {activity.deal.title}
+                    </Link>
+                  )}
                   <span>
                     {activity.owner.name} · {formatDateTime(activity.created_at)}
                   </span>

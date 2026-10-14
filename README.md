@@ -12,8 +12,9 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 
 ## Features
 
+- **Quick search (Ctrl+K / ⌘K)** — find any contact, company or deal from anywhere; arrow keys and Enter to open.
 - **Contacts and companies** — search across name, email, phone and company; filter by tag and owner; filters live in the URL.
-- **Deals and a Kanban pipeline** — six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
+- **Deals and a Kanban pipeline** — every deal has its own page with an activity timeline; six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
 - **Activities and tasks** — log calls, meetings and notes on a contact's timeline; tasks with due dates show up under *Today*, *Overdue* and *Next 7 days*.
 - **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage.
 - **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.

@@ -15,6 +15,7 @@ const ContactDetailPage = page(() => import('./pages/ContactDetailPage'), 'Conta
 const CompaniesPage = page(() => import('./pages/CompaniesPage'), 'CompaniesPage')
 const CompanyDetailPage = page(() => import('./pages/CompanyDetailPage'), 'CompanyDetailPage')
 const PipelinePage = page(() => import('./pages/PipelinePage'), 'PipelinePage')
+const DealDetailPage = page(() => import('./pages/DealDetailPage'), 'DealDetailPage')
 const TasksPage = page(() => import('./pages/TasksPage'), 'TasksPage')
 const UsersPage = page(() => import('./pages/UsersPage'), 'UsersPage')
 const SettingsPage = page(() => import('./pages/SettingsPage'), 'SettingsPage')
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="companies" element={<CompaniesPage />} />
           <Route path="companies/:id" element={<CompanyDetailPage />} />
           <Route path="pipeline" element={<PipelinePage />} />
+          <Route path="deals/:id" element={<DealDetailPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route
             path="users"

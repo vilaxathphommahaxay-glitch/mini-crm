@@ -23,9 +23,11 @@ interface Props {
   /** creating from a pipeline column */
   stage?: Stage
   onClose: () => void
+  /** after a successful delete (e.g. leave the deal's own page) */
+  onDeleted?: () => void
 }
 
-function DealForm({ deal, contactId, stage, onClose }: Props) {
+function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
   const isAdmin = useCurrentUser().role === 'admin'
   const save = useSaveDeal()
   const remove = useDeleteDeal()
@@ -70,6 +72,7 @@ function DealForm({ deal, contactId, stage, onClose }: Props) {
       await remove.mutateAsync(deal.id)
       toast.success('Deal deleted')
       onClose()
+      onDeleted?.()
     } catch (error) {
       setConfirmDelete(false)
       setFormError(errorMessage(error))

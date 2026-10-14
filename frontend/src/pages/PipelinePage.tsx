@@ -14,7 +14,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { errorMessage } from '../api/client'
 import { moveDeal, useBoard } from '../api/hooks'
 import { STAGE_LABELS, STAGES, type Deal, type Stage } from '../api/types'
@@ -203,6 +203,7 @@ export function PipelinePage() {
   const board = useBoard(ownerId)
   const queryClient = useQueryClient()
   const toast = useToast()
+  const navigate = useNavigate()
 
   const serverColumns = useMemo(() => toColumns(board.data), [board.data])
   // While dragging (and until the server confirms) the board shows this local copy.
@@ -348,7 +349,7 @@ export function PipelinePage() {
                   stage={stage}
                   deals={columns[stage]}
                   focusId={focusId}
-                  onOpen={(deal) => setDealForm({ deal })}
+                  onOpen={(deal) => navigate(`/deals/${deal.id}`)}
                   onAdd={(s) => setDealForm({ stage: s })}
                   onKeyMove={onKeyMove}
                 />

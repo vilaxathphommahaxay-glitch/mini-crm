@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError, errorMessage } from '../api/client'
 import { useCompany, useContacts, useDeals, useDeleteCompany } from '../api/hooks'
-import type { Deal } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { DealsTable } from '../components/DealsTable'
 import { DetailList } from '../components/DetailList'
@@ -14,7 +13,6 @@ import { ConfirmDialog } from '../components/ui/Modal'
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/states'
 import { CompanyFormModal } from '../forms/CompanyForm'
 import { ContactFormModal } from '../forms/ContactForm'
-import { DealFormModal } from '../forms/DealForm'
 import { NotFoundPage } from './NotFoundPage'
 
 function safeHref(url: string) {
@@ -34,7 +32,6 @@ export function CompanyDetailPage() {
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [addingContact, setAddingContact] = useState(false)
-  const [editingDeal, setEditingDeal] = useState<Deal | null>(null)
 
   if (company.isPending) return <LoadingState />
   if (company.error instanceof ApiError && company.error.status === 404) return <NotFoundPage />
@@ -149,7 +146,11 @@ export function CompanyDetailPage() {
             ) : deals.data.items.length === 0 ? (
               <EmptyState title="No deals with this company" />
             ) : (
-              <DealsTable deals={deals.data.items} showContact onSelect={setEditingDeal} />
+              <DealsTable
+                deals={deals.data.items}
+                showContact
+                onSelect={(deal) => navigate(`/deals/${deal.id}`)}
+              />
             )}
           </Card>
         </div>
@@ -160,11 +161,6 @@ export function CompanyDetailPage() {
         open={addingContact}
         companyId={c.id}
         onClose={() => setAddingContact(false)}
-      />
-      <DealFormModal
-        open={editingDeal !== null}
-        deal={editingDeal ?? undefined}
-        onClose={() => setEditingDeal(null)}
       />
       <ConfirmDialog
         open={deleting}

@@ -62,11 +62,13 @@ try {
   const wonCard = column('Won').locator('li', { hasText: negotiation[0] })
   check((await wonCard.textContent()).includes('closed'), 'won card shows closed date')
 
-  // 4) a click (no drag) opens the edit form
+  // 4) a click (no drag) opens the deal's page
+  const clicked = (await titles('Lead'))[0]
   await column('Lead').locator('li [aria-roledescription]').first().click()
-  await page.getByRole('dialog', { name: 'Edit deal' }).waitFor()
-  check(await page.getByRole('dialog').getByText('change it on the Pipeline board').isVisible(), 'click opens edit form')
-  await page.keyboard.press('Escape')
+  await page.getByRole('heading', { name: clicked }).waitFor()
+  check(/\/deals\/\d+$/.test(page.url()), `click opens the deal page (${clicked})`)
+  await page.goBack()
+  await column('Lead').locator('li').first().waitFor()
 
   // 5) keyboard: focus a card, ArrowRight -> next stage; focus stays on the card
   const kbTitle = (await titles('Lead'))[0]

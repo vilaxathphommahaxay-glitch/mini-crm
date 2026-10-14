@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError, errorMessage } from '../api/client'
 import { useActivities, useContact, useDeals, useDeleteContact } from '../api/hooks'
-import type { Deal } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { TagList } from '../components/badges'
@@ -32,7 +31,7 @@ export function ContactDetailPage() {
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [logging, setLogging] = useState(false)
-  const [dealForm, setDealForm] = useState<{ deal?: Deal } | null>(null)
+  const [creatingDeal, setCreatingDeal] = useState(false)
 
   if (contact.isPending) return <LoadingState />
   if (contact.error instanceof ApiError && contact.error.status === 404) return <NotFoundPage />
@@ -104,7 +103,7 @@ export function ContactDetailPage() {
             <CardHeader
               title="Deals"
               actions={
-                <Button size="sm" variant="secondary" onClick={() => setDealForm({})}>
+                <Button size="sm" variant="secondary" onClick={() => setCreatingDeal(true)}>
                   <Icon name="plus" className="size-3.5" />
                   New deal
                 </Button>
@@ -117,7 +116,10 @@ export function ContactDetailPage() {
             ) : deals.data.items.length === 0 ? (
               <EmptyState title="No deals yet" />
             ) : (
-              <DealsTable deals={deals.data.items} onSelect={(deal) => setDealForm({ deal })} />
+              <DealsTable
+                deals={deals.data.items}
+                onSelect={(deal) => navigate(`/deals/${deal.id}`)}
+              />
             )}
           </Card>
 
@@ -146,12 +148,7 @@ export function ContactDetailPage() {
 
       <ContactFormModal open={editing} contact={c} onClose={() => setEditing(false)} />
       <ActivityFormModal open={logging} contactId={c.id} onClose={() => setLogging(false)} />
-      <DealFormModal
-        open={dealForm !== null}
-        deal={dealForm?.deal}
-        contactId={c.id}
-        onClose={() => setDealForm(null)}
-      />
+      <DealFormModal open={creatingDeal} contactId={c.id} onClose={() => setCreatingDeal(false)} />
       <ConfirmDialog
         open={deleting}
         title="Delete contact?"
