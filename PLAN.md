@@ -251,3 +251,5 @@ token หมดอายุหรือได้ `401` → ล้าง token �
   - `POST /users/{id}/transfer` โอน companies/contacts/deals/activities ทั้งหมดให้อีกคน (admin เท่านั้น)
   - `GET /dashboard/team` + ตาราง Team บน Dashboard ของ admin (คลิกชื่อเพื่อกรอง)
   - ข้อมูลตัวอย่างมีประวัติย้อนหลัง (วันที่สร้าง/แก้ไขกระจายหลายเดือน)
+- [x] ความพร้อมใช้งานจริง: จำกัดการ login ผิด (5 ครั้ง/อีเมล, 20 ครั้ง/ที่อยู่ ใน 15 นาที → 429),
+  security headers + CSP ใน nginx, สคริปต์ `scripts/backup.sh` / `scripts/restore.sh` (ทดสอบ backup → ลบ → restore แล้ว)

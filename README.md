@@ -43,6 +43,15 @@ Log in as an admin and then as a staff member to see the difference in what each
 
 The interactive API documentation is at **http://localhost:8080/api/docs**.
 
+### Backups
+
+```bash
+./scripts/backup.sh                                   # -> backups/crm-YYYYMMDD-HHMMSS.sql.gz
+./scripts/restore.sh backups/crm-20261014-120000.sql.gz   # asks you to type "restore" first
+```
+
+Run them from Git Bash on Windows. Copy the `backups/` folder somewhere safe (it is git-ignored); a daily scheduled backup is a good idea for real use.
+
 ## Local development
 
 Requirements: Python 3.12+ and Node.js 22+.
@@ -137,11 +146,14 @@ PLAN.md              scope, data model, API and the phase-by-phase plan
 - **Drag and drop sends `before_id`, not a position number.** Staff only see their own cards, so an on-screen index wouldn't match the real order. The server places the deal before the given card and renumbers the column in one transaction.
 - **CSV export is safe to open in Excel.** It includes a BOM so Lao/Thai text displays correctly, and cells that would run as formulas (`=…`, `@…`) are escaped. Phone numbers like `+856…` are left alone.
 - **One error shape everywhere:** `{"error": {"code", "message", "details"}}`. Forms map `details` back onto the matching field.
+- **Sign-in is rate limited.** After 5 failed attempts for one email (or 20 from one address across emails) within 15 minutes, further attempts get `429` until the window passes.
+- **Locked-down headers.** nginx sends a strict Content-Security-Policy for the app (scripts only from itself), `X-Frame-Options: DENY`, `nosniff` and a referrer policy, and hides its version.
 - **Portable SQL.** The same code and tests run on SQLite and PostgreSQL; tags use a join table rather than JSON queries.
 
 ## Known limitations
 
 - The access token (8 hours, no refresh token) is kept in `localStorage`. That's fine for a demo but would need hardening (httpOnly cookies, refresh tokens) for production.
+- The sign-in rate limit is kept in memory, so it is per backend process; running several workers or servers would need a shared store such as Redis.
 - Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
 - No currency conversion, email/SMS sending, file attachments or audit log (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
 - The UI is English only and has no dark mode.
