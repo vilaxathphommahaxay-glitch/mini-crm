@@ -44,8 +44,17 @@ try {
   for (const locale of ['lo-LA', 'en-US']) {
     const context = await browser.newContext({ locale })
     const fresh = await context.newPage()
+    const fontRequests = []
+    fresh.on('request', (r) => /noto-sans-lao/.test(r.url()) && fontRequests.push(r.url()))
     await fresh.goto(`${BASE}/login`)
     await fresh.getByRole('heading', { name: headings[expected[locale]] }).waitFor()
+    if (expected[locale] === 'en') {
+      await fresh.waitForTimeout(500)
+      // The "ລາວ" button is Lao script (so people who can't read English can find it) and needs the
+      // medium weight; the other weights must stay undownloaded on English pages.
+      const extra = fontRequests.filter((url) => !/-500-/.test(url))
+      if (extra.length) throw new Error(`English page downloaded Lao font weights it does not need: ${extra}`)
+    }
     await context.close()
   }
   check(true, `first visit language (${forced ? `forced to ${forced}` : 'follows the browser'})`)
@@ -101,7 +110,8 @@ try {
       sample: document.fonts.check("16px 'Noto Sans Lao'", 'ພາສາລາວ'),
     }
   })
-  check(font.sample, `Lao font available (${font.loaded} weights loaded)`)
+  // the bundled font must really be used (not left unused behind a system font)
+  check(font.sample && font.loaded > 0, `bundled Lao font in use (${font.loaded} weights loaded)`)
 
   // a detail page, a form and a CSV dialog
   await page.goto(`${BASE}/contacts`)

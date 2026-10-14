@@ -1,15 +1,42 @@
 @import 'tailwindcss';
 
-/* Lao script, served from our own origin (the Content-Security-Policy allows only 'self').
-   The browser downloads a weight only when Lao text is on the page. */
-@import '@fontsource/noto-sans-lao/lao-400.css';
-@import '@fontsource/noto-sans-lao/lao-500.css';
-@import '@fontsource/noto-sans-lao/lao-600.css';
+/* Lao script, served from our own origin (the Content-Security-Policy allows only 'self'). */
+@font-face {
+  font-family: 'Noto Sans Lao';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/noto-sans-lao/files/noto-sans-lao-lao-400-normal.woff2')
+    format('woff2');
+  unicode-range: U+0E80-0EFF; /* the Lao block: pages without Lao text never download these */
+}
+
+@font-face {
+  font-family: 'Noto Sans Lao';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/noto-sans-lao/files/noto-sans-lao-lao-500-normal.woff2')
+    format('woff2');
+  unicode-range: U+0E80-0EFF; /* the Lao block: pages without Lao text never download these */
+}
+
+@font-face {
+  font-family: 'Noto Sans Lao';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../node_modules/@fontsource/noto-sans-lao/files/noto-sans-lao-lao-600-normal.woff2')
+    format('woff2');
+  unicode-range: U+0E80-0EFF; /* the Lao block: pages without Lao text never download these */
+}
 
 @theme {
-  /* Latin text keeps the system font; Lao glyphs fall back to Noto Sans Lao per character. */
+  /* The Lao font goes first: its @font-face only covers Lao characters, so Latin text still
+     uses the system font, while Lao always looks the same instead of depending on whichever
+     Lao font a device happens to have (some have none, some have a poor one). */
   --font-sans:
-    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Sans Lao';
+    'Noto Sans Lao', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 /* Lao needs a little more room than Latin: it stacks vowel and tone marks above and below the
