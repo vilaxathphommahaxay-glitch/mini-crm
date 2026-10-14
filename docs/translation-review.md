@@ -32,6 +32,8 @@ Please check these first; a change here should be applied everywhere.
 | Admin / Staff | ຜູ້ດູແລລະບົບ / ພະນັກງານ | The two roles. |
 | LAK / THB / USD | ກີບ / ບາດ / ໂດລາ | Currencies are named in Lao instead of showing codes. |
 | Transfer records | ໂອນຂໍ້ມູນ | Hand a person's customers, deals and tasks to someone else. |
+| Quote / Quotation | ໃບສະເໜີລາຄາ | A priced offer for a deal, printed or sent to the customer. |
+| VAT | ອາກອນມູນຄ່າເພີ່ມ | Value-added tax, as a percentage. |
 
 ## Everything on screen
 
@@ -49,12 +51,16 @@ Please check these first; a change here should be applied everywhere.
 | `nav.users` | Users | ຜູ້ໃຊ້ລະບົບ |
 | `nav.settings` | Settings | ຕັ້ງຄ່າ |
 | `nav.logout` | Log out | ອອກຈາກລະບົບ |
+| `reminders.label` | {count} tasks overdue or due today | ມີ {count} ວຽກທີ່ເກີນກຳນົດ ຫຼື ຄົບກຳນົດມື້ນີ້ |
+| `reminders.label_one` | {count} task overdue or due today | ມີ {count} ວຽກທີ່ເກີນກຳນົດ ຫຼື ຄົບກຳນົດມື້ນີ້ |
 | `role.admin` | Admin | ຜູ້ດູແລລະບົບ |
 | `role.staff` | Staff | ພະນັກງານ |
 | `common.save` | Save | ບັນທຶກ |
 | `common.cancel` | Cancel | ຍົກເລີກ |
 | `common.delete` | Delete | ລຶບ |
 | `common.edit` | Edit | ແກ້ໄຂ |
+| `common.call` | Call | ໂທ |
+| `common.whatsapp` | WhatsApp | ແຊັດ WhatsApp |
 | `common.close` | Close | ປິດ |
 | `common.dismiss` | Dismiss | ປິດ |
 | `common.done` | Done | ສຳເລັດ |
@@ -302,6 +308,65 @@ Please check these first; a change here should be applied everywhere.
 | `dealPage.movedTo` | Moved to {stage} | ຍ້າຍໄປ “{stage}” ແລ້ວ |
 | `dealPage.noActivity` | No activity on this deal yet | ລາຍການຂາຍນີ້ຍັງບໍ່ມີກິດຈະກຳ |
 | `dealPage.noActivityHint` | Log calls, meetings and next steps here. | ບັນທຶກການໂທ, ການນັດພົບ ແລະ ຂັ້ນຕອນຕໍ່ໄປຢູ່ບ່ອນນີ້. |
+| `quote.title` | Quotes | ໃບສະເໜີລາຄາ |
+| `quote.new` | New quote | ສ້າງໃບສະເໜີລາຄາ |
+| `quote.none` | No quotes yet | ຍັງບໍ່ມີໃບສະເໜີລາຄາ |
+| `quote.noneHint` | Make a price offer for the customer, then print it or save it as a PDF. | ສ້າງໃບສະເໜີລາຄາໃຫ້ລູກຄ້າ ແລ້ວພິມ ຫຼື ບັນທຶກເປັນ PDF ໄດ້. |
+| `quote.docTitle` | Quotation | ໃບສະເໜີລາຄາ |
+| `quote.number` | Quote no. | ເລກທີ |
+| `quote.issueDate` | Date | ວັນທີ |
+| `quote.validUntil` | Valid until | ໃຊ້ໄດ້ຮອດວັນທີ |
+| `quote.billTo` | Quoted to | ສະເໜີໃຫ້ |
+| `quote.tel` | Tel. | ໂທ |
+| `quote.taxId` | Tax ID | ເລກປະຈຳຕົວຜູ້ເສຍອາກອນ |
+| `quote.items` | Products and services | ສິນຄ້າ ແລະ ບໍລິການ |
+| `quote.item` | Item {n} | ລາຍການທີ {n} |
+| `quote.description` | Description | ລາຍລະອຽດ |
+| `quote.quantity` | Qty | ຈຳນວນ |
+| `quote.unitPrice` | Unit price | ລາຄາຕໍ່ໜ່ວຍ |
+| `quote.amount` | Amount | ເປັນເງິນ |
+| `quote.addItem` | Add item | ເພີ່ມລາຍການ |
+| `quote.removeItem` | Remove item {n} | ລຶບລາຍການທີ {n} |
+| `quote.subtotal` | Subtotal | ລວມ |
+| `quote.discount` | Discount | ສ່ວນຫຼຸດ |
+| `quote.taxRate` | VAT (%) | ອາກອນມູນຄ່າເພີ່ມ (%) |
+| `quote.taxRateHint` | Leave 0 if you don't charge VAT | ໃສ່ 0 ຖ້າບໍ່ເກັບອາກອນ |
+| `quote.tax` | VAT {rate}% | ອາກອນມູນຄ່າເພີ່ມ {rate}% |
+| `quote.total` | Total | ລວມທັງໝົດ |
+| `quote.notes` | Notes | ໝາຍເຫດ |
+| `quote.notesHint` | Printed on the quote, e.g. delivery time or what is included. | ຈະພິມໃສ່ໃບສະເໜີລາຄາ ເຊັ່ນ: ໄລຍະເວລາສົ່ງ ຫຼື ສິ່ງທີ່ລວມຢູ່ໃນລາຄາ. |
+| `quote.terms` | Terms | ເງື່ອນໄຂ |
+| `quote.preparedBy` | Prepared by | ຜູ້ສະເໜີ |
+| `quote.acceptedBy` | Accepted by the customer | ລູກຄ້າຕົກລົງ |
+| `quote.signature` | Signature and date | ລາຍເຊັນ ແລະ ວັນທີ |
+| `quote.edit` | Edit quote | ແກ້ໄຂໃບສະເໜີລາຄາ |
+| `quote.backToDeal` | Back to the deal | ກັບໄປທີ່ລາຍການຂາຍ |
+| `quote.print` | Print / Save as PDF | ພິມ / ບັນທຶກເປັນ PDF |
+| `quote.printHint` | To get a PDF file, choose “Save as PDF” as the printer. | ຖ້າຢາກໄດ້ໄຟລ໌ PDF, ໃຫ້ເລືອກ “Save as PDF” (ບັນທຶກເປັນ PDF) ແທນເຄື່ອງພິມ. |
+| `quote.sendWhatsapp` | Send on WhatsApp | ສົ່ງທາງ WhatsApp |
+| `quote.created` | Quote {number} created | ສ້າງໃບສະເໜີລາຄາ {number} ແລ້ວ |
+| `quote.saved` | Quote saved | ບັນທຶກໃບສະເໜີລາຄາແລ້ວ |
+| `quote.deleted` | Quote deleted | ລຶບໃບສະເໜີລາຄາແລ້ວ |
+| `quote.delete` | Delete quote | ລຶບໃບສະເໜີລາຄາ |
+| `quote.deleteTitle` | Delete this quote? | ລຶບໃບສະເໜີລາຄານີ້ບໍ? |
+| `quote.deleteMessage` | Quote {number} will be deleted. This cannot be undone. | ໃບສະເໜີລາຄາ {number} ຈະຖືກລຶບ ແລະ ກູ້ຄືນບໍ່ໄດ້. |
+| `quote.useAsDealValue` | Use total as deal value | ໃຊ້ຍອດລວມເປັນມູນຄ່າລາຍການຂາຍ |
+| `quote.dealValueUpdated` | Deal value updated | ອັບເດດມູນຄ່າລາຍການຂາຍແລ້ວ |
+| `quote.noBusinessAdmin` | Your business name and address are not on the quote yet. Add them in Settings. | ໃບສະເໜີລາຄາຍັງບໍ່ມີຊື່ ແລະ ທີ່ຢູ່ຂອງຮ້ານ. ໃຫ້ໄປໃສ່ໃນໜ້າຕັ້ງຄ່າ. |
+| `quote.noBusinessStaff` | Your business name and address are not on the quote yet. Ask an admin to add them in Settings. | ໃບສະເໜີລາຄາຍັງບໍ່ມີຊື່ ແລະ ທີ່ຢູ່ຂອງຮ້ານ. ໃຫ້ຜູ້ດູແລລະບົບໃສ່ໃນໜ້າຕັ້ງຄ່າ. |
+| `quote.goToSettings` | Open Settings | ໄປທີ່ໜ້າຕັ້ງຄ່າ |
+| `business.title` | Business details for quotes | ຂໍ້ມູນຮ້ານ ສຳລັບໃບສະເໜີລາຄາ |
+| `business.hint` | Printed at the top of every quote. | ຈະພິມຢູ່ເທິງສຸດຂອງທຸກໃບສະເໜີລາຄາ. |
+| `business.name` | Business name | ຊື່ຮ້ານ ຫຼື ບໍລິສັດ |
+| `business.terms` | Standard terms | ເງື່ອນໄຂມາດຕະຖານ |
+| `business.termsHint` | Printed at the bottom of every quote, e.g. how to pay or your bank account. | ຈະພິມຢູ່ລຸ່ມສຸດຂອງທຸກໃບສະເໜີລາຄາ ເຊັ່ນ: ວິທີຈ່າຍເງິນ ຫຼື ເລກບັນຊີທະນາຄານ. |
+| `business.saved` | Business details saved | ບັນທຶກຂໍ້ມູນຮ້ານແລ້ວ |
+| `validation.descriptionRequired` | Describe the item | ໃສ່ລາຍລະອຽດຂອງລາຍການ |
+| `validation.quantity` | Enter a number above 0 | ໃສ່ຕົວເລກທີ່ຫຼາຍກວ່າ 0 |
+| `validation.amount` | Enter an amount like 150000 or 99.50 | ໃສ່ຈຳນວນເງິນ ເຊັ່ນ 150000 ຫຼື 99.50 |
+| `validation.percent` | Enter a number from 0 to 100 | ໃສ່ຕົວເລກແຕ່ 0 ຫາ 100 |
+| `fielderror.discountTooLarge` | The discount is larger than the subtotal | ສ່ວນຫຼຸດຫຼາຍກວ່າຍອດລວມ |
+| `fielderror.beforeIssueDate` | Must be on or after the quote date | ຕ້ອງເປັນວັນທີດຽວກັນ ຫຼື ຫຼັງວັນທີອອກໃບ |
 | `tasks.today` | Today | ມື້ນີ້ |
 | `tasks.overdue` | Overdue | ເກີນກຳນົດ |
 | `tasks.upcoming` | Next 7 days | 7 ມື້ຂ້າງໜ້າ |

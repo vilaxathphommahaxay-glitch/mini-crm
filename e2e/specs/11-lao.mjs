@@ -16,7 +16,7 @@ async function dataWords() {
     else if (Array.isArray(value)) value.forEach(collect)
     else if (value && typeof value === 'object') Object.values(value).forEach(collect)
   }
-  for (const path of ['contacts?size=100', 'companies?size=100', 'deals?size=100', 'activities?size=100', 'users?size=100', 'tags', 'dashboard/summary']) {
+  for (const path of ['contacts?size=100', 'companies?size=100', 'deals?size=100', 'activities?size=100', 'users?size=100', 'tags', 'dashboard/summary', 'settings/business']) {
     collect(await (await page.request.get(`${BASE}/api/${path}`, { headers })).json())
   }
   return words

@@ -16,6 +16,9 @@ const CompaniesPage = page(() => import('./pages/CompaniesPage'), 'CompaniesPage
 const CompanyDetailPage = page(() => import('./pages/CompanyDetailPage'), 'CompanyDetailPage')
 const PipelinePage = page(() => import('./pages/PipelinePage'), 'PipelinePage')
 const DealDetailPage = page(() => import('./pages/DealDetailPage'), 'DealDetailPage')
+const QuotePage = page(() => import('./pages/QuotePage'), 'QuotePage')
+const NewQuotePage = page(() => import('./pages/QuoteEditorPage'), 'NewQuotePage')
+const EditQuotePage = page(() => import('./pages/QuoteEditorPage'), 'EditQuotePage')
 const TasksPage = page(() => import('./pages/TasksPage'), 'TasksPage')
 const UsersPage = page(() => import('./pages/UsersPage'), 'UsersPage')
 const SettingsPage = page(() => import('./pages/SettingsPage'), 'SettingsPage')
@@ -40,6 +43,9 @@ export default function App() {
           <Route path="companies/:id" element={<CompanyDetailPage />} />
           <Route path="pipeline" element={<PipelinePage />} />
           <Route path="deals/:id" element={<DealDetailPage />} />
+          <Route path="deals/:dealId/quotes/new" element={<NewQuotePage />} />
+          <Route path="quotes/:id" element={<QuotePage />} />
+          <Route path="quotes/:id/edit" element={<EditQuotePage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route
             path="users"

@@ -115,14 +115,14 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 print:bg-white">
       {/* desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-60 lg:block">
+      <aside className="fixed inset-y-0 left-0 hidden w-60 lg:block print:hidden">
         <Sidebar onSearch={openSearch} />
       </aside>
 
       {/* mobile / tablet: top bar + drawer */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 lg:hidden print:hidden">
         <button
           type="button"
           aria-label={t('nav.openMenu')}
@@ -151,7 +151,7 @@ export function Layout() {
         </div>
       )}
 
-      <main className="px-4 py-6 sm:px-6 lg:ml-60 lg:px-8">
+      <main className="px-4 py-6 sm:px-6 lg:ml-60 lg:px-8 print:m-0 print:p-0">
         {/* pages load lazily; keep the sidebar on screen while they do */}
         <Suspense fallback={<LoadingState />}>
           <Outlet />

@@ -148,7 +148,7 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
 
       <div className="-mx-5 mt-5 -mb-4 flex items-center gap-2 border-t border-slate-200 px-5 py-3">
         {deal && (
-          <Button variant="ghost" className="text-red-600" onClick={() => setConfirmDelete(true)}>
+          <Button variant="dangerGhost" onClick={() => setConfirmDelete(true)}>
             {t('dealForm.delete')}
           </Button>
         )}

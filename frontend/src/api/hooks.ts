@@ -10,12 +10,15 @@ import {
 import { api } from './client'
 import type {
   Activity,
+  BusinessProfile,
   BoardColumn,
   Company,
   Contact,
   DashboardSummary,
   Deal,
   Page,
+  Quote,
+  QuoteSummary,
   Reminders,
   SearchResults,
   Stage,
@@ -45,9 +48,10 @@ function useOne<T>(resource: string, id: number | undefined) {
 
 /** Mutations that touch one resource also refresh whatever views depend on it. */
 const DEPENDENTS: Record<string, string[]> = {
-  contacts: ['contacts', 'tags', 'deals', 'activities', 'dashboard'],
-  companies: ['companies', 'contacts', 'deals'],
-  deals: ['deals', 'activities', 'dashboard'],
+  contacts: ['contacts', 'tags', 'deals', 'activities', 'dashboard', 'quotes'],
+  companies: ['companies', 'contacts', 'deals', 'quotes'],
+  deals: ['deals', 'activities', 'dashboard', 'quotes'],
+  quotes: ['quotes'],
   activities: ['activities', 'dashboard'],
   users: ['users'],
 }
@@ -114,6 +118,47 @@ export function moveDeal(id: number, stage: Stage, beforeId: number | null) {
   return api<Deal>(`/deals/${id}/move`, {
     method: 'PATCH',
     body: { stage, before_id: beforeId },
+  })
+}
+
+// --- quotes ---
+export function useDealQuotes(dealId: number) {
+  return useQuery({
+    queryKey: ['quotes', 'deal', dealId],
+    queryFn: () => api<QuoteSummary[]>(`/deals/${dealId}/quotes`),
+  })
+}
+
+export const useQuote = (id?: number) => useOne<Quote>('quotes', id)
+
+/** New quotes are created on their deal; existing ones are replaced as a whole (PUT). */
+export function useSaveQuote() {
+  const invalidate = useInvalidate()
+  return useMutation({
+    mutationFn: ({ id, dealId, body }: { id?: number; dealId: number; body: Body }) =>
+      id === undefined
+        ? api<Quote>(`/deals/${dealId}/quotes`, { method: 'POST', body })
+        : api<Quote>(`/quotes/${id}`, { method: 'PUT', body }),
+    onSuccess: () => invalidate('quotes'),
+  })
+}
+
+export const useDeleteQuote = () => useDelete('quotes')
+
+export function useBusinessProfile() {
+  return useQuery({
+    queryKey: ['business'],
+    queryFn: () => api<BusinessProfile>('/settings/business'),
+    staleTime: 5 * 60_000,
+  })
+}
+
+export function useSaveBusinessProfile() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: BusinessProfile) =>
+      api<BusinessProfile>('/settings/business', { method: 'PUT', body: { ...body } }),
+    onSuccess: (saved) => client.setQueryData(['business'], saved),
   })
 }
 

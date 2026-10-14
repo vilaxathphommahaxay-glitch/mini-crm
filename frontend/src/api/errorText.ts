@@ -56,6 +56,8 @@ const FIELD_BY_CODE: Record<string, MessageKey> = {
   wrong_password: 'fielderror.wrongPassword',
   company_conflict: 'fielderror.companyConflict',
   bad_position: 'fielderror.badPosition',
+  discount_too_large: 'fielderror.discountTooLarge',
+  before_issue_date: 'fielderror.beforeIssueDate',
   cannot_be_empty: 'validation.required',
   missing: 'validation.required',
   too_short: 'validation.required',

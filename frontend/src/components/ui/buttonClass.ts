@@ -1,4 +1,4 @@
-export type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
+export type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'dangerGhost'
 export type Size = 'sm' | 'md'
 
 const VARIANTS: Record<Variant, string> = {
@@ -7,6 +7,8 @@ const VARIANTS: Record<Variant, string> = {
     'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:text-slate-400',
   danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300',
   ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:text-slate-300',
+  // a quiet "Delete …" next to the main actions
+  dangerGhost: 'text-red-600 hover:bg-red-50 hover:text-red-700 disabled:text-red-300',
 }
 
 const SIZES: Record<Size, string> = {

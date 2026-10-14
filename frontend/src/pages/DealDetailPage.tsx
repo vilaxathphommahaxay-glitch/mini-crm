@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError, errorMessage } from '../api/client'
-import { moveDeal, useActivities, useDeal } from '../api/hooks'
+import { moveDeal, useActivities, useDeal, useDealQuotes } from '../api/hooks'
 import { STAGES, type Stage } from '../api/types'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
@@ -141,6 +141,7 @@ export function DealDetailPage() {
               ]}
             />
           </Card>
+          <QuotesCard dealId={d.id} />
         </div>
 
         <Card className="min-w-0">
@@ -179,5 +180,49 @@ export function DealDetailPage() {
         onClose={() => setLogging(false)}
       />
     </>
+  )
+}
+
+function QuotesCard({ dealId }: { dealId: number }) {
+  const quotes = useDealQuotes(dealId)
+  return (
+    <Card>
+      <CardHeader
+        title={t('quote.title')}
+        actions={
+          <ButtonLink to={`/deals/${dealId}/quotes/new`} size="sm" variant="secondary">
+            <Icon name="plus" className="size-3.5" />
+            {t('quote.new')}
+          </ButtonLink>
+        }
+      />
+      {quotes.isPending ? (
+        <LoadingState />
+      ) : quotes.isError ? (
+        <ErrorState error={quotes.error} onRetry={() => quotes.refetch()} />
+      ) : quotes.data.length === 0 ? (
+        <EmptyState title={t('quote.none')}>{t('quote.noneHint')}</EmptyState>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {quotes.data.map((quote) => (
+            <li key={quote.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+              <Icon name="document" className="size-4 shrink-0 text-slate-400" />
+              <div className="min-w-0 flex-1">
+                <Link
+                  to={`/quotes/${quote.id}`}
+                  className="font-medium text-slate-900 hover:text-indigo-600"
+                >
+                  {quote.number}
+                </Link>
+                <p className="text-xs text-slate-500">{formatDate(quote.issue_date)}</p>
+              </div>
+              <span className="text-right whitespace-nowrap text-slate-900 tabular-nums">
+                {formatMoney(quote.total, quote.currency)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   )
 }

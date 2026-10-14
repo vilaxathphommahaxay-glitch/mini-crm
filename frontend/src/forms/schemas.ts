@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import type { ActivityType, Currency, Stage } from '../api/types'
 import { msg, type MessageKey } from '../i18n'
+import { toCents } from '../lib/money'
 
 const optionalText = (max: number) => z.string().trim().max(max, msg('validation.maxChars', max))
 const requiredText = (required: MessageKey, max: number) =>
@@ -174,5 +175,48 @@ export function toFollowUpBody(v: ActivityFormValues) {
     contact_id: idOrNull(v.contact_id),
     deal_id: idOrNull(v.deal_id),
     ...ownerPart(v.owner_id),
+  }
+}
+
+// --- quote ---
+const plainAmount = (v: string) => v.replaceAll(',', '').trim()
+
+export const quoteSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        description: requiredText('validation.descriptionRequired', 500),
+        quantity: z.string().refine((v) => {
+          const cents = toCents(v)
+          return cents !== null && cents > 0n && cents < 10n ** 12n
+        }, msg('validation.quantity')),
+        unit_price: z.string().refine((v) => toCents(v) !== null, msg('validation.amount')),
+      }),
+    )
+    .min(1),
+  discount: z.string().refine((v) => !v.trim() || toCents(v) !== null, msg('validation.amount')),
+  tax_rate: z.string().refine((v) => {
+    if (!v.trim()) return true
+    const hundredths = toCents(v)
+    return hundredths !== null && hundredths <= 10000n
+  }, msg('validation.percent')),
+  issue_date: z.string().min(1, msg('validation.pickDate')),
+  valid_until: z.string(),
+  notes: z.string().max(5000, msg('validation.maxChars', 5000)),
+})
+export type QuoteFormValues = z.infer<typeof quoteSchema>
+
+export function toQuoteBody(v: QuoteFormValues) {
+  return {
+    items: v.items.map((item) => ({
+      description: item.description.trim(),
+      quantity: plainAmount(item.quantity),
+      unit_price: plainAmount(item.unit_price),
+    })),
+    discount: plainAmount(v.discount) || '0',
+    tax_rate: plainAmount(v.tax_rate) || '0',
+    issue_date: v.issue_date,
+    valid_until: v.valid_until || null,
+    notes: blankToNull(v.notes),
   }
 }

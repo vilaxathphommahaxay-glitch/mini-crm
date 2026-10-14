@@ -61,8 +61,10 @@ def test_seed_languages_have_the_same_shape(db):
         if isinstance(en[key], list):
             assert len(en[key]) == len(lo[key]), key
         elif isinstance(en[key], dict):
-            sizes = {k: len(v) for k, v in en[key].items()}
-            assert sizes == {k: len(v) for k, v in lo[key].items()}
+            assert set(en[key]) == set(lo[key]), key
+            for k, v in en[key].items():
+                if isinstance(v, list):
+                    assert len(v) == len(lo[key][k]), (key, k)
     assert "{n}" in lo["repeat_order"]
 
 

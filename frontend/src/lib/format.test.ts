@@ -5,6 +5,8 @@ import { formatDate, formatMoney, formatTotals } from './format'
 describe('formatMoney', () => {
   it('groups thousands and hides LAK decimals', () => {
     expect(formatMoney('1500000.00', 'LAK')).toBe('1,500,000 LAK')
+    // ...unless there really is a fraction, so lines still add up on a quote
+    expect(formatMoney('25000.50', 'LAK')).toBe('25,000.50 LAK')
   })
 
   it('keeps two decimals for THB and USD', () => {

@@ -3,12 +3,15 @@ import { t } from '../i18n'
 
 const DECIMALS: Record<Currency, number> = { LAK: 0, THB: 2, USD: 2 }
 
-/** "1500000.00" -> "1,500,000 LAK". Works on the string so large amounts stay exact. */
+/**
+ * "1500000.00" -> "1,500,000 LAK". Works on the string so large amounts stay exact.
+ * LAK normally has no decimals, but a real fraction ("25000.50") is shown rather than hidden.
+ */
 export function formatMoney(amount: string, currency: Currency): string {
   const negative = amount.startsWith('-')
   const [whole, fraction = ''] = amount.replace('-', '').split('.')
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  const digits = DECIMALS[currency]
+  const digits = DECIMALS[currency] || (/[1-9]/.test(fraction) ? 2 : 0)
   const decimals = digits ? `.${fraction.padEnd(digits, '0').slice(0, digits)}` : ''
   return `${negative ? '-' : ''}${grouped}${decimals} ${t(`currency.${currency}`)}`
 }

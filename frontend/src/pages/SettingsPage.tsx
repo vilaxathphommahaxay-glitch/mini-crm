@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { api, errorMessage, fieldErrors } from '../api/client'
 import { useCurrentUser } from '../auth/context'
 import { LanguageSwitch } from '../components/LanguageSwitch'
+import { BusinessProfileCard } from '../forms/BusinessProfileForm'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
 import { Field, FormError, Input } from '../components/ui/form'
@@ -103,6 +104,11 @@ export function SettingsPage() {
           <LanguageSwitch tone="light" />
         </div>
       </Card>
+      {user.role === 'admin' && (
+        <div className="mt-6">
+          <BusinessProfileCard />
+        </div>
+      )}
     </>
   )
 }

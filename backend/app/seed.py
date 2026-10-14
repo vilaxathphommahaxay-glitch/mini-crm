@@ -20,10 +20,14 @@ from app.models import (
     CLOSED_STAGES,
     Activity,
     ActivityType,
+    BusinessProfile,
     Company,
     Contact,
     Currency,
     Deal,
+    Quote,
+    QuoteCounter,
+    QuoteItem,
     Role,
     Stage,
     Tag,
@@ -44,6 +48,14 @@ LOGINS = [
 DATASETS = {
     "en": {
         "user_names": ["Admin", "Somchai Vongsa", "Keo Phommachanh"],
+        "business": {
+            "name": "Mini CRM Demo Shop",
+            "address": "Lane Xang Avenue\nVientiane, Laos",
+            "phone": "+856 21 212 345",
+            "email": "sales@example.la",
+            "quote_terms": "Prices include delivery within Vientiane.\n"
+            "Please pay by bank transfer to BCEL 010-12-00-0000000 (demo account).",
+        },
         "companies": [
             ("Vientiane Coffee House", "vientianecoffeehouse"),
             ("Mekong Trading", "mekongtrading"),
@@ -127,6 +139,14 @@ DATASETS = {
     },
     "lo": {
         "user_names": ["ຜູ້ດູແລລະບົບ", "ສົມໃຈ ວົງສາ", "ແກ້ວ ພົມມະຈັນ"],
+        "business": {
+            "name": "ຮ້ານຕົວຢ່າງ Mini CRM",
+            "address": "ຖະໜົນລ້ານຊ້າງ\nນະຄອນຫຼວງວຽງຈັນ",
+            "phone": "+856 21 212 345",
+            "email": "sales@example.la",
+            "quote_terms": "ລາຄານີ້ລວມຄ່າຂົນສົ່ງພາຍໃນນະຄອນຫຼວງວຽງຈັນແລ້ວ.\n"
+            "ກະລຸນາໂອນເງິນເຂົ້າບັນຊີ BCEL 010-12-00-0000000 (ບັນຊີຕົວຢ່າງ).",
+        },
         "companies": [
             ("ຮ້ານກາເຟວຽງຈັນ", "vientianecoffeehouse"),
             ("ແມ່ຂອງ ການຄ້າ", "mekongtrading"),
@@ -222,7 +242,19 @@ def is_empty(db: Session) -> bool:
 
 
 def wipe(db: Session) -> None:
-    for table in (Activity, Deal, contact_tags, Contact, Tag, Company, User):
+    for table in (
+        QuoteItem,
+        Quote,
+        QuoteCounter,
+        BusinessProfile,
+        Activity,
+        Deal,
+        contact_tags,
+        Contact,
+        Tag,
+        Company,
+        User,
+    ):
         db.execute(delete(table))
     db.commit()
 
@@ -247,6 +279,7 @@ def seed(db: Session, rng: random.Random | None = None, language: str = "en") ->
         for name, (email, pw, role) in zip(data["user_names"], LOGINS, strict=True)
     ]
     db.add_all(users)
+    db.add(BusinessProfile(id=1, **data["business"]))
     staff = [u for u in users if u.role == Role.staff]
     owners = staff + users[:1]  # most data belongs to staff, some to admin
 

@@ -162,3 +162,51 @@ export interface Reminders {
   overdue: number
   today: number
 }
+
+export interface QuoteItem {
+  id: number
+  description: string
+  quantity: string
+  unit_price: string
+  amount: string
+}
+
+export interface QuoteSummary {
+  id: number
+  number: string
+  currency: Currency
+  issue_date: string
+  valid_until: string | null
+  total: string
+  created_at: string
+}
+
+export interface Quote extends QuoteSummary {
+  deal: { id: number; title: string }
+  customer: {
+    name: string
+    phone: string | null
+    email: string | null
+    company_name: string | null
+    company_address: string | null
+    company_phone: string | null
+  }
+  prepared_by: { id: number; name: string }
+  discount: string
+  tax_rate: string
+  notes: string | null
+  items: QuoteItem[]
+  subtotal: string
+  tax: string
+  updated_at: string
+}
+
+/** The seller's details printed on quotes. */
+export interface BusinessProfile {
+  name: string | null
+  address: string | null
+  phone: string | null
+  email: string | null
+  tax_id: string | null
+  quote_terms: string | null
+}

@@ -55,3 +55,14 @@
 :lang(lo) .uppercase {
   text-transform: none;
 }
+
+/* Printing (quotes): A4 with even margins; the page itself hides the app around the document. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  body {
+    background: white;
+  }
+}
