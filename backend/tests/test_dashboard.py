@@ -168,3 +168,39 @@ def test_deals_without_a_next_step_can_show_more(client, factory, staff):
 
     assert (default["count"], len(default["items"])) == (12, 10)
     assert len(everything["items"]) == 12
+
+
+def test_quiet_contacts(client, factory, staff, other_staff):
+    from datetime import date
+
+    from app.clock import utcnow
+    from app.models import ActivityType
+
+    now = utcnow()
+    days_ago = lambda n: now - timedelta(days=n)  # noqa: E731
+    called_long_ago = factory.contact(staff, first_name="Long ago", created_at=days_ago(200))
+    factory.activity(
+        staff, contact_id=called_long_ago.id, type=ActivityType.call, created_at=days_ago(90)
+    )
+    factory.contact(staff, first_name="Never", created_at=days_ago(60))
+    recent = factory.contact(staff, first_name="Recent", created_at=days_ago(200))
+    factory.activity(staff, contact_id=recent.id, type=ActivityType.note, created_at=days_ago(3))
+    factory.contact(staff, first_name="New", created_at=days_ago(5))
+    planned = factory.contact(staff, first_name="Planned", created_at=days_ago(200))
+    factory.activity(staff, contact_id=planned.id, due_date=date.today())
+    old_task_only = factory.contact(staff, first_name="Task only", created_at=days_ago(100))
+    factory.activity(
+        staff, contact_id=old_task_only.id, due_date=date.today(), done=True, created_at=days_ago(1)
+    )
+    factory.contact(other_staff, first_name="Not mine", created_at=days_ago(300))
+
+    body = client.get("/api/dashboard/quiet-contacts", headers=auth(staff)).json()
+
+    # a finished task is not "being in touch"; an open task means it's already planned
+    assert [i["name"] for i in body["items"]] == ["Task only", "Long ago", "Never"]
+    assert body["count"] == 3
+    assert body["items"][2]["last_contact_at"] is None
+    assert body["items"][1]["last_contact_at"] is not None
+    short = client.get("/api/dashboard/quiet-contacts?days=95&limit=1", headers=auth(staff)).json()
+    assert short["count"] == 1  # "Long ago" was called 90 days ago
+    assert short["items"][0]["name"] == "Task only"

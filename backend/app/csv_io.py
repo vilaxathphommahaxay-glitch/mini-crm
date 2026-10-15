@@ -4,10 +4,12 @@ import csv
 import io
 import re
 from collections.abc import Iterable
+from datetime import datetime
 
 from pydantic import ValidationError
 
-from app.models import Contact
+from app.clock import app_tz
+from app.models import Contact, Deal
 from app.schemas.contacts import ContactCreate
 
 COLUMNS = ["first_name", "last_name", "email", "phone", "company", "tags", "notes"]
@@ -62,6 +64,47 @@ def export_contacts(contacts: Iterable[Contact]) -> str:
             c.company.name if c.company else None,
             TAG_SEPARATOR.join(c.tag_names),
             c.notes,
+        ]
+        writer.writerow([_safe_cell(v) for v in row])
+    return out.getvalue()
+
+
+DEAL_COLUMNS = [
+    "title",
+    "stage",
+    "value",
+    "currency",
+    "contact",
+    "company",
+    "owner",
+    "expected_close_date",
+    "closed_date",
+    "created_date",
+]
+
+
+def _local_date(moment: datetime | None) -> str | None:
+    return moment.astimezone(app_tz()).date().isoformat() if moment else None
+
+
+def export_deals(deals: Iterable[Deal]) -> str:
+    """Deals for a spreadsheet: amounts as plain numbers, dates as YYYY-MM-DD in APP_TIMEZONE."""
+    out = io.StringIO()
+    out.write("﻿")  # BOM: Excel then reads Lao text as UTF-8
+    writer = csv.writer(out, lineterminator="\r\n")
+    writer.writerow(DEAL_COLUMNS)
+    for d in deals:
+        row = [
+            d.title,
+            d.stage.value,
+            f"{d.value:.2f}",
+            d.currency.value,
+            d.contact.full_name,
+            d.company.name if d.company else None,
+            d.owner.name,
+            d.expected_close_date.isoformat() if d.expected_close_date else None,
+            _local_date(d.closed_at),
+            _local_date(d.created_at),
         ]
         writer.writerow([_safe_cell(v) for v in row])
     return out.getvalue()

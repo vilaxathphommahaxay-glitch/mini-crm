@@ -485,6 +485,10 @@ export const en = {
   'dashboard.addTask': 'Add task',
   'dashboard.nothingOverdue': 'Nothing overdue',
   'dashboard.caughtUp': "You're all caught up.",
+  'quiet.title': 'Not in touch for {days}+ days ({count})',
+  'quiet.last': 'Last contact {date}',
+  'quiet.never': 'Never contacted',
+  'quiet.none': 'Everyone has been contacted recently',
 
   'pipeline.subtitle': '{count} open deals · won and lost show the last 90 days',
   'pipeline.subtitle_one': '{count} open deal · won and lost show the last 90 days',

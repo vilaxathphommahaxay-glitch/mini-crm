@@ -1,12 +1,12 @@
 from datetime import timedelta
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session, joinedload
 
-from app import storage
+from app import csv_io, storage
 from app.access import apply_patch, get_owned, get_referenced, resolve_owner, scope
-from app.clock import utcnow
+from app.clock import local_today, utcnow
 from app.deps import CurrentUser, DbSession
 from app.errors import field_error
 from app.models import CLOSED_STAGES, STAGES, Activity, Company, Contact, Deal, Stage, User
@@ -51,6 +51,26 @@ def list_deals(
         stmt = stmt.where(Deal.company_id == company_id)
     stmt = stmt.order_by(Deal.updated_at.desc(), Deal.id.desc())
     return paginate(db, stmt, pagination)
+
+
+@router.get("/export")
+def export_deals(
+    user: CurrentUser,
+    db: DbSession,
+    stage: Stage | None = None,
+    owner_id: int | None = None,
+):
+    """Every visible deal (optionally one stage / owner) as a UTF-8 CSV for Excel."""
+    stmt = scope(select(Deal).options(*_LOAD), Deal, user, owner_id)
+    if stage is not None:
+        stmt = stmt.where(Deal.stage == stage)
+    deals = db.scalars(stmt.order_by(Deal.created_at.desc(), Deal.id.desc())).all()
+    filename = f"deals-{local_today().isoformat()}.csv"
+    return Response(
+        content=csv_io.export_deals(deals),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/board", response_model=list[BoardColumn])

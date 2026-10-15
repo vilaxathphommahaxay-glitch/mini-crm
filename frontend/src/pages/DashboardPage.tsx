@@ -4,6 +4,7 @@ import { useDashboard } from '../api/hooks'
 import { useCurrentUser } from '../auth/context'
 import { ActivityList } from '../components/ActivityList'
 import { StageBadge } from '../components/badges'
+import { QuietContactsCard } from '../components/QuietContactsCard'
 import { TeamTable } from '../components/TeamTable'
 import { Button } from '../components/ui/Button'
 import { Card, CardHeader, PageHeader } from '../components/ui/layout'
@@ -206,6 +207,8 @@ export function DashboardPage() {
               </ul>
             )}
           </Card>
+
+          <QuietContactsCard ownerId={toId(values.owner_id)} />
 
           <Card>
             <CardHeader

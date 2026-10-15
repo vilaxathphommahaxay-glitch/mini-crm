@@ -1,3 +1,4 @@
+import { ExportButton } from '../../components/ExportButton'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { api, errorMessage } from '../../api/client'
@@ -7,7 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { FormError } from '../../components/ui/form'
 import { Modal } from '../../components/ui/Modal'
 import { t, type MessageKey } from '../../i18n'
-import { filenameFrom, saveBlob } from '../../lib/download'
+import { saveBlob } from '../../lib/download'
 
 const COLUMNS = 'first_name,last_name,email,phone,company,tags,notes'
 const TEMPLATE = `﻿${COLUMNS}\r\nSomchai,Vongsa,somchai@example.la,+856 20 5555 1234,Mekong Trading,vip;wholesale,Met at trade fair\r\n`
@@ -158,28 +159,11 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
 
 /** Export (respecting the current filters) and Import buttons for the contacts list. */
 export function ContactsImportExport({ filters }: { filters: Filters }) {
-  const toast = useToast()
   const [importing, setImporting] = useState(false)
-  const [exporting, setExporting] = useState(false)
-
-  async function runExport() {
-    setExporting(true)
-    try {
-      const response = await api<Response>('/contacts/export', { query: filters, raw: true })
-      const name = filenameFrom(response.headers.get('Content-Disposition'), 'contacts.csv')
-      saveBlob(await response.blob(), name)
-    } catch (err) {
-      toast.error(errorMessage(err))
-    } finally {
-      setExporting(false)
-    }
-  }
 
   return (
     <>
-      <Button variant="secondary" onClick={runExport} loading={exporting}>
-        {t('csv.export')}
-      </Button>
+      <ExportButton path="/contacts/export" query={filters} fallbackName="contacts.csv" />
       <Button variant="secondary" onClick={() => setImporting(true)}>
         {t('csv.import')}
       </Button>

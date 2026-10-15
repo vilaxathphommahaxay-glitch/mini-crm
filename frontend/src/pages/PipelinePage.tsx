@@ -22,6 +22,7 @@ import { useCurrentUser } from '../auth/context'
 import { Icon } from '../components/icons'
 import { useToast } from '../components/toast/context'
 import { Button } from '../components/ui/Button'
+import { ExportButton } from '../components/ExportButton'
 import { PageHeader } from '../components/ui/layout'
 import { ErrorState, LoadingState } from '../components/ui/states'
 import { DealFormModal } from '../forms/DealForm'
@@ -311,6 +312,11 @@ export function PipelinePage() {
         subtitle={board.data ? t('pipeline.subtitle', { count: openCount }) : undefined}
         actions={
           <>
+            <ExportButton
+              path="/deals/export"
+              query={{ owner_id: values.owner_id || undefined }}
+              fallbackName="deals.csv"
+            />
             {isAdmin && (
               <div className="w-48">
                 <OwnerSelect

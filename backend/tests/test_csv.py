@@ -198,3 +198,44 @@ def test_whole_file_errors_have_distinct_codes(client, staff, monkeypatch):
     assert code(HEADER + "A,,,,,,\nB,,,,,,\n") == "file_too_many_rows"
     monkeypatch.setattr(csv_io, "MAX_BYTES", 10)
     assert code(HEADER) == "file_too_large"
+
+
+def test_export_deals_for_excel(client, factory, staff, other_staff):
+    from decimal import Decimal
+
+    from app.models import Currency, Stage
+
+    company = factory.company(staff, name="Dao Coffee")
+    contact = factory.contact(staff, first_name="=HYPERLINK(1)", last_name="ນ້ອຍ")
+    factory.deal(
+        staff,
+        contact=contact,
+        company_id=company.id,
+        title="Beans",
+        value=Decimal("1500000"),
+        stage=Stage.won,
+    )
+    factory.deal(staff, title="Cups", value=Decimal("99.5"), currency=Currency.USD)
+    factory.deal(other_staff, title="Not mine")
+
+    response = client.get("/api/deals/export", headers=auth(staff))
+    only_won = client.get("/api/deals/export?stage=won", headers=auth(staff))
+
+    assert response.headers["content-type"].startswith("text/csv")
+    assert response.headers["content-disposition"].startswith('attachment; filename="deals-')
+    text = response.content.decode("utf-8")
+    assert text.startswith("﻿")
+    rows = list(csv.reader(io.StringIO(text.removeprefix("﻿"))))
+    assert rows[0][:4] == ["title", "stage", "value", "currency"]
+    by_title = {row[0]: row for row in rows[1:]}
+    assert set(by_title) == {"Beans", "Cups"}
+    assert by_title["Beans"][1:7] == [
+        "won",
+        "1500000.00",
+        "LAK",
+        "'=HYPERLINK(1) ນ້ອຍ",
+        "Dao Coffee",
+        "Staff A",
+    ]
+    assert by_title["Cups"][2:4] == ["99.50", "USD"]
+    assert len(list(csv.reader(io.StringIO(only_won.text)))) == 2

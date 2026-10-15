@@ -21,6 +21,7 @@ import type {
   DuplicateGroup,
   HistoryEvent,
   Page,
+  QuietContacts,
   Quote,
   QuoteSummary,
   Reminders,
@@ -282,6 +283,19 @@ export function useSearch(q: string) {
     enabled: q.trim().length > 0,
     placeholderData: keepPreviousData, // no flicker between keystrokes
     staleTime: 10_000,
+  })
+}
+
+export const QUIET_DAYS = 30
+
+export function useQuietContacts(ownerId?: number, all = false) {
+  const limit = all ? 200 : 10
+  return useQuery({
+    queryKey: ['dashboard', 'quiet', ownerId ?? null, limit],
+    queryFn: () =>
+      api<QuietContacts>('/dashboard/quiet-contacts', {
+        query: { owner_id: ownerId, days: QUIET_DAYS, limit },
+      }),
   })
 }
 

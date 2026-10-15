@@ -106,6 +106,9 @@ Please check these first; a change here should be applied everywhere.
 | `act.dealLink` | Deal: {title} | ລາຍການຂາຍ: {title} |
 | `act.deleteTitle` | Delete activity? | ລຶບກິດຈະກຳນີ້ບໍ? |
 | `act.deleteMessage` | “{subject}” will be removed permanently. | “{subject}” ຈະຖືກລຶບຖາວອນ. |
+| `act.callSubject` | Call with {name} | ໂທຫາ {name} |
+| `act.whatsappSubject` | WhatsApp with {name} | ແຊັດ WhatsApp ກັບ {name} |
+| `act.afterCallHint` | Note how it went and plan the next step. Nobody answered? Just close this. | ບັນທຶກວ່າເປັນແນວໃດ ແລະ ວາງແຜນຂັ້ນຕໍ່ໄປ. ຖ້າບໍ່ມີຄົນຮັບສາຍ ກໍປິດໄດ້ເລີຍ. |
 | `palette.contacts` | Contacts | ລູກຄ້າ |
 | `palette.companies` | Companies | ບໍລິສັດ |
 | `palette.deals` | Deals | ລາຍການຂາຍ |
@@ -221,6 +224,9 @@ Please check these first; a change here should be applied everywhere.
 | `select.me` | — Me — | — ຂ້ອຍເອງ — |
 | `select.allOwners` | All owners | ຜູ້ຮັບຜິດຊອບທັງໝົດ |
 | `select.disabledOwner` | {name} (disabled) | {name} (ປິດການໃຊ້ງານ) |
+| `select.findContact` | Type to find a contact | ພິມເພື່ອຊອກຫາລູກຄ້າ |
+| `select.findCompany` | Type to find a company | ພິມເພື່ອຊອກຫາບໍລິສັດ |
+| `select.noMatches` | No matches | ບໍ່ພົບ |
 | `contactForm.new` | New contact | ເພີ່ມລູກຄ້າ |
 | `contactForm.edit` | Edit contact | ແກ້ໄຂລູກຄ້າ |
 | `contactForm.created` | Contact created | ເພີ່ມລູກຄ້າແລ້ວ |
@@ -460,6 +466,10 @@ Please check these first; a change here should be applied everywhere.
 | `dashboard.addTask` | Add task | ເພີ່ມວຽກ |
 | `dashboard.nothingOverdue` | Nothing overdue | ບໍ່ມີວຽກເກີນກຳນົດ |
 | `dashboard.caughtUp` | You're all caught up. | ທ່ານເຮັດວຽກຄົບຖ້ວນແລ້ວ. |
+| `quiet.title` | Not in touch for {days}+ days ({count}) | ບໍ່ໄດ້ຕິດຕໍ່ເກີນ {days} ມື້ ({count}) |
+| `quiet.last` | Last contact {date} | ຕິດຕໍ່ຄັ້ງສຸດທ້າຍ {date} |
+| `quiet.never` | Never contacted | ຍັງບໍ່ເຄີຍຕິດຕໍ່ |
+| `quiet.none` | Everyone has been contacted recently | ໄດ້ຕິດຕໍ່ລູກຄ້າທຸກຄົນມາບໍ່ດົນນີ້ |
 | `pipeline.subtitle` | {count} open deals · won and lost show the last 90 days | ລາຍການຂາຍທີ່ເປີດຢູ່ {count} ລາຍການ · ຂາຍໄດ້ ແລະ ຂາຍບໍ່ໄດ້ ສະແດງ 90 ມື້ຫຼ້າສຸດ |
 | `pipeline.subtitle_one` | {count} open deal · won and lost show the last 90 days | ລາຍການຂາຍທີ່ເປີດຢູ່ {count} ລາຍການ · ຂາຍໄດ້ ແລະ ຂາຍບໍ່ໄດ້ ສະແດງ 90 ມື້ຫຼ້າສຸດ |
 | `pipeline.column` | {stage} column | ຖັນ {stage} |

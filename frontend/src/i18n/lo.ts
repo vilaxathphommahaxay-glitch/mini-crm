@@ -482,6 +482,10 @@ export const lo: Record<keyof typeof en, string> = {
   'dashboard.addTask': 'ເພີ່ມວຽກ',
   'dashboard.nothingOverdue': 'ບໍ່ມີວຽກເກີນກຳນົດ',
   'dashboard.caughtUp': 'ທ່ານເຮັດວຽກຄົບຖ້ວນແລ້ວ.',
+  'quiet.title': 'ບໍ່ໄດ້ຕິດຕໍ່ເກີນ {days} ມື້ ({count})',
+  'quiet.last': 'ຕິດຕໍ່ຄັ້ງສຸດທ້າຍ {date}',
+  'quiet.never': 'ຍັງບໍ່ເຄີຍຕິດຕໍ່',
+  'quiet.none': 'ໄດ້ຕິດຕໍ່ລູກຄ້າທຸກຄົນມາບໍ່ດົນນີ້',
 
   'pipeline.subtitle':
     'ລາຍການຂາຍທີ່ເປີດຢູ່ {count} ລາຍການ · ຂາຍໄດ້ ແລະ ຂາຍບໍ່ໄດ້ ສະແດງ 90 ມື້ຫຼ້າສຸດ',

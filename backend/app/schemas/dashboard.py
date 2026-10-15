@@ -2,7 +2,7 @@ from datetime import datetime
 
 from app.models import Currency, Stage
 from app.schemas.activities import ActivityOut
-from app.schemas.common import ContactRef, OutputModel, UserRef
+from app.schemas.common import CompanyRef, ContactRef, OutputModel, UserRef
 from app.schemas.deals import CurrencyTotal, Money
 
 
@@ -55,3 +55,16 @@ class TeamMember(OutputModel):
     won_this_month: int
     won_value: list[CurrencyTotal]
     overdue_tasks: int
+
+
+class QuietContact(OutputModel):
+    id: int
+    name: str
+    phone: str | None
+    company: CompanyRef | None
+    last_contact_at: datetime | None  # None: never contacted
+
+
+class QuietContacts(OutputModel):
+    count: int
+    items: list[QuietContact]

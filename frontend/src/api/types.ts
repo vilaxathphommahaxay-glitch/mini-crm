@@ -259,3 +259,15 @@ export interface DuplicateGroup {
   reasons: ('phone' | 'email' | 'name')[]
   contacts: DuplicateContact[]
 }
+
+/** Customers nobody has been in touch with for a while (dashboard). */
+export interface QuietContacts {
+  count: number
+  items: {
+    id: number
+    name: string
+    phone: string | null
+    company: { id: number; name: string } | null
+    last_contact_at: string | null
+  }[]
+}

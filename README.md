@@ -15,15 +15,15 @@ Built as a full-stack portfolio project — FastAPI + PostgreSQL on the back end
 ## Features
 
 - **Quick search (Ctrl+K / ⌘K)** — find any contact, company or deal from anywhere; arrow keys and Enter to open.
-- **One tap to reach a customer** — *Call* and *WhatsApp* buttons on every contact; Lao numbers in local format (`020 …`) are converted for WhatsApp automatically.
+- **One tap to reach a customer** — *Call* and *WhatsApp* buttons on every contact; Lao numbers in local format (`020 …`) are converted for WhatsApp automatically. After the call, the log form is already open (“Call with Noy”), so calls get recorded.
 - **Installable on phones** — “Add to Home screen” gives the app its own icon and opens it full screen.
 - **Contacts and companies** — add a contact and a brand-new company in one form; search across name, email, phone and company; filter by tag and owner; filters live in the URL.
 - **Deals and a Kanban pipeline** — every deal has its own page with an activity timeline; six stages, drag and drop between and within columns (or use the keyboard), live per-currency totals. Moving a deal to *Won* or *Lost* stamps the close date automatically.
 - **Activities and tasks** — log calls, meetings and notes on a contact's or deal's timeline and schedule the follow-up in the same form; tasks show up under *Today*, *Overdue* and *Next 7 days*.
 - **Reminders everywhere** — a red/amber count of overdue and due-today tasks on the *Tasks* menu, in the browser tab title (“(3) Mini CRM”) and on the app icon when installed.
 - **Quotations** — build a quote from a deal (line items, discount, VAT), with numbers that run per year (`Q-2026-0001`) and are never reused. Print it or save it as a PDF from the browser (A4, Lao script included), or send it as a WhatsApp message. Your business name, address and payment terms (Settings, admins) are printed on every quote.
-- **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, and *deals without a next step* so nothing gets forgotten.
-- **CSV import/export** — Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
+- **Dashboard** — tasks due, open deals, won revenue per month, pipeline value per stage, *deals without a next step*, and customers *not in touch for 30+ days* (with Call / WhatsApp / Add task buttons) so nobody gets forgotten.
+- **CSV import/export** — contacts in and out, deals out (Pipeline → *Export CSV*); Excel-friendly UTF-8 (Lao and Thai text included), row-by-row import report, duplicate detection.
 - **Roles** — *Admin* sees and manages everything, including users; *Staff* only ever see the records they own.
 - **Duplicate contacts** — *Find duplicates* lists contacts with the same phone number (however it was written: `+856 20…`, `020…`), email or full name. Pick the one to keep: deals, activities, files and tags of the others move to it, its empty details are filled in, and the others are removed.
 - **Files and photos** — attach photos, contracts and receipts (up to 10 MB each; photos, PDF, Office, text and ZIP) to any contact, company or deal. Take a picture straight from the phone's camera; photos preview in the app.
@@ -183,6 +183,5 @@ PLAN.md              scope, data model, API and the phase-by-phase plan
 
 - The access token (8 hours, no refresh token) is kept in `localStorage`. That's fine for a demo but would need hardening (httpOnly cookies, refresh tokens) for production.
 - The sign-in rate limit is kept in memory, so it is per backend process; running several workers or servers would need a shared store such as Redis.
-- Relation dropdowns (company, contact, owner) list the first 100 records — enough for a small business, but a search-as-you-type picker would be needed at scale.
 - No currency conversion or email/SMS sending. Quotes are made into PDFs by the browser's own *Save as PDF*, not by the server (see *ไม่ทำในเวอร์ชันแรก* in [PLAN.md](PLAN.md)).
 - The UI is available in Lao and English only, and has no dark mode.

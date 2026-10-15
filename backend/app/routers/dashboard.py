@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Query
@@ -7,12 +7,12 @@ from sqlalchemy import exists, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.access import scope
-from app.clock import app_tz, local_today
+from app.clock import app_tz, local_today, utcnow
 from app.deps import AdminUser, CurrentUser, DbSession
-from app.models import CLOSED_STAGES, STAGES, Activity, Deal, Stage, User
+from app.models import CLOSED_STAGES, STAGES, Activity, ActivityType, Contact, Deal, Stage, User
 from app.pipeline import totals_by_currency
 from app.routers.activities import LOAD, Due, filter_due
-from app.schemas.dashboard import DashboardSummary, TeamMember
+from app.schemas.dashboard import DashboardSummary, QuietContacts, TeamMember
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -168,3 +168,51 @@ def team(_: AdminUser, db: DbSession):
         # skip disabled people who no longer own anything open
         if u.is_active or open_counts[u.id] or overdue.get(u.id)
     ]
+
+
+@router.get("/quiet-contacts", response_model=QuietContacts)
+def quiet_contacts(
+    user: CurrentUser,
+    db: DbSession,
+    owner_id: int | None = None,
+    days: Annotated[int, Query(ge=1, le=365)] = 30,
+    limit: Annotated[int, Query(ge=1, le=200)] = 10,
+):
+    """Customers nobody has called, met or written a note about for `days` days (or ever, if
+    they were added longer ago than that), and who have no open task planned. Longest silence
+    first: the ones to get back in touch with."""
+    since = utcnow() - timedelta(days=days)
+    last_touch = (
+        select(Activity.contact_id, func.max(Activity.created_at).label("at"))
+        .where(Activity.type != ActivityType.task, Activity.contact_id.is_not(None))
+        .group_by(Activity.contact_id)
+        .subquery()
+    )
+    planned = exists().where(
+        Activity.contact_id == Contact.id,
+        Activity.done.is_(False),
+        Activity.due_date.is_not(None),
+    )
+    quiet_since = func.coalesce(last_touch.c.at, Contact.created_at)
+    stmt = (
+        scope(select(Contact, last_touch.c.at), Contact, user, owner_id)
+        .outerjoin(last_touch, last_touch.c.contact_id == Contact.id)
+        .where(quiet_since < since, ~planned)
+    )
+    total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+    rows = db.execute(
+        stmt.options(joinedload(Contact.company)).order_by(quiet_since, Contact.id).limit(limit)
+    ).all()
+    return {
+        "count": total,
+        "items": [
+            {
+                "id": contact.id,
+                "name": contact.full_name,
+                "phone": contact.phone,
+                "company": contact.company,
+                "last_contact_at": last_at,
+            }
+            for contact, last_at in rows
+        ],
+    }
