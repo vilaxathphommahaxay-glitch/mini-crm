@@ -35,7 +35,8 @@ export function ContactDetailPage() {
 
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [logging, setLogging] = useState(false)
+  // after Call / WhatsApp the log form opens ready, so the call doesn't go unrecorded
+  const [logging, setLogging] = useState<{ subject?: string; intro?: string } | null>(null)
   const [creatingDeal, setCreatingDeal] = useState(false)
 
   if (contact.isPending) return <LoadingState />
@@ -52,6 +53,10 @@ export function ContactDetailPage() {
       setDeleting(false)
       toast.error(errorMessage(error)) // e.g. "This contact still has 2 deal(s)…"
     }
+  }
+
+  function logAfter(subject: 'act.callSubject' | 'act.whatsappSubject') {
+    setLogging({ subject: t(subject, { name: c.full_name }), intro: t('act.afterCallHint') })
   }
 
   return (
@@ -76,7 +81,11 @@ export function ContactDetailPage() {
         actions={
           <>
             {c.phone && (
-              <a href={telLink(c.phone)} className={buttonClass('secondary')}>
+              <a
+                href={telLink(c.phone)}
+                className={buttonClass('secondary')}
+                onClick={() => logAfter('act.callSubject')}
+              >
                 <Icon name="phone" className="size-4" />
                 {t('common.call')}
               </a>
@@ -86,6 +95,7 @@ export function ContactDetailPage() {
                 href={whatsappLink(c.phone)!}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => logAfter('act.whatsappSubject')}
                 className={buttonClass('secondary', 'md', 'text-green-700')}
               >
                 <Icon name="chat" className="size-4" />
@@ -111,7 +121,14 @@ export function ContactDetailPage() {
                 label: t('f.email'),
                 value: c.email && <a href={`mailto:${c.email}`}>{c.email}</a>,
               },
-              { label: t('f.phone'), value: c.phone && <a href={telLink(c.phone)}>{c.phone}</a> },
+              {
+                label: t('f.phone'),
+                value: c.phone && (
+                  <a href={telLink(c.phone)} onClick={() => logAfter('act.callSubject')}>
+                    {c.phone}
+                  </a>
+                ),
+              },
               { label: t('f.company'), value: c.company?.name },
               { label: t('f.tags'), value: <TagList tags={c.tags} /> },
               ...(isAdmin ? [{ label: t('f.owner'), value: c.owner.name }] : []),
@@ -152,7 +169,7 @@ export function ContactDetailPage() {
             <CardHeader
               title={t('act.title')}
               actions={
-                <Button size="sm" onClick={() => setLogging(true)}>
+                <Button size="sm" onClick={() => setLogging({})}>
                   <Icon name="plus" className="size-3.5" />
                   {t('act.log')}
                 </Button>
@@ -177,10 +194,12 @@ export function ContactDetailPage() {
 
       <ContactFormModal open={editing} contact={c} onClose={() => setEditing(false)} />
       <ActivityFormModal
-        open={logging}
+        open={logging !== null}
         defaultType="call"
+        defaultSubject={logging?.subject}
+        intro={logging?.intro}
         contactId={c.id}
-        onClose={() => setLogging(false)}
+        onClose={() => setLogging(null)}
       />
       <DealFormModal open={creatingDeal} contactId={c.id} onClose={() => setCreatingDeal(false)} />
       <ConfirmDialog

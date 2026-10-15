@@ -33,6 +33,9 @@ interface Props {
   dealId?: number
   defaultType?: ActivityType
   defaultDueDate?: string
+  defaultSubject?: string
+  /** a line above the form, e.g. after tapping Call: "note how it went" */
+  intro?: string
   onClose: () => void
 }
 
@@ -42,6 +45,8 @@ function ActivityForm({
   dealId,
   defaultType = 'task',
   defaultDueDate = '',
+  defaultSubject = '',
+  intro,
   onClose,
 }: Props) {
   const isAdmin = useCurrentUser().role === 'admin'
@@ -58,7 +63,7 @@ function ActivityForm({
     resolver: zodResolver(activitySchema),
     defaultValues: {
       type: activity?.type ?? defaultType,
-      subject: activity?.subject ?? '',
+      subject: activity?.subject ?? defaultSubject,
       description: activity?.description ?? '',
       due_date: activity ? (activity.due_date ?? '') : defaultDueDate,
       done: activity?.done ?? false,
@@ -101,6 +106,7 @@ function ActivityForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
+      {intro && <p className="text-sm text-slate-600">{intro}</p>}
       <FormError message={formError} />
       <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
         <Field label={t('f.type')} error={errors.type?.message}>

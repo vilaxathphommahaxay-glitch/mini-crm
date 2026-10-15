@@ -79,6 +79,9 @@ export const lo: Record<keyof typeof en, string> = {
   'act.dealLink': 'ລາຍການຂາຍ: {title}',
   'act.deleteTitle': 'ລຶບກິດຈະກຳນີ້ບໍ?',
   'act.deleteMessage': '“{subject}” ຈະຖືກລຶບຖາວອນ.',
+  'act.callSubject': 'ໂທຫາ {name}',
+  'act.whatsappSubject': 'ແຊັດ WhatsApp ກັບ {name}',
+  'act.afterCallHint': 'ບັນທຶກວ່າເປັນແນວໃດ ແລະ ວາງແຜນຂັ້ນຕໍ່ໄປ. ຖ້າບໍ່ມີຄົນຮັບສາຍ ກໍປິດໄດ້ເລີຍ.',
 
   'palette.contacts': 'ລູກຄ້າ',
   'palette.companies': 'ບໍລິສັດ',

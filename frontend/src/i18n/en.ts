@@ -78,6 +78,9 @@ export const en = {
   'act.dealLink': 'Deal: {title}',
   'act.deleteTitle': 'Delete activity?',
   'act.deleteMessage': '“{subject}” will be removed permanently.',
+  'act.callSubject': 'Call with {name}',
+  'act.whatsappSubject': 'WhatsApp with {name}',
+  'act.afterCallHint': 'Note how it went and plan the next step. Nobody answered? Just close this.',
 
   'palette.contacts': 'Contacts',
   'palette.companies': 'Companies',
