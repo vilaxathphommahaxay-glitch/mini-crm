@@ -205,6 +205,9 @@ export const en = {
   'select.me': '— Me —',
   'select.allOwners': 'All owners',
   'select.disabledOwner': '{name} (disabled)',
+  'select.findContact': 'Type to find a contact',
+  'select.findCompany': 'Type to find a company',
+  'select.noMatches': 'No matches',
 
   'contactForm.new': 'New contact',
   'contactForm.edit': 'Edit contact',

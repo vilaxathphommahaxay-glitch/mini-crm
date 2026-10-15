@@ -143,7 +143,7 @@ function ActivityForm({
       )}
       {!lockedContact && (
         <Field label={t('f.contact')} error={errors.contact_id?.message}>
-          {(c) => <ContactSelect {...c} {...register('contact_id')} />}
+          {(c) => <ContactSelect {...c} {...register('contact_id')} selected={activity?.contact} />}
         </Field>
       )}
       {dealId === undefined && (

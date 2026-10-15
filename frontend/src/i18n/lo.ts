@@ -206,6 +206,9 @@ export const lo: Record<keyof typeof en, string> = {
   'select.me': '— ຂ້ອຍເອງ —',
   'select.allOwners': 'ຜູ້ຮັບຜິດຊອບທັງໝົດ',
   'select.disabledOwner': '{name} (ປິດການໃຊ້ງານ)',
+  'select.findContact': 'ພິມເພື່ອຊອກຫາລູກຄ້າ',
+  'select.findCompany': 'ພິມເພື່ອຊອກຫາບໍລິສັດ',
+  'select.noMatches': 'ບໍ່ພົບ',
 
   'contactForm.new': 'ເພີ່ມລູກຄ້າ',
   'contactForm.edit': 'ແກ້ໄຂລູກຄ້າ',

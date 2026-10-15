@@ -122,7 +122,14 @@ export function ContactForm({ contact, companyId, onClose, onSaved }: Props) {
         </Field>
       </div>
       <Field label={t('f.company')} error={errors.company_id?.message}>
-        {(c) => <CompanySelect {...c} {...register('company_id')} allowCreate />}
+        {(c) => (
+          <CompanySelect
+            {...c}
+            {...register('company_id')}
+            allowCreate
+            selected={contact?.company}
+          />
+        )}
       </Field>
       {newCompany && (
         <Field

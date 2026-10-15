@@ -130,7 +130,7 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
       </div>
       {!lockedContact && (
         <Field label={t('f.contact')} required error={errors.contact_id?.message}>
-          {(c) => <ContactSelect {...c} {...register('contact_id')} />}
+          {(c) => <ContactSelect {...c} {...register('contact_id')} selected={deal?.contact} />}
         </Field>
       )}
       <Field
@@ -138,7 +138,7 @@ function DealForm({ deal, contactId, stage, onClose, onDeleted }: Props) {
         error={errors.company_id?.message}
         hint={deal ? undefined : t('dealForm.companyHint')}
       >
-        {(c) => <CompanySelect {...c} {...register('company_id')} />}
+        {(c) => <CompanySelect {...c} {...register('company_id')} selected={deal?.company} />}
       </Field>
       {isAdmin && (
         <Field label={t('f.owner')} error={errors.owner_id?.message}>
